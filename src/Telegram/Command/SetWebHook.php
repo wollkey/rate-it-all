@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Command;
+namespace App\Telegram\Command;
 
-use App\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\TelegramApi;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'app:telegram-set-webhook')]
-class SetTelegramWebHook extends Command
+class SetWebHook extends Command
 {
     public function __construct(
         private readonly TelegramApi $telegram,

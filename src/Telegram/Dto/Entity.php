@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Dto;
+namespace App\Telegram\Dto;
 
-use App\Application\Enum\EntityType;
+use App\Telegram\Enum\EntityType;
 
 final readonly class Entity
 {

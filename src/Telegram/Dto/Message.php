@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Dto;
+namespace App\Telegram\Dto;
 
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
-final readonly class MessageDto
+final readonly class Message
 {
     /**
-     * @param Entity[] $entities
+     * @param array<Entity> $entities
      */
     public function __construct(
         #[SerializedName('message_id')]
-        private int $messageId,
-        private FromDto $from,
-        private ChatDto $chat,
+        private int    $messageId,
+        private From   $from,
+        private Chat   $chat,
         private string $text,
-        private array $entities = [],
+        private array  $entities = [],
     ) {
     }
 
@@ -26,12 +26,12 @@ final readonly class MessageDto
         return $this->messageId;
     }
 
-    public function getFrom(): FromDto
+    public function getFrom(): From
     {
         return $this->from;
     }
 
-    public function getChat(): ChatDto
+    public function getChat(): Chat
     {
         return $this->chat;
     }
@@ -42,7 +42,7 @@ final readonly class MessageDto
     }
 
     /**
-     * @return Entity[]
+     * @return array<Entity>
      */
     public function getEntities(): array
     {

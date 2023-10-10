@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Dto;
+namespace App\Telegram\Dto;
 
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
-final readonly class FromDto
+final readonly class From
 {
     public function __construct(
         private int $id,

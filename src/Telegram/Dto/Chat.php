@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Dto;
+namespace App\Telegram\Dto;
 
-use App\Application\Enum\ChatType;
+use App\Telegram\Enum\ChatType;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
-final readonly class ChatDto
+final readonly class Chat
 {
     public function __construct(
         private int $id,

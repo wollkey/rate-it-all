@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use App\Infrastructure\Command\SetTelegramWebHook;
+use App\Telegram\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
 
 return function(ContainerConfigurator $container): void {
@@ -22,6 +22,6 @@ return function(ContainerConfigurator $container): void {
             '$bot_username' => env('TELEGRAM_BOT_USERNAME'),
         ]);
 
-    $services->get(SetTelegramWebHook::class)
+    $services->set(SetWebHook::class)
         ->arg('$webhookUrl', env('TELEGRAM_WEBHOOK_URL'));
 };
