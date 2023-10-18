@@ -1,0 +1,28 @@
+parameters:
+    analyser:
+        types:
+            - "use"
+            - "file"
+            - "class"
+    paths:
+        - ./src
+    layers:
+        -
+            name: Telegram
+            collectors:
+                -   type: directory
+                    value: src/Telegram/.*
+        -
+            name: Game
+            collectors:
+                -   type: directory
+                    value: src/Game/.*
+
+    ruleset:
+        Game:
+            - Telegram
+
+    formatters:
+        graphviz:
+            hidden_layers: [ ]
+            point_to_groups: true

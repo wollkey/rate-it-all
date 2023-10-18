@@ -12,3 +12,7 @@
 ###> Project files ###
 .idea
 ###< Project files ###
+
+###> qossmic/deptrac-shim ###
+/.deptrac.cache
+###< qossmic/deptrac-shim ###
