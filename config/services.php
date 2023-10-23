@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use App\Telegram\Command\SetWebHook;
+use App\Telegram\Infrastructure\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
 
 return function(ContainerConfigurator $container): void {
