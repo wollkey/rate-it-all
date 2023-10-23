@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Orm;
+namespace App\Game\Domain\Entity;
 
+use App\Game\Domain\Repository\PlayerRepositoryInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TelegramUserRepository::class)]
-class TelegramUser
+#[ORM\Entity(repositoryClass: PlayerRepositoryInterface::class)]
+class Player
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
