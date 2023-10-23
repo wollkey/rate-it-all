@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Command;
+namespace App\Telegram\Infrastructure\Command;
 
-use App\Telegram\TelegramApi;
+use App\Telegram\Infrastructure\Gateway\TelegramApi;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

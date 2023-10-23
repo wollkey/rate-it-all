@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Dto;
+namespace App\Telegram\Domain\Entity;
 
+use App\Telegram\Domain\Enum\ChatType;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
-final readonly class From
+final readonly class Chat
 {
     public function __construct(
         private int $id,
-        #[SerializedName('is_bot')]
-        private bool $isBot,
         #[SerializedName('first_name')]
-        private string $firstName,
+        private string $first_name,
         #[SerializedName('last_name')]
         private string $last_name,
         private string $username,
+        private ChatType $type,
     ) {
     }
 
@@ -25,14 +25,9 @@ final readonly class From
         return $this->id;
     }
 
-    public function getIsBot(): bool
-    {
-        return $this->isBot;
-    }
-
     public function getFirstName(): string
     {
-        return $this->firstName;
+        return $this->first_name;
     }
 
     public function getLastName(): string
@@ -43,5 +38,10 @@ final readonly class From
     public function getUsername(): string
     {
         return $this->username;
+    }
+
+    public function getType(): ChatType
+    {
+        return $this->type;
     }
 }

@@ -2,23 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram;
+namespace App\Telegram\Domain;
 
-use App\Telegram\Dto\Message;
-use App\Telegram\Enum\EntityType;
-use App\Telegram\Exception\TelegramBotNotFoundException;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use App\Telegram\Domain\Entity\Message;
+use App\Telegram\Domain\Enum\EntityType;
+use App\Telegram\Infrastructure\Contract\BotCommandInterface;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\TaggedLocator;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 final readonly class TelegramBot
 {
     /**
-     * @param iterable<BotCommandInterface> $commands
+     * @param ContainerInterface<BotCommandInterface> $commands
      */
     public function __construct(
-        #[TaggedIterator('app.telegram_bot.command')]
-        private iterable $commands,
+        #[TaggedLocator('app.telegram_bot.command')]
+        private ContainerInterface $commands,
         private CacheInterface $cache,
     ) {
     }
@@ -34,19 +35,7 @@ final readonly class TelegramBot
         return false;
     }
 
-    public function executeCommand(string $commandName, Message $message): void
-    {
-        foreach ($this->commands as $command) {
-            if ($commandName === $command->getName()) {
-                $command->execute($message);
-                return;
-            }
-        }
-
-        throw new TelegramBotNotFoundException("Command $commandName not found");
-    }
-
-    public function getMessageCommand(Message $message): string
+    public function getMessageCommand(Message $message): ?string
     {
         $commandEntity = null;
 
@@ -58,32 +47,38 @@ final readonly class TelegramBot
         }
 
         if ($commandEntity === null) {
-            throw new TelegramBotNotFoundException('Yoy must have at least one command');
+            return null;
         }
 
         return substr($message->getText(), $commandEntity->getOffset(), $commandEntity->getLength());
     }
 
-    public function startProcessingCommand(int $chatId, string $command): void
+    /**
+     * @param class-string $fqcn
+     */
+    public function startProcessingCommand(int $chatId, string $fqcn): void
     {
         $cacheKey = $this->getCacheKey($chatId);
 
-        $this->cache->get($cacheKey, function (ItemInterface $item) use ($command): ?string {
+        $this->cache->get($cacheKey, function (ItemInterface $item) use ($fqcn): ?string {
             $item->expiresAfter(3600);
 
-            return $command;
+            return $fqcn;
         });
     }
 
-    public function getProcessingCommand(int $chatId): ?string
+    public function getProcessingCommand(int $chatId): ?BotCommandInterface
     {
         $cacheKey = $this->getCacheKey($chatId);
 
-        return $this->cache->get($cacheKey, function (ItemInterface $item): null {
+        $fqcn = $this->cache->get($cacheKey, function (ItemInterface $item): null {
             $item->expiresAfter(0);
-
             return null;
         });
+
+        return $fqcn !== null && $this->commands->has($fqcn)
+            ? $this->commands->get($fqcn)
+            : null;
     }
 
     public function stopProcessingCommand(int $chatId): void
@@ -93,6 +88,6 @@ final readonly class TelegramBot
 
     private function getCacheKey(int $chatId): string
     {
-        return "telegram_game_bot_chat_$chatId";
+        return "telegram_bot_processing_chat_$chatId";
     }
 }

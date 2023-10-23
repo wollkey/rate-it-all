@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Dto;
+namespace App\Telegram\Domain\Entity;
 
 use Symfony\Component\Serializer\Annotation\SerializedName;
+use Symfony\Component\Serializer\Annotation\SerializedPath;
 
 final readonly class Message
 {
@@ -18,6 +19,8 @@ final readonly class Message
         private Chat   $chat,
         private string $text,
         private array  $entities = [],
+        #[SerializedPath("[reply_markup][inline_keyboard][callback_data]")]
+        private ?string $callbackData = null,
     ) {
     }
 
@@ -47,5 +50,10 @@ final readonly class Message
     public function getEntities(): array
     {
         return $this->entities;
+    }
+
+    public function getCallbackData(): ?string
+    {
+        return $this->callbackData;
     }
 }
