@@ -1,4 +1,4 @@
-name: Validate project
+name: Symfony-tests
 
 on:
     push:
@@ -10,7 +10,7 @@ permissions:
     contents: read
 
 jobs:
-    validate-container:
+    check-code:
         runs-on: ubuntu-latest
         steps:
             #  To automatically get bug fixes and new Php versions for shivammathur/setup-php,
@@ -30,5 +30,7 @@ jobs:
                       ${{ runner.os }}-php-
             - name: Install Dependencies
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-            - name: Build symfony container
-              run: bin/console
+            - name: Analyze code via linter
+              run: ./vendor/bin/php-cs-fixer fix --dry-run
+            - name: Analyze code via static analyzer
+              run: ./vendor/bin/psalm
