@@ -37,6 +37,10 @@ final readonly class TelegramBot
 
     public function getMessageCommand(Message $message): ?string
     {
+        if ($message->getText() === null) {
+            return null;
+        }
+
         $commandEntity = null;
 
         foreach ($message->getEntities() as $entity) {

@@ -14,11 +14,11 @@ final readonly class Message
      */
     public function __construct(
         #[SerializedName('message_id')]
-        private int    $messageId,
-        private From   $from,
-        private Chat   $chat,
-        private string $text,
-        private array  $entities = [],
+        private int $messageId,
+        private From $from,
+        private Chat $chat,
+        private string|null $text = null,
+        private array $entities = [],
         #[SerializedPath("[reply_markup][inline_keyboard][callback_data]")]
         private ?string $callbackData = null,
     ) {
@@ -39,7 +39,7 @@ final readonly class Message
         return $this->chat;
     }
 
-    public function getText(): string
+    public function getText(): ?string
     {
         return $this->text;
     }
