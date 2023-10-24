@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
+  <file src="src/Game/Application/EventListener/CreatePlayerEventListener.php">
+    <UnusedClass>
+      <code>CreatePlayerEventListener</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Game/Application/UseCase/AddThingUseCase.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>thingExists</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Application/UseCase/CreateGameUseCase.php">
+    <PossiblyNullArgument>
+      <code>$master</code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Application/UseCase/JoinGameUseCase.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Domain/Entity/Player.php">
+    <InvalidArgument>
+      <code>PlayerRepositoryInterface::class</code>
+    </InvalidArgument>
+    <MissingConstructor>
+      <code>$firstName</code>
+      <code>$lastName</code>
+      <code>$telegramId</code>
+    </MissingConstructor>
+    <PossiblyUnusedMethod>
+      <code>getFirstName</code>
+      <code>getLastName</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Domain/Model/Game.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[$rating < 1 || $rating > 10]]></code>
+      <code><![CDATA[$rating < 1 || $rating > 10]]></code>
+      <code><![CDATA[$rating > 10]]></code>
+    </DocblockTypeContradiction>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->playerThings]]></code>
+    </InvalidPropertyAssignmentValue>
+    <MixedArgument>
+      <code>$rating</code>
+      <code><![CDATA[$this->thingRatings[$ratedThing->getValue()]]]></code>
+      <code><![CDATA[$this->thingRatings[$ratedThing->getValue()]]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code>$thing</code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAssignment>
+      <code><![CDATA[$this->thingRatings[$thing->getValue()][$playerId]]]></code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code>$playerRatings</code>
+    </MixedAssignment>
+    <MixedInferredReturnType>
+      <code>?Thing</code>
+    </MixedInferredReturnType>
+    <MixedReturnStatement>
+      <code>$unratedThings[array_rand($unratedThings)]</code>
+    </MixedReturnStatement>
+    <PossiblyNullArgument>
+      <code><![CDATA[$player->getId()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullArrayOffset>
+      <code><![CDATA[$this->playerThings]]></code>
+      <code><![CDATA[$this->players]]></code>
+      <code><![CDATA[$this->players]]></code>
+    </PossiblyNullArrayOffset>
+    <PossiblyNullReference>
+      <code>getId</code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Game/Domain/Model/GameSession.php">
+    <DeprecatedMethod>
+      <code>getTimeHiAndVersionHex</code>
+    </DeprecatedMethod>
+    <MissingReturnType>
+      <code>finishGame</code>
+    </MissingReturnType>
+    <PossiblyNullArgument>
+      <code><![CDATA[$player->getId()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Domain/Repository/PlayerRepositoryInterface.php">
+    <MissingParamType>
+      <code>$lockMode</code>
+      <code>$lockVersion</code>
+    </MissingParamType>
+  </file>
+  <file src="src/Game/Infrastructure/Command/AddThingCommand.php">
+    <PossiblyNullArgument>
+      <code><![CDATA[$message->getText()]]></code>
+      <code>$player</code>
+      <code><![CDATA[$player->getId()]]></code>
+      <code><![CDATA[$player->getId()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>playerThingLimitReached</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/CreateGameCommand.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/EnterGameIdCommand.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+      <code><![CDATA[$telegramDto->getMessage()->getText()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>getMaster</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/FinishGameCommand.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/JoinCommand.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/LeaveGameCommand.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <UnusedClass>
+      <code>LeaveGameCommand</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Game/Infrastructure/Command/RateTheThingCommand.php">
+    <ArgumentTypeCoercion>
+      <code>$rating</code>
+    </ArgumentTypeCoercion>
+    <PossiblyNullArgument>
+      <code>$player</code>
+      <code>$ratedThing</code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>getRatedThing</code>
+      <code>getValue</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/RulesCommand.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/ShowResultCommand.php">
+    <MixedAssignment>
+      <code>$rating</code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code>$rating</code>
+    </MixedOperand>
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>generateResult</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/StartCommand.php">
+    <UnusedClass>
+      <code>StartCommand</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Game/Infrastructure/Command/StartGameCommand.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Command/StartRatingThingCommand.php">
+    <PossiblyNullArgument>
+      <code>$player</code>
+      <code>$randomThing</code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code>getRandomThing</code>
+      <code>getValue</code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Game/Infrastructure/Repository/GameSessionRepository.php">
+    <DocblockTypeContradiction>
+      <code>$gameId !== null</code>
+    </DocblockTypeContradiction>
+    <MixedArgument>
+      <code>$gameId</code>
+    </MixedArgument>
+    <UnusedClass>
+      <code>GameSessionRepository</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Game/Infrastructure/Repository/TelegramPlayerRepository.php">
+    <PossiblyUnusedParam>
+      <code>$registry</code>
+    </PossiblyUnusedParam>
+    <UnusedClass>
+      <code>TelegramPlayerRepository</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Telegram/Domain/Entity/CallbackQuery.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Entity/Chat.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+      <code>getFirstName</code>
+      <code>getId</code>
+      <code>getLastName</code>
+      <code>getType</code>
+      <code>getUsername</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Entity/Entity.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Entity/From.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+      <code>getIsBot</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Entity/Message.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+      <code>getCallbackData</code>
+      <code>getChat</code>
+      <code>getMessageId</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Entity/TelegramRequest.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Telegram/Domain/Exception/TelegramBotNotFoundException.php">
+    <UnusedClass>
+      <code>TelegramBotNotFoundException</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Telegram/Domain/TelegramBot.php">
+    <DocblockTypeContradiction>
+      <code>$fqcn !== null</code>
+    </DocblockTypeContradiction>
+    <LessSpecificReturnType>
+      <code>?string</code>
+    </LessSpecificReturnType>
+    <MixedArgument>
+      <code>$fqcn</code>
+    </MixedArgument>
+    <MixedInferredReturnType>
+      <code>?BotCommandInterface</code>
+    </MixedInferredReturnType>
+    <MixedReturnStatement>
+      <code><![CDATA[$fqcn !== null && $this->commands->has($fqcn)
+            ? $this->commands->get($fqcn)
+            : null]]></code>
+      <code><![CDATA[$fqcn !== null && $this->commands->has($fqcn)
+            ? $this->commands->get($fqcn)
+            : null]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+      <code>isMessageCommand</code>
+    </PossiblyUnusedMethod>
+    <TooManyTemplateParams>
+      <code><![CDATA[ContainerInterface<BotCommandInterface>]]></code>
+    </TooManyTemplateParams>
+  </file>
+  <file src="src/Telegram/Infrastructure/Command/SetWebHook.php">
+    <UnusedClass>
+      <code>SetWebHook</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Telegram/Infrastructure/Contract/TelegramApiInterface.php">
+    <MissingReturnType>
+      <code>sendMessage</code>
+    </MissingReturnType>
+  </file>
+  <file src="src/Telegram/Infrastructure/Gateway/HandleWebHook.php">
+    <UnusedClass>
+      <code>HandleWebHook</code>
+    </UnusedClass>
+  </file>
+  <file src="src/Telegram/Infrastructure/Gateway/TelegramApi.php">
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code>string</code>
+    </PossiblyUnusedReturnValue>
+  </file>
+</files>
