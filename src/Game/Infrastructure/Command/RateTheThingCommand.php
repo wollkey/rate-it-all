@@ -59,9 +59,6 @@ final readonly class RateTheThingCommand implements BotCommandInterface
 
             if ($randomThing === null) {
                 foreach ($game->getPlayers() as $player) {
-                    if ($game->isPlayerMaster($player)) {
-
-                    }
                     $this->telegramApi->sendMessage(
                         $player->getTelegramId(),
                         "Congrats! You really rated all this nonsense",
@@ -83,7 +80,7 @@ final readonly class RateTheThingCommand implements BotCommandInterface
                 return;
             }
 
-            $game->setRatedThing(new Thing($randomThing));
+            $game->setRatedThing($randomThing);
             $this->gameSession->save($game);
 
             foreach ($game->getPlayers() as $player) {

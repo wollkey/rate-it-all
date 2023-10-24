@@ -103,7 +103,7 @@ final class Game
         return count($this->thingRatings) >= count($this->players) * $this->thingPerPlayer;
     }
 
-    public function getRandomThing(): ?string
+    public function getRandomThing(): ?Thing
     {
         $unratedThings = $this->getUnratedThings();
 
@@ -120,7 +120,7 @@ final class Game
 
         foreach ($this->thingRatings as $thing => $playerRatings) {
             if (empty($playerRatings)) {
-                $unratedThings[] = $thing;
+                $unratedThings[] = new Thing($thing);
             }
         }
 

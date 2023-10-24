@@ -34,7 +34,7 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
 
         $randomThing = $game->getRandomThing();
 
-        $game->setRatedThing(new Thing($randomThing));
+        $game->setRatedThing($randomThing);
         $this->gameSession->save($game);
 
         foreach ($game->getPlayers() as $player) {
