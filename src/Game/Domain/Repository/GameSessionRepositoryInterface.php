@@ -6,7 +6,6 @@ namespace App\Game\Domain\Repository;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Model\Game;
-use Ramsey\Uuid\UuidInterface;
 
 interface GameSessionRepositoryInterface
 {

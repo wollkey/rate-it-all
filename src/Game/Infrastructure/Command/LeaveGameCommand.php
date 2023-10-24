@@ -50,6 +50,7 @@ final readonly class LeaveGameCommand implements BotCommandInterface
                     ],
                 ],
             );
+
             return;
         }
 

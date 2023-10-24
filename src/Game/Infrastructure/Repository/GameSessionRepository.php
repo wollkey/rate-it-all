@@ -19,8 +19,9 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
 
     public function findByPlayer(int $playerId): ?Game
     {
-        $gameId = $this->cache->get("telegram_bot_player_$playerId", function(ItemInterface $item) {
+        $gameId = $this->cache->get("telegram_bot_player_$playerId", function (ItemInterface $item) {
             $item->expiresAfter(0);
+
             return null;
         });
 
@@ -43,6 +44,7 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
     {
         return $this->cache->get($this->getGameCacheKey($gameId), function (ItemInterface $item): null {
             $item->expiresAfter(0);
+
             return null;
         });
     }
@@ -51,7 +53,7 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
     {
         $cacheKey = $this->getPlayerCacheKey($player);
         $this->cache->delete($cacheKey);
-        $this->cache->get($cacheKey, fn() => $gameId);
+        $this->cache->get($cacheKey, fn () => $gameId);
     }
 
     public function delete(Game $game): void

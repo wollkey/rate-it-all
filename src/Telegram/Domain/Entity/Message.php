@@ -19,7 +19,7 @@ final readonly class Message
         private Chat $chat,
         private string|null $text = null,
         private array $entities = [],
-        #[SerializedPath("[reply_markup][inline_keyboard][callback_data]")]
+        #[SerializedPath('[reply_markup][inline_keyboard][callback_data]')]
         private ?string $callbackData = null,
     ) {
     }

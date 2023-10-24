@@ -37,6 +37,7 @@ final readonly class JoinCommand implements BotCommandInterface
         if ($game !== null) {
             $replyMessage = "You have already joined the game with id *{$game->getId()}*";
             $this->telegramApi->sendMessage($user->getId(), $replyMessage, ['parse_mode' => 'MarkdownV2']);
+
             return;
         }
 

@@ -7,7 +7,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use App\Telegram\Infrastructure\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
 
-return function(ContainerConfigurator $container): void {
+return function (ContainerConfigurator $container): void {
     $services = $container->services()
         ->defaults()
             ->autowire()

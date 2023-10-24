@@ -77,6 +77,7 @@ final readonly class TelegramBot
 
         $fqcn = $this->cache->get($cacheKey, function (ItemInterface $item): null {
             $item->expiresAfter(0);
+
             return null;
         });
 

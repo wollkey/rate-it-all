@@ -6,7 +6,6 @@ namespace App\Game\Infrastructure\Command;
 
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Model\GameSession;
-use App\Game\Domain\Model\Thing;
 use App\Game\Domain\Repository\PlayerRepositoryInterface;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\Exception\TelegramException;
@@ -61,7 +60,7 @@ final readonly class RateTheThingCommand implements BotCommandInterface
                 foreach ($game->getPlayers() as $player) {
                     $this->telegramApi->sendMessage(
                         $player->getTelegramId(),
-                        "Congrats! You really rated all this nonsense",
+                        'Congrats! You really rated all this nonsense',
                         [
                             'reply_markup' => [
                                 'inline_keyboard' => [[
@@ -90,7 +89,7 @@ final readonly class RateTheThingCommand implements BotCommandInterface
             return;
         }
 
-        $this->telegramApi->sendMessage($from->getId(), "Okay. Wait other players");
+        $this->telegramApi->sendMessage($from->getId(), 'Okay. Wait other players');
     }
 
     public function supports(TelegramDto $telegramDto): bool

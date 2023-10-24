@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Telegram\Infrastructure\Gateway;
 
 use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\Entity\From;
 use App\Telegram\Domain\Entity\TelegramRequest;
 use App\Telegram\Domain\EntityExtractor\MessageExtractor;
 use App\Telegram\Domain\EntityExtractor\UserExtractor;
@@ -65,6 +64,7 @@ final readonly class HandleWebHook
         foreach ($this->telegramCommands as $command) {
             if ($command->supports($telegramDto)) {
                 $this->telegramBot->stopProcessingCommand($fromId);
+
                 return $command;
             }
         }

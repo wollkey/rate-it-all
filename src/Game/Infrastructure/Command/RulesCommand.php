@@ -27,13 +27,13 @@ final readonly class RulesCommand implements BotCommandInterface
         $this->telegramApi->sendMessage(
             $telegramDto->getUser()->getId(),
             implode(PHP_EOL, [
-                'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...'.PHP_EOL,
+                'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' . PHP_EOL,
                 'Rules of the game:',
                 '- Create a game or join an existing one',
                 '- Invite your friends',
                 '- Add any things that come to your mind',
                 '- Rate these things with your friends',
-                'Have fun!'
+                'Have fun!',
             ]),
             [
                 'parse_mode' => 'markdown',

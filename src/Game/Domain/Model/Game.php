@@ -6,15 +6,14 @@ namespace App\Game\Domain\Model;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Exception\GameException;
-use Ramsey\Uuid\UuidInterface;
 
 final class Game
 {
     /**
-     * @param Player[] $players
+     * @param Player[]             $players
      * @param array<int, string[]> $playerThings
-     * @param array $thingRatings
-     * TODO add param types
+     *
+     * @TODO add param types
      */
     public function __construct(
         private readonly string $id,
@@ -76,7 +75,7 @@ final class Game
     public function rateThing(Thing $thing, int $playerId, int $rating): void
     {
         if ($rating < 1 || $rating > 10) {
-            throw new GameException("You must use only from 1 to 10 numbers");
+            throw new GameException('You must use only from 1 to 10 numbers');
         }
 
         if (!$this->thingExists($thing)) {

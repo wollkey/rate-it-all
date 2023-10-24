@@ -38,7 +38,7 @@ final readonly class TelegramApi implements TelegramApiInterface
             $response = Request::sendMessage([
                 'chat_id' => $chatId,
                 'text' => $text,
-                ...$data
+                ...$data,
             ]);
         } catch (ExternalTelegramException $exception) {
             throw new TelegramException("Message was not sent because of error {$exception->getMessage()}");

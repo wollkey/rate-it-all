@@ -27,7 +27,7 @@ final readonly class GameSession
 
     private function generateShortUuid(): string
     {
-        return (Uuid::uuid7())->getTimeHiAndVersionHex();
+        return Uuid::uuid7()->getTimeHiAndVersionHex();
     }
 
     public function restart(Game $game): Game

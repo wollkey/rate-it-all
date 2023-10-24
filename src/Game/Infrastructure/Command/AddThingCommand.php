@@ -48,7 +48,7 @@ final readonly class AddThingCommand implements BotCommandInterface
             $this->telegramApi->sendMessage($player->getTelegramId(), $allThingsMessage);
 
             if ($game->totalThingLimitReached()) {
-                $readyMessage = "Every players is ready.";
+                $readyMessage = 'Every players is ready.';
                 $this->telegramApi->sendMessage(
                     $game->getMaster()->getTelegramId(),
                     $readyMessage,
