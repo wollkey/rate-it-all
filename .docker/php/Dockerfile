@@ -14,7 +14,6 @@ COPY ./composer.* .
 RUN composer install --no-cache --no-ansi --no-autoloader --no-scripts --no-dev
 
 RUN set -x \
-    && composer dump-autoload -n --optimize \
-    && composer install
+    && composer dump-autoload -n --optimize
 
 CMD ["php-fpm"]

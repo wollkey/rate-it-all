@@ -21,6 +21,6 @@ jobs:
                 script: |
                     cd /var/www/game &&
                     git pull &&
-                    docker compose up -d --build
-                    chmod +x ./deploy.sh
+                    docker compose up -d --build &&
+                    chmod +x ./deploy.sh &&
                     docker exec -it game_php /bin/sh -c "./deploy.sh" 
