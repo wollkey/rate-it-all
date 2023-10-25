@@ -13,8 +13,6 @@ COPY ./composer.* .
 
 RUN composer install --no-cache --no-ansi --no-autoloader --no-scripts --no-dev
 
-COPY ./ .
-
 RUN set -x \
     && composer dump-autoload -n --optimize \
     && composer install
