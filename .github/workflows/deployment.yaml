@@ -35,7 +35,5 @@ jobs:
                 password: ${{ secrets.PASSWORD }}
                 script: |
                     cd /var/www/game &&
-                    wget https://raw.githubusercontent.com/wollkey/rate-it-all/master/docker-compose.yaml &&
-                    wget https://raw.githubusercontent.com/wollkey/rate-it-all/master/.docker/nginx/server.conf &&
-                    docker-compose down &&
-                    docker-compose up -d
+                    git pull &&
+                    docker-compose up -d --build
