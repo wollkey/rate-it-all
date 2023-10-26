@@ -8,4 +8,5 @@ return [
     'POSTGRES_USER' => null,
     'TELEGRAM_API_KEY' => null,
     'TELEGRAM_BOT_USERNAME' => null,
+    'TELEGRAM_WEBHOOK_URL' => null,
 ];
