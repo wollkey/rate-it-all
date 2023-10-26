@@ -20,7 +20,8 @@ jobs:
                 password: ${{ secrets.PASSWORD }}
                 script: |
                     cd /var/www/game &&
-                    git pull &&
+                    git fetch --all &&
+                    git reset --hard origin/master &&
                     docker compose up -d --build &&
                     chmod +x ./deploy.sh &&
                     docker exec game_php /bin/sh -c "./deploy.sh" 
