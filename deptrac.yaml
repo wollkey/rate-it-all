@@ -25,4 +25,5 @@ parameters:
     formatters:
         graphviz:
             hidden_layers: [ ]
+            groups: []
             point_to_groups: true
