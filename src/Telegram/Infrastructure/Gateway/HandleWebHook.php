@@ -12,11 +12,14 @@ use App\Telegram\Domain\Event\BeginHandleWebHook;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsController]
@@ -34,14 +37,33 @@ final readonly class HandleWebHook
         private UserExtractor $userExtractor,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
+        private LoggerInterface $logger,
+        private SerializerInterface $serializer,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function __invoke(#[MapRequestPayload] TelegramRequest $telegramRequest): Response
+    public function __invoke(Request $request): Response
     {
+        try {
+            $this->tryHandleWebHook($request);
+        } catch (\Throwable $throwable) {
+            $this->logger->error($throwable);
+        }
+
+        return new Response('Ok');
+    }
+
+    private function tryHandleWebHook(Request $request): void
+    {
+        $telegramRequest = $this->serializer->deserialize(
+            $request->getContent(),
+            TelegramRequest::class,
+            JsonEncoder::FORMAT
+        );
+
         $telegramDto = $this->prepareTelegramData($telegramRequest);
 
         $this->eventDispatcher->dispatch(new BeginHandleWebHook($telegramDto));
@@ -53,8 +75,6 @@ final readonly class HandleWebHook
         } catch (TelegramException $exception) {
             $this->telegramApi->sendMessage($telegramDto->getUser()->getId(), $exception->getMessage());
         }
-
-        return new Response('Ok');
     }
 
     private function resolveCommand(TelegramDto $telegramDto): ?BotCommandInterface

@@ -14,6 +14,7 @@
         "phpdocumentor/reflection-docblock": "^5.3",
         "predis/predis": "^2.2",
         "ramsey/uuid": "^4.7",
+        "sentry/sentry-symfony": "*",
         "symfony/cache": "6.3.*",
         "symfony/console": "6.3.*",
         "symfony/dotenv": "6.3.*",

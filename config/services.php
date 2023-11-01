@@ -6,6 +6,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use App\Telegram\Infrastructure\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
+use Monolog\Processor\PsrLogMessageProcessor;
 
 return function (ContainerConfigurator $container): void {
     $services = $container->services()
@@ -24,4 +25,7 @@ return function (ContainerConfigurator $container): void {
 
     $services->set(SetWebHook::class)
         ->arg('$webhookUrl', env('TELEGRAM_WEBHOOK_URL'));
+
+    $services->set(PsrLogMessageProcessor::class)
+        ->tag('monolog.processor', ['handler' => 'sentry']);
 };

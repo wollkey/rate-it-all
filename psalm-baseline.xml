@@ -316,9 +316,9 @@
     </TooManyTemplateParams>
   </file>
   <file src="src/Telegram/Infrastructure/Command/SetWebHook.php">
-    <UnusedClass>
-      <code>SetWebHook</code>
-    </UnusedClass>
+    <PossiblyUnusedMethod>
+      <code>__construct</code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="src/Telegram/Infrastructure/Contract/TelegramApiInterface.php">
     <MissingReturnType>
