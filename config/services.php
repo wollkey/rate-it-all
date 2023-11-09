@@ -26,6 +26,8 @@ return function (ContainerConfigurator $container): void {
     $services->set(SetWebHook::class)
         ->arg('$webhookUrl', env('TELEGRAM_WEBHOOK_URL'));
 
-    $services->set(PsrLogMessageProcessor::class)
-        ->tag('monolog.processor', ['handler' => 'sentry']);
+    if ($container->env() === 'prod') {
+        $services->set(PsrLogMessageProcessor::class)
+            ->tag('monolog.processor', ['handler' => 'sentry']);
+    }
 };
