@@ -18,8 +18,8 @@ class Player
     #[ORM\Column(length: 255)]
     private string $firstName;
 
-    #[ORM\Column(length: 255)]
-    private string $lastName;
+    #[ORM\Column(length: 255, nullable: true)]
+    private string|null $lastName = null;
 
     #[ORM\Column(type: 'bigint')]
     private int $telegramId;
@@ -41,7 +41,7 @@ class Player
         return $this;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }

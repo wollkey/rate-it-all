@@ -13,10 +13,10 @@ final readonly class Chat
         private int $id,
         #[SerializedName('first_name')]
         private string $first_name,
-        #[SerializedName('last_name')]
-        private string $last_name,
         private string $username,
         private ChatType $type,
+        #[SerializedName('last_name')]
+        private string|null $lastName = null,
     ) {
     }
 
@@ -30,11 +30,6 @@ final readonly class Chat
         return $this->first_name;
     }
 
-    public function getLastName(): string
-    {
-        return $this->last_name;
-    }
-
     public function getUsername(): string
     {
         return $this->username;
@@ -43,5 +38,10 @@ final readonly class Chat
     public function getType(): ChatType
     {
         return $this->type;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
     }
 }
