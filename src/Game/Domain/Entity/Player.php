@@ -21,7 +21,7 @@ class Player
     #[ORM\Column(length: 255)]
     private string $lastName;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'bigint')]
     private int $telegramId;
 
     public function getId(): ?int
