@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Shared\Application;
+
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 42)]
+final readonly class LocaleSubscriber
+{
+    public function __construct(
+        private string $defaultLocale = 'en',
+    ) {
+    }
+
+    public function __invoke(RequestEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if (!$request->hasPreviousSession()) {
+            return;
+        }
+
+        $locale = $request->attributes->get('_locale');
+
+        if (!empty($locale)) {
+            $request->getSession()->set('_locale', $locale);
+        } else {
+            $request->setLocale($request->getSession()->get('_locale', $this->defaultLocale));
+        }
+    }
+}

@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsController]
-#[Route('/telegram/hook')]
+#[Route('/{_locale}/telegram/hook')]
 final readonly class HandleWebHook
 {
     /**

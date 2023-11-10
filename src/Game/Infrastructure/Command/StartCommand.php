@@ -8,12 +8,14 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class StartCommand implements BotCommandInterface
 {
     public function __construct(
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -25,9 +27,9 @@ final readonly class StartCommand implements BotCommandInterface
         $this->telegramApi->sendMessage(
             $telegramDto->getUser()->getId(),
             implode(PHP_EOL, [
-                'Hi there!',
-                'This is a game in which you have to rate everything that comes to your mind.',
-                'See the ' . RulesCommand::COMMAND_NAME,
+                $this->translator->trans('Hi there!'),
+                $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
+                $this->translator->trans('See the') . ' ' . RulesCommand::COMMAND_NAME,
             ]),
         );
     }

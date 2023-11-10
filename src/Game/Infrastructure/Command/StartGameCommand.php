@@ -10,6 +10,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class StartGameCommand implements BotCommandInterface
 {
@@ -20,6 +21,7 @@ final readonly class StartGameCommand implements BotCommandInterface
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
         private PlayerRepositoryInterface $playerRepository,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -35,12 +37,12 @@ final readonly class StartGameCommand implements BotCommandInterface
         if ($game === null) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                'First create a new game',
+                $this->translator->trans('First create a new game'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
                             [
-                                'text' => 'create',
+                                'text' => $this->translator->trans('Create'),
                                 'callback_data' => CreateGameCommand::COMMAND_NAME,
                             ],
                         ]],
@@ -53,7 +55,7 @@ final readonly class StartGameCommand implements BotCommandInterface
 
         foreach ($game->getPlayers() as $player) {
             $this->telegramBot->startProcessingCommand($player->getTelegramId(), AddThingCommand::class);
-            $this->telegramApi->sendMessage($player->getTelegramId(), 'Enter any thing:');
+            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Add any things that come to your mind').':');
         }
     }
 

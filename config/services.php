@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Shared\Application\LocaleSubscriber;
 use App\Telegram\Infrastructure\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -30,4 +31,7 @@ return function (ContainerConfigurator $container): void {
         $services->set(PsrLogMessageProcessor::class)
             ->tag('monolog.processor', ['handler' => 'sentry']);
     }
+
+    $services->set(LocaleSubscriber::class)
+        ->arg('$defaultLocale', '%kernel.default_locale%');
 };

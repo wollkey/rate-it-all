@@ -10,6 +10,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class JoinCommand implements BotCommandInterface
 {
@@ -20,6 +21,7 @@ final readonly class JoinCommand implements BotCommandInterface
         private PlayerRepositoryInterface $playerRepository,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -35,14 +37,14 @@ final readonly class JoinCommand implements BotCommandInterface
         $game = $this->gameSession->continueGame($player);
 
         if ($game !== null) {
-            $replyMessage = "You have already joined the game with id *{$game->getId()}*";
+            $replyMessage = $this->translator->trans('You have already joined the game with id gameId', ['gameId' => "*{$game->getId()}*"]);
             $this->telegramApi->sendMessage($user->getId(), $replyMessage, ['parse_mode' => 'MarkdownV2']);
 
             return;
         }
 
         $this->telegramBot->startProcessingCommand($user->getId(), EnterGameIdCommand::class);
-        $this->telegramApi->sendMessage($user->getId(), 'Enter the game id:');
+        $this->telegramApi->sendMessage($user->getId(), $this->translator->trans('Enter the game id:'));
     }
 
     public function supports(TelegramDto $telegramDto): bool

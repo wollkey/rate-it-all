@@ -12,6 +12,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class AddThingCommand implements BotCommandInterface
 {
@@ -21,6 +22,7 @@ final readonly class AddThingCommand implements BotCommandInterface
         private AddThingUseCase $addThingUseCase,
         private PlayerRepositoryInterface $playerRepository,
         private GameSession $gameSession,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -36,7 +38,7 @@ final readonly class AddThingCommand implements BotCommandInterface
         $game = $this->gameSession->continueGame($player);
 
         if ($game->playerThingLimitReached($player->getId())) {
-            $this->telegramApi->sendMessage($player->getTelegramId(), 'Wait other players');
+            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Wait other players'));
         }
 
         $game = ($this->addThingUseCase)($message->getText(), new PlayerDto((string) $user->getId()));
@@ -44,19 +46,18 @@ final readonly class AddThingCommand implements BotCommandInterface
         if ($game->playerThingLimitReached($player->getId())) {
             $this->telegramBot->stopProcessingCommand($player->getTelegramId());
 
-            $allThingsMessage = 'Great job. Wait other players...';
+            $allThingsMessage = $this->translator->trans('Great job. Wait other players...');
             $this->telegramApi->sendMessage($player->getTelegramId(), $allThingsMessage);
 
             if ($game->totalThingLimitReached()) {
-                $readyMessage = 'Every players is ready.';
                 $this->telegramApi->sendMessage(
                     $game->getMaster()->getTelegramId(),
-                    $readyMessage,
+                    $this->translator->trans('Every players is ready.'),
                     [
                         'reply_markup' => [
                             'inline_keyboard' => [[
                                 [
-                                    'text' => "Let's have some fun!",
+                                    'text' => $this->translator->trans("Let's have some fun!"),
                                     'callback_data' => StartRatingThingCommand::COMMAND_NAME,
                                 ],
                             ]],
@@ -68,7 +69,7 @@ final readonly class AddThingCommand implements BotCommandInterface
             return;
         }
 
-        $this->telegramApi->sendMessage($player->getTelegramId(), 'Great, enter the next thing:');
+        $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Great, enter the next thing:'));
     }
 
     public function supports(TelegramDto $telegramDto): bool

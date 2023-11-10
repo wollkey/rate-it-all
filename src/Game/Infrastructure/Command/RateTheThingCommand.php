@@ -12,6 +12,7 @@ use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class RateTheThingCommand implements BotCommandInterface
 {
@@ -20,6 +21,7 @@ final readonly class RateTheThingCommand implements BotCommandInterface
         private PlayerRepositoryInterface $playerRepository,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -34,13 +36,13 @@ final readonly class RateTheThingCommand implements BotCommandInterface
         $ratedThing = $game->getRatedThing();
 
         if ($game->alreadyRated($ratedThing, $from->getId())) {
-            throw new TelegramException('You must not change you rating. Wait other players');
+            throw new TelegramException($this->translator->trans('You must not change you rating.').$this->translator->trans('Wait other players'));
         }
 
         $rating = $telegramDto->getMessage()->getText();
 
         if (!is_numeric($rating)) {
-            throw new TelegramException('Rating must be a number');
+            throw new TelegramException($this->translator->trans('Rating must be a number'));
         }
 
         $rating = (int) $rating;
@@ -60,12 +62,12 @@ final readonly class RateTheThingCommand implements BotCommandInterface
                 foreach ($game->getPlayers() as $player) {
                     $this->telegramApi->sendMessage(
                         $player->getTelegramId(),
-                        'Congrats! You really rated all this nonsense',
+                        $this->translator->trans('Congrats! You really rated all this nonsense'),
                         [
                             'reply_markup' => [
                                 'inline_keyboard' => [[
                                     [
-                                        'text' => 'Show result',
+                                        'text' => $this->translator->trans('Show result'),
                                         'callback_data' => ShowResultCommand::COMMAND_NAME,
                                     ],
                                 ]],
@@ -83,13 +85,13 @@ final readonly class RateTheThingCommand implements BotCommandInterface
             $this->gameSession->save($game);
 
             foreach ($game->getPlayers() as $player) {
-                $this->telegramApi->sendMessage($player->getTelegramId(), "Rate the next thing: {$game->getRatedThing()->getValue()}");
+                $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans("Rate the next thing: nextWord", ['nextWord' => $game->getRatedThing()->getValue()]));
             }
 
             return;
         }
 
-        $this->telegramApi->sendMessage($from->getId(), 'Okay. Wait other players');
+        $this->telegramApi->sendMessage($from->getId(), $this->translator->trans('Okay.').$this->translator->trans('Wait other players'));
     }
 
     public function supports(TelegramDto $telegramDto): bool

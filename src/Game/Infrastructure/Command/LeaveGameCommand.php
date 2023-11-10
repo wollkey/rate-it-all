@@ -10,6 +10,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class LeaveGameCommand implements BotCommandInterface
 {
@@ -18,6 +19,7 @@ final readonly class LeaveGameCommand implements BotCommandInterface
         private PlayerRepositoryInterface $playerRepository,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -34,16 +36,16 @@ final readonly class LeaveGameCommand implements BotCommandInterface
         if ($game === null) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                "You are not in any game\nYou can create a new game or join an existing one",
+                $this->translator->trans('You are not in any game').PHP_EOL.$this->translator->trans('Create a game or join an existing one'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
                             [
-                                'text' => 'create',
+                                'text' => $this->translator->trans('Create'),
                                 'callback_data' => CreateGameCommand::COMMAND_NAME,
                             ],
                             [
-                                'text' => 'join',
+                                'text' => $this->translator->trans('Join'),
                                 'callback_data' => JoinCommand::COMMAND_NAME,
                             ],
                         ]],
@@ -57,12 +59,12 @@ final readonly class LeaveGameCommand implements BotCommandInterface
         if ($game->isPlayerMaster($player)) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                'You are master, you cannot leave the game, only finish it. Do you really want it?',
+                $this->translator->trans('You are master, you cannot leave the game, only finish it. Do you really want it?'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
                             [
-                                'text' => 'Finish game',
+                                'text' => $this->translator->trans('Finish game'),
                                 'callback_data' => FinishGameCommand::COMMAND_NAME,
                             ],
                         ]],

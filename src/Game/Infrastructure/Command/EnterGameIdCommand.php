@@ -12,6 +12,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class EnterGameIdCommand implements BotCommandInterface
 {
@@ -21,6 +22,7 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
         private TelegramBot $telegramBot,
         private JoinGameUseCase $joinGameUseCase,
         private PlayerRepositoryInterface $playerRepository,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -38,8 +40,14 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
         $player = $this->playerRepository->find($playerDto->getId());
         $game = $this->gameSession->continueGame($player);
 
-        $this->telegramApi->sendMessage($user->getId(), "You have successfully joined\nWait until the game starts");
-        $this->telegramApi->sendMessage($game->getMaster()->getTelegramId(), "Player {$user->getUsername()} has joined");
+        $this->telegramApi->sendMessage(
+            $user->getId(),
+            $this->translator->trans('You have successfully joined').PHP_EOL.$this->translator->trans('Wait until the game starts')
+        );
+        $this->telegramApi->sendMessage(
+            $game->getMaster()->getTelegramId(),
+            $this->translator->trans('Player player has joined', ['player' => $user->getUsername()])
+        );
         $this->telegramBot->stopProcessingCommand($user->getId());
     }
 

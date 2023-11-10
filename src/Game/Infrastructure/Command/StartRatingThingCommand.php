@@ -10,6 +10,7 @@ use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
 use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class StartRatingThingCommand implements BotCommandInterface
 {
@@ -20,6 +21,7 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
         private PlayerRepositoryInterface $playerRepository,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -39,7 +41,10 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
 
         foreach ($game->getPlayers() as $player) {
             $this->telegramBot->startProcessingCommand($player->getTelegramId(), RateTheThingCommand::class);
-            $this->telegramApi->sendMessage($player->getTelegramId(), "Rate the next thing: {$game->getRatedThing()->getValue()}");
+            $this->telegramApi->sendMessage(
+                $player->getTelegramId(),
+                $this->translator->trans('Rate the next thing: anyThing', ['anyThing' => $game->getRatedThing()->getValue()])
+            );
         }
     }
 
