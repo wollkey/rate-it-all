@@ -18,7 +18,7 @@ final readonly class GameSession
 
     public function create(Player $master): Game
     {
-        $newGame = (new Game($this->generateShortUuid(), $master, 3));
+        $newGame = (new Game($this->generateShortUuid(), $master, 2));
 
         $this->sessionRepository->addPlayerToGame($master, $newGame->getId());
 
