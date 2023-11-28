@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Repository;
+namespace App\Game\Infrastructure\Telegram\Repository;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Repository\PlayerRepositoryInterface;

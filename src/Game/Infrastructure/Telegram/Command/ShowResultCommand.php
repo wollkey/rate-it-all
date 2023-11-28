@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\GameSession;
+use App\Game\Domain\Model\Game;
 use App\Game\Domain\Repository\PlayerRepositoryInterface;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
@@ -16,7 +16,7 @@ final readonly class ShowResultCommand implements BotCommandInterface
     public const COMMAND_NAME = '/show_result';
 
     public function __construct(
-        private GameSession $gameSession,
+        private Game $game,
         private PlayerRepositoryInterface $playerRepository,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot
@@ -29,9 +29,10 @@ final readonly class ShowResultCommand implements BotCommandInterface
     public function execute(TelegramDto $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->getUser()->getId());
-        $game = $this->gameSession->continueGame($player);
+        $gameSession = $this->game->continue($player);
 
-        $result = $this->formatResult($game->generateResult());
+        dump($gameSession->generateResult());
+        $result = $this->formatResult($gameSession->generateResult());
 
         $this->telegramApi->sendMessage($player->getTelegramId(), $result);
     }

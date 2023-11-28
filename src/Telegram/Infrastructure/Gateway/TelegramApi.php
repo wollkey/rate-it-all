@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Gateway;
 
+use App\Telegram\Domain\Entity\Message;
+use App\Telegram\Domain\Entity\TelegramResponse;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Infrastructure\Contract\TelegramApiInterface;
+use Longman\TelegramBot\Entities\Message as LongmanMessage;
 use Longman\TelegramBot\Exception\TelegramException as ExternalTelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\SerializerInterface;
 
 final readonly class TelegramApi implements TelegramApiInterface
 {
     public function __construct(
         private Telegram $telegram,
+        private SerializerInterface $serializer,
     ) {
     }
 
@@ -32,7 +38,7 @@ final readonly class TelegramApi implements TelegramApiInterface
     /**
      * @throws \Exception
      */
-    public function sendMessage(int $chatId, string $text, array $data = []): string
+    public function sendMessage(int $chatId, string $text, array $data = []): TelegramResponse
     {
         try {
             $response = Request::sendMessage([
@@ -45,9 +51,30 @@ final readonly class TelegramApi implements TelegramApiInterface
         }
 
         if (!$response->isOk()) {
-            $response->printError();
+            throw new \Exception($response->printError(true));
         }
 
-        return $text;
+        return new TelegramResponse($this->mapTelegramMessage($response->getResult()));
+    }
+
+    public function editMessage(int $chatId, int $messageId, string $text, array $data = []): void
+    {
+        $response = Request::editMessageText([
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'text' => $text,
+            ...$data,
+        ]);
+
+        if (!$response->isOk()) {
+            throw new \Exception($response->printError(true));
+        }
+    }
+
+    private function mapTelegramMessage(LongmanMessage $message): Message
+    {
+        $serializedMessage = $this->serializer->serialize($message, JsonEncoder::FORMAT);
+
+        return $this->serializer->deserialize($serializedMessage, Message::class, JsonEncoder::FORMAT);
     }
 }

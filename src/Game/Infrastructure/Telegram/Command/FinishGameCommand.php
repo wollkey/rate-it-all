@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\GameSession;
+use App\Game\Domain\Model\Game;
 use App\Game\Domain\Repository\PlayerRepositoryInterface;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\Exception\TelegramException;
@@ -18,7 +18,7 @@ final readonly class FinishGameCommand implements BotCommandInterface
     public const COMMAND_NAME = '/finish_game';
 
     public function __construct(
-        private GameSession $gameSession,
+        private Game $game,
         private PlayerRepositoryInterface $playerRepository,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
@@ -37,18 +37,18 @@ final readonly class FinishGameCommand implements BotCommandInterface
             return;
         }
 
-        $game = $this->gameSession->continueGame($player);
+        $gameSession = $this->game->continue($player);
 
-        if ($game === null) {
+        if ($gameSession === null) {
             return;
         }
 
-        if (!$game->isPlayerMaster($player)) {
+        if (!$gameSession->isPlayerMaster($player)) {
             throw new TelegramException($this->translator->trans('Only master can finish this game. You can only leave it.'));
         }
 
-        $this->gameSession->finishGame($game);
-        $this->telegramApi->sendMessage($game->getMaster()->getTelegramId(), $this->translator->trans('The game is over!'));
+        $this->game->finishGame($gameSession);
+        $this->telegramApi->sendMessage($gameSession->getMaster()->getTelegramId(), $this->translator->trans('The game is over!'));
     }
 
     public function supports(TelegramDto $telegramDto): bool

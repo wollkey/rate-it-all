@@ -62,7 +62,7 @@ final readonly class TelegramBot
      */
     public function startProcessingCommand(int $chatId, string $fqcn): void
     {
-        $cacheKey = $this->getCacheKey($chatId);
+        $cacheKey = $this->getProcessingCommandCacheKey($chatId);
 
         $this->cache->get($cacheKey, function (ItemInterface $item) use ($fqcn): ?string {
             $item->expiresAfter(3600);
@@ -73,7 +73,7 @@ final readonly class TelegramBot
 
     public function getProcessingCommand(int $chatId): ?BotCommandInterface
     {
-        $cacheKey = $this->getCacheKey($chatId);
+        $cacheKey = $this->getProcessingCommandCacheKey($chatId);
 
         $fqcn = $this->cache->get($cacheKey, function (ItemInterface $item): null {
             $item->expiresAfter(0);
@@ -88,11 +88,37 @@ final readonly class TelegramBot
 
     public function stopProcessingCommand(int $chatId): void
     {
-        $this->cache->delete($this->getCacheKey($chatId));
+        $this->cache->delete($this->getProcessingCommandCacheKey($chatId));
     }
 
-    private function getCacheKey(int $chatId): string
+    public function getEditedMessage(int $chatId): ?Message
     {
-        return "telegram_bot_processing_chat_$chatId";
+        return $this->cache->get($this->getEditedMessageCacheKey($chatId), function (ItemInterface $item) {
+            $item->expiresAfter(3600);
+
+            return $item->get();
+        });
+    }
+
+    public function saveEditedMessage(Message $message): void
+    {
+        $chatId = $message->getChat()->getId();
+
+        $this->cache->get($this->getEditedMessageCacheKey($chatId), function (ItemInterface $item) use ($message) {
+            $item->set($message);
+            $item->expiresAfter(3600);
+
+            return $message;
+        });
+    }
+
+    private function getProcessingCommandCacheKey(int $chatId): string
+    {
+        return "telegram_bot_processing_command_$chatId";
+    }
+
+    private function getEditedMessageCacheKey(int $chatId): string
+    {
+        return "telegram_bot_edited_message_$chatId";
     }
 }

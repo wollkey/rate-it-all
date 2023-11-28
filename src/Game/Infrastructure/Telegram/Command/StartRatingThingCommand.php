@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\GameSession;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
+use App\Game\Application\UseCase\TakeNextThingUseCase;
+use App\Game\Domain\Model\Game;
+use App\Game\Infrastructure\UserResolver\PlayerResolver;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
@@ -17,10 +18,11 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
     public const COMMAND_NAME = '/start_rating';
 
     public function __construct(
-        private GameSession $gameSession,
+        private Game $game,
+        private TakeNextThingUseCase $startRatingThingUseCase,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
-        private PlayerRepositoryInterface $playerRepository,
+        private PlayerResolver $playerResolver,
         private TranslatorInterface $translator,
     ) {
     }
@@ -30,20 +32,16 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $from = $telegramDto->getUser();
-        $player = $this->playerRepository->find($from->getId());
-        $game = $this->gameSession->continueGame($player);
+        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        ($this->startRatingThingUseCase)($player);
 
-        $randomThing = $game->getRandomThing();
-
-        $game->setRatedThing($randomThing);
-        $this->gameSession->save($game);
-
-        foreach ($game->getPlayers() as $player) {
+        // TODO add event
+        $gameSession = $this->game->findSessionByPlayer($player);
+        foreach ($gameSession->getPlayers() as $player) {
             $this->telegramBot->startProcessingCommand($player->getTelegramId(), RateTheThingCommand::class);
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                $this->translator->trans('Rate the next thing: anyThing', ['anyThing' => $game->getRatedThing()->getValue()])
+                $this->translator->trans('Rate the next thing: anyThing', ['anyThing' => $gameSession->getCurrentRatedThing()->getThing()->getValue()])
             );
         }
     }

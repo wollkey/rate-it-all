@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Application\Dto\PlayerDto;
 use App\Game\Application\UseCase\AddThingUseCase;
-use App\Game\Domain\Model\GameSession;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
+use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
+use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
+use App\Game\Domain\Model\Game;
+use App\Game\Domain\ValueObject\Thing;
+use App\Game\Infrastructure\UserResolver\PlayerResolver;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
@@ -17,11 +21,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final readonly class AddThingCommand implements BotCommandInterface
 {
     public function __construct(
+        private AddThingUseCase $addThingUseCase,
+        private Game $game,
+        private PlayerResolver $playerResolver,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
-        private AddThingUseCase $addThingUseCase,
-        private PlayerRepositoryInterface $playerRepository,
-        private GameSession $gameSession,
         private TranslatorInterface $translator
     ) {
     }
@@ -31,27 +35,35 @@ final readonly class AddThingCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $user = $telegramDto->getUser();
-        $message = $telegramDto->getMessage();
+        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $thing = $telegramDto->getMessage()->getText();
 
-        $player = $this->playerRepository->find($user->getId());
-        $game = $this->gameSession->continueGame($player);
+        try {
+            ($this->addThingUseCase)($player, new Thing($thing));
+        } catch (GameNotFoundException) {
+            $this->handleGameNotFound($player);
 
-        if ($game->playerThingLimitReached($player->getId())) {
-            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Wait other players'));
+            return;
+        } catch (ThingIsAlreadyInTheListException) {
+            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('This thing is already exist'));
+
+            return;
+        } catch (ThingsPlayerLimitReachedException) {
+            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Wait other players...'));
+            $this->telegramBot->stopProcessingCommand($player->getTelegramId());
         }
 
-        $game = ($this->addThingUseCase)($message->getText(), new PlayerDto((string) $user->getId()));
-
-        if ($game->playerThingLimitReached($player->getId())) {
+        // TODO Move to event subscriber or listener
+        $gameSession = $this->game->findSessionByPlayer($player);
+        if ($gameSession->playerThingLimitReached($player->getId())) {
             $this->telegramBot->stopProcessingCommand($player->getTelegramId());
 
             $allThingsMessage = $this->translator->trans('Great job. Wait other players...');
             $this->telegramApi->sendMessage($player->getTelegramId(), $allThingsMessage);
 
-            if ($game->totalThingLimitReached()) {
+            if ($gameSession->totalThingLimitReached()) {
                 $this->telegramApi->sendMessage(
-                    $game->getMaster()->getTelegramId(),
+                    $gameSession->getMaster()->getTelegramId(),
                     $this->translator->trans('Every players is ready.'),
                     [
                         'reply_markup' => [
@@ -75,5 +87,10 @@ final readonly class AddThingCommand implements BotCommandInterface
     public function supports(TelegramDto $telegramDto): bool
     {
         return false;
+    }
+
+    private function handleGameNotFound(Player $player): void
+    {
+        $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('This thing is already exist'));
     }
 }

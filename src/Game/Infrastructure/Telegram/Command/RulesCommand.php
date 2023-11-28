@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
+use App\Game\Domain\Model\Game;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
@@ -18,6 +19,7 @@ final readonly class RulesCommand implements BotCommandInterface
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
         private TranslatorInterface $translator,
+        private Game $game,
     ) {
     }
 
@@ -28,15 +30,7 @@ final readonly class RulesCommand implements BotCommandInterface
     {
         $this->telegramApi->sendMessage(
             $telegramDto->getUser()->getId(),
-            implode(PHP_EOL, [
-                $this->translator->trans('In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...') . PHP_EOL,
-                $this->translator->trans('Rules of the game:'),
-                '- '.$this->translator->trans('Create a game or join an existing one'),
-                '- '.$this->translator->trans('Invite your friends'),
-                '- '.$this->translator->trans('Add any things that come to your mind'),
-                '- '.$this->translator->trans('Rate these things with your friends'). PHP_EOL,
-                $this->translator->trans('Have fun!'),
-            ]),
+            $this->game->prettyInfo(),
             [
                 'parse_mode' => 'markdown',
                 'reply_markup' => [

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Command;
+namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Application\Dto\PlayerDto;
-use App\Game\Application\UseCase\CreateGameUseCase;
+use App\Game\Domain\Model\Game;
+use App\Game\Infrastructure\UserResolver\PlayerResolver;
 use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\TelegramBot;
 use App\Telegram\Infrastructure\Contract\BotCommandInterface;
@@ -17,7 +17,7 @@ final readonly class CreateGameCommand implements BotCommandInterface
     public const COMMAND_NAME = '/create_game';
 
     public function __construct(
-        private CreateGameUseCase $useCase,
+        private PlayerResolver $playerResolver,
         private TelegramApi $telegramApi,
         private TelegramBot $telegramBot,
         private TranslatorInterface $translator,
@@ -29,33 +29,21 @@ final readonly class CreateGameCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $user = $telegramDto->getUser();
-        $playerDto = new PlayerDto((string) $user->getId());
+        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
 
-        $newGame = $this->useCase->newGame($playerDto);
-
-        $this->telegramApi->sendMessage(
-            $user->getId(),
-            $this->translator->trans(
-                'Invite your friends with this code: gameId',
-                ['gameId' => "`{$newGame->getId()}`"],
-            ),
-            [
-                'parse_mode' => 'markdown',
-            ],
-        );
+        $this->telegramBot->startProcessingCommand($player->getTelegramId(), EnterThingsPerPlayerCommand::class);
 
         $this->telegramApi->sendMessage(
-            $user->getId(),
-            $this->translator->trans("And then start the game as soon as you're ready"),
+            $player->getTelegramId(),
+            $this->translator->trans('Enter number of rated things per player:'),
             [
                 'reply_markup' => [
-                    'inline_keyboard' => [[
-                        [
-                            'text' => $this->translator->trans('Start the game'),
-                            'callback_data' => StartGameCommand::COMMAND_NAME,
-                        ],
-                    ]],
+                    'inline_keyboard' => [
+                        array_map(static fn (int $numberOfThings): array => [
+                            'text' => $numberOfThings,
+                            'callback_data' => $numberOfThings,
+                        ], range(Game::MIN_THINGS_PER_PLAYER, Game::MAX_THINGS_PER_PLAYER)),
+                    ],
                 ],
             ],
         );

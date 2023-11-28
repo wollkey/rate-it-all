@@ -3,22 +3,20 @@
 return [
     'Create' => 'Создать',
     'Join' => 'Присоединиться',
-    'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' =>
-    'В этой игре вам предстоит оценивать любые вещи, которые придут вам в голову: *красный цвет*, *мытьё рук*, *маленькая зарплата*...',
+    'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' => 'В этой игре вам предстоит оценивать любые вещи, которые придут вам в голову: *красный цвет*, *мытьё рук*, *маленькая зарплата*...',
 
     'Create a game or join an existing one' => 'Создайте игру или присоединитесь к существующей',
     'Invite your friends' => 'Пригласите друзей',
     'Add any things that come to your mind' => 'Добавьте любую вещь, которая придёт вам в голову',
     'Rate these things with your friends' => 'Оцените эти вещи со своими друзьями',
-    'You have successfully joined' => 'Вы присоединились к игре',
-    'Wait until the game starts' => 'Ожидайте других игроков',
+    'You have successfully joined.' => 'Вы присоединились к игре.',
+    'Wait until the game starts...' => 'Ожидайте начала игры...',
     'Player player has joined' => 'Игрок player присоединился',
     'You have already joined the game with id gameId' => 'Вы уже в игре под номером gameId',
 
     'You are not in any game' => 'Вы не находитесь ни в одной игре',
 
-
-    'Wait other players' => 'Ждите остальных игроков',
+    'Wait other players...' => 'Ждите остальных игроков...',
     'Rules of the game:' => 'Правила игры:',
     'Great job. Wait other players...' => 'Отлично! Ожидайте других игроков...',
     'Every players is ready.' => 'Все игроки готовы.',
@@ -39,7 +37,7 @@ return [
 
     'Rate the next thing: nextWord' => 'Оцените следующее: nextWord',
 
-    'You are master, you cannot leave the game, only finish it. Do you really want it?' => 'Вы мастер! Вы не можете покинуть игру, только завершить её. Вы действительно хотите её закончить?',
+    'As master you can only finish the game. Do you really want it?' => 'Как мастер вы можете только завершить игру. Хотите закончить игру?',
     'Only master can finish this game. You can only leave it.' => 'Только Мастер может завершить игру! Вы можете только покинуть её.',
     'The game is over!' => 'Игра окончена!',
 
@@ -51,12 +49,24 @@ return [
     'Enter any thing:' => 'Введите что-нибудь',
 
     'Rate the next thing: anyThing' => 'Оцените следующее: anyThing',
-    'Enter the game id:' => 'Введите номер игры',
+    'Enter the game id:' => 'Введите номер игры:',
 
     'Create a game' => 'Создать игру',
     'Join the game' => 'Присоединиться к игре',
 
-    'Finish game' => 'Закончить игру',
+    'Finish the game' => 'Завершить игру',
 
-    'This thing is already exist' => 'Эта хрень уже существует'
+    'This thing is already exist' => 'Эта хрень уже существует',
+
+    'Enter number of rated things per player:' => 'Введите количество оцениваемых вещей на одного игрока:',
+
+    'The game with this id not found' => 'Игра с таким номером не найдена',
+
+    'You are already in the game. Would you like to finish the current one?' => 'Вы уже участвуете в игре. Хотели бы вы завершить текущую?',
+    'You are in another game, do you want to leave it?' => 'Вы находитесь в другой игре, желаете покинуть её?',
+    'As soon as you are ready, start the game' => 'Начните игру как только будете готовы 🚀',
+
+    'Players joined the game:' => 'Присоединённые игроки:',
+
+    'Leave the game' => 'Покинуть игру',
 ];

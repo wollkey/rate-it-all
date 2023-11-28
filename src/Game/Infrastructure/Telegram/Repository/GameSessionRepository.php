@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Repository;
+namespace App\Game\Infrastructure\Telegram\Repository;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Model\Game;
+use App\Game\Domain\Model\GameSession;
 use App\Game\Domain\Repository\GameSessionRepositoryInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -17,7 +17,7 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
     ) {
     }
 
-    public function findByPlayer(int $playerId): ?Game
+    public function findByPlayer(int $playerId): ?GameSession
     {
         $gameId = $this->cache->get("telegram_bot_player_$playerId", function (ItemInterface $item) {
             $item->expiresAfter(0);
@@ -28,19 +28,19 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
         return $gameId !== null ? $this->find($gameId) : null;
     }
 
-    public function save(Game $game): void
+    public function save(GameSession $gameSession): void
     {
-        $cacheKey = $this->getGameCacheKey($game->getId());
+        $cacheKey = $this->getGameCacheKey($gameSession->getId());
 
         $this->cache->delete($cacheKey);
-        $this->cache->get($cacheKey, function (ItemInterface $item) use ($game): Game {
+        $this->cache->get($cacheKey, function (ItemInterface $item) use ($gameSession): GameSession {
             $item->expiresAfter(3600);
 
-            return $game;
+            return $gameSession;
         });
     }
 
-    public function find(string $gameId): ?Game
+    public function find(string $gameId): ?GameSession
     {
         return $this->cache->get($this->getGameCacheKey($gameId), function (ItemInterface $item): null {
             $item->expiresAfter(0);
@@ -56,9 +56,9 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
         $this->cache->get($cacheKey, fn () => $gameId);
     }
 
-    public function delete(Game $game): void
+    public function delete(GameSession $gameSession): void
     {
-        $this->cache->delete($this->getGameCacheKey($game->getId()));
+        $this->cache->delete($this->getGameCacheKey($gameSession->getId()));
     }
 
     private function getGameCacheKey(string $gameId): string

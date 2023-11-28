@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Game\Domain\Repository;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Model\Game;
+use App\Game\Domain\Model\GameSession;
 
 interface GameSessionRepositoryInterface
 {
-    public function findByPlayer(int $playerId): ?Game;
+    public function findByPlayer(int $playerId): ?GameSession;
 
-    public function save(Game $game): void;
+    public function save(GameSession $gameSession): void;
 
-    public function find(string $gameId): ?Game;
+    public function find(string $gameId): ?GameSession;
 
-    public function delete(Game $game): void;
+    public function delete(GameSession $gameSession): void;
 
     public function addPlayerToGame(Player $player, string $gameId): void;
 

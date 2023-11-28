@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace App\Game\Application\UseCase;
 
-use App\Game\Application\Dto\PlayerDto;
-use App\Game\Domain\Model\GameSession;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
+use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\GameException;
+use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Model\Game;
 
 final readonly class JoinGameUseCase
 {
     public function __construct(
-        private GameSession $gameSession,
-        private PlayerRepositoryInterface $playerRepository,
+        private Game $game,
     ) {
     }
 
-    public function join(PlayerDto $playerDto, string $gameId): void
+    /**
+     * @throws GameNotFoundException
+     * @throws GameException
+     */
+    public function join(Player $player, string $gameId): void
     {
-        $player = $this->playerRepository->find($playerDto->getId());
-        $game = $this->gameSession->get($gameId);
+        $gameSession = $this->game->findSession($gameId);
 
-        $this->gameSession->addPlayerToGame($player, $game);
-        $this->gameSession->save($game);
+        $this->game->addPlayerToGameSession($player, $gameSession);
+        $this->game->saveSession($gameSession);
     }
 }
