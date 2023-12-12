@@ -36,11 +36,11 @@ final readonly class RulesCommand implements BotCommandInterface
                 'reply_markup' => [
                     'inline_keyboard' => [[
                         [
-                            'text' => $this->translator->trans('Create a game'),
+                            'text' => $this->translator->trans('Create'),
                             'callback_data' => CreateGameCommand::COMMAND_NAME,
                         ],
                         [
-                            'text' => $this->translator->trans('Join the game'),
+                            'text' => $this->translator->trans('Join'),
                             'callback_data' => JoinCommand::COMMAND_NAME,
                         ],
                     ]],

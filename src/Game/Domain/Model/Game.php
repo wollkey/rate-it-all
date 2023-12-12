@@ -44,12 +44,11 @@ final readonly class Game
         return implode(PHP_EOL, [
             $this->description() . PHP_EOL,
             $this->translator->trans('Rules of the game:'),
-            ...array_map(static fn(string $rule) => "- $rule", $this->rules()),
+            ...array_map(static fn (string $rule) => "- $rule", $this->rules()),
             '',
             $this->translator->trans('Have fun!'),
         ]);
     }
-
 
     public function createSession(Player $master, ThingsPerPlayer $thingPerPlayer): GameSession
     {

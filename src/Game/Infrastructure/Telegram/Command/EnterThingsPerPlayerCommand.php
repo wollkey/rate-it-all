@@ -26,6 +26,9 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
     ) {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function execute(TelegramDto $telegramDto): void
     {
         $player = $this->playerResolver->getPlayer($telegramDto->getUser());

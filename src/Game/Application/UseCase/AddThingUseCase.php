@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Event\ThingHasBeenAdded;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Model\Game;
 use App\Game\Domain\ValueObject\Thing;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class AddThingUseCase
 {
     public function __construct(
         private Game $game,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -37,5 +40,7 @@ final readonly class AddThingUseCase
 
         $gameSession->addThing($player, $thing);
         $this->game->saveSession($gameSession);
+
+        $this->eventDispatcher->dispatch(new ThingHasBeenAdded($player, $gameSession));
     }
 }

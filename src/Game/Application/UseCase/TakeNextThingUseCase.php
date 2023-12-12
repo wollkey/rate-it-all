@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Event\NextRatedThingTaken;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
 use App\Game\Domain\Model\Game;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class TakeNextThingUseCase
 {
     public function __construct(
         private Game $game,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -31,5 +34,7 @@ final readonly class TakeNextThingUseCase
 
         $gameSession->setCurrentRatedThing($randomThing);
         $this->game->saveSession($gameSession);
+
+        $this->eventDispatcher->dispatch(new NextRatedThingTaken($gameSession));
     }
 }

@@ -31,7 +31,6 @@ final readonly class ShowResultCommand implements BotCommandInterface
         $player = $this->playerRepository->find($telegramDto->getUser()->getId());
         $gameSession = $this->game->continue($player);
 
-        dump($gameSession->generateResult());
         $result = $this->formatResult($gameSession->generateResult());
 
         $this->telegramApi->sendMessage($player->getTelegramId(), $result);

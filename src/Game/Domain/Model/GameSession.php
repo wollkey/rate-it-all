@@ -14,9 +14,10 @@ use App\Game\Domain\ValueObject\ThingsPerPlayer;
 final class GameSession
 {
     /**
-     * @param Player[] $players
-     * @param array<int, Thing[]> $playerThings
+     * @param Player[]                  $players
+     * @param array<int, Thing[]>       $playerThings
      * @param array<string, RatedThing> $ratedThings
+     *
      * @throws PlayerAlreadyInGameException
      */
     public function __construct(
