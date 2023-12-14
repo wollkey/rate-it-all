@@ -34,16 +34,18 @@ final readonly class RulesCommand implements BotCommandInterface
             [
                 'parse_mode' => 'markdown',
                 'reply_markup' => [
-                    'inline_keyboard' => [[
+                    'inline_keyboard' => [
                         [
-                            'text' => $this->translator->trans('Create'),
-                            'callback_data' => CreateGameCommand::COMMAND_NAME,
-                        ],
-                        [
-                            'text' => $this->translator->trans('Join'),
-                            'callback_data' => JoinCommand::COMMAND_NAME,
-                        ],
-                    ]],
+                            [
+                                'text' => $this->translator->trans('Create'),
+                                'callback_data' => CreateGameCommand::COMMAND_NAME,
+                            ],
+                            [
+                                'text' => $this->translator->trans('Join'),
+                                'callback_data' => JoinCommand::COMMAND_NAME,
+                            ],
+                        ]
+                    ],
                 ],
             ],
         );
@@ -51,6 +53,9 @@ final readonly class RulesCommand implements BotCommandInterface
 
     public function supports(TelegramDto $telegramDto): bool
     {
-        return $this->telegramBot->getMessageCommand($telegramDto->getMessage()) === self::COMMAND_NAME;
+        return match (self::COMMAND_NAME) {
+            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            default => false,
+        };
     }
 }

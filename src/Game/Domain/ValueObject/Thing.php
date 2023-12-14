@@ -6,6 +6,8 @@ namespace App\Game\Domain\ValueObject;
 
 final readonly class Thing
 {
+    private const MIN_STRING_LENGTH = 2;
+
     private string $value;
     private string $hash;
 
@@ -29,7 +31,7 @@ final readonly class Thing
 
     private function validate(string $value): void
     {
-        if (strlen($value) < 2) {
+        if (mb_strlen($value) < self::MIN_STRING_LENGTH) {
             throw new \InvalidArgumentException();
         }
     }

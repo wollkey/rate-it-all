@@ -12,6 +12,8 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 final readonly class GameSessionRepository implements GameSessionRepositoryInterface
 {
+    private const ONE_DAY_IN_SECONDS = 3600 * 24;
+
     public function __construct(
         private CacheInterface $cache,
     ) {
@@ -34,7 +36,7 @@ final readonly class GameSessionRepository implements GameSessionRepositoryInter
 
         $this->cache->delete($cacheKey);
         $this->cache->get($cacheKey, function (ItemInterface $item) use ($gameSession): GameSession {
-            $item->expiresAfter(3600);
+            $item->expiresAfter(self::ONE_DAY_IN_SECONDS);
 
             return $gameSession;
         });

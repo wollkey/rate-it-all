@@ -45,7 +45,7 @@ final readonly class AddThingCommand implements BotCommandInterface
         } catch (ThingsPlayerLimitReachedException) {
             $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Wait other players...'));
             $this->telegramBot->stopProcessingCommand($player->getTelegramId());
-        } catch (GameException $exception) {
+        } catch (GameException|\InvalidArgumentException $exception) {
             throw new TelegramException($exception->getMessage(), previous: $exception);
         }
     }

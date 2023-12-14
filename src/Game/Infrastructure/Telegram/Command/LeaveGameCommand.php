@@ -56,7 +56,10 @@ final readonly class LeaveGameCommand implements BotCommandInterface
 
     public function supports(TelegramDto $telegramDto): bool
     {
-        return $this->telegramBot->getMessageCommand($telegramDto->getMessage()) === self::COMMAND_NAME;
+        return match (self::COMMAND_NAME) {
+            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            default => false,
+        };
     }
 
     /**
