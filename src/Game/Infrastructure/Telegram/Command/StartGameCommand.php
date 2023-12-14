@@ -44,7 +44,10 @@ final readonly class StartGameCommand implements BotCommandInterface
 
         foreach ($gameSession->getPlayers() as $player) {
             $this->telegramBot->startProcessingCommand($player->getTelegramId(), AddThingCommand::class);
-            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Add any things that come to your mind') . ':');
+            $this->telegramApi->sendMessage(
+                $player->getTelegramId(),
+                $this->translator->trans('Add any crazy thing that came into your head:')
+            );
         }
     }
 
@@ -63,7 +66,7 @@ final readonly class StartGameCommand implements BotCommandInterface
     {
         $this->telegramApi->sendMessage(
             $player->getTelegramId(),
-            $this->translator->trans('First create a new game'),
+            $this->translator->trans('Kick things off with a new game'),
             [
                 'reply_markup' => [
                     'inline_keyboard' => [[

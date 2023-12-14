@@ -40,18 +40,18 @@ final readonly class TellPlayerToAddNextThing
 
         $this->telegramBot->stopProcessingCommand($player->getTelegramId());
 
-        $allThingsMessage = $this->translator->trans('Great job. Wait other players...');
+        $allThingsMessage = $this->translator->trans('Great job! Just waiting on others now...');
         $this->telegramApi->sendMessage($player->getTelegramId(), $allThingsMessage);
 
         if ($gameSession->totalThingLimitReached()) {
             $this->telegramApi->sendMessage(
                 $gameSession->getMaster()->getTelegramId(),
-                $this->translator->trans('Every players is ready.'),
+                $this->translator->trans('All players are ready'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
                             [
-                                'text' => $this->translator->trans("Let's have some fun!"),
+                                'text' => $this->translator->trans("Let's have some madness!"),
                                 'callback_data' => StartRatingThingCommand::COMMAND_NAME,
                             ],
                         ]],

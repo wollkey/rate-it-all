@@ -40,7 +40,7 @@ final readonly class FinishGameCommand implements BotCommandInterface
         $gameSession = $this->game->continue($player);
 
         if (!$gameSession->isPlayerMaster($player)) {
-            throw new TelegramException($this->translator->trans('Only master can finish this game. You can only leave it.'));
+            throw new TelegramException($this->translator->trans('Only the game master can end this party. You can gracefully exit, though.'));
         }
 
         $this->game->finishGame($gameSession);

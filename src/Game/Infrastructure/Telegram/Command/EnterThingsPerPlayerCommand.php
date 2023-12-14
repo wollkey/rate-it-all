@@ -41,7 +41,7 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
         $this->telegramApi->sendMessage(
             $player->getTelegramId(),
             $this->translator->trans(
-                'Invite your friends with this code: gameId',
+                'Invite your friends using this code: gameId',
                 ['gameId' => "`{$newGame->getId()}`"],
             ),
             [

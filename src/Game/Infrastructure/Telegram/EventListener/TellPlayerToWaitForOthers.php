@@ -29,7 +29,7 @@ final readonly class TellPlayerToWaitForOthers
 
         $this->telegramApi->sendMessage(
             $event->getPlayer()->getTelegramId(),
-            $this->translator->trans('Okay.') . ' ' . $this->translator->trans('Wait other players...')
+            $this->translator->trans('Great job! Just waiting on others now...')
         );
     }
 }

@@ -39,7 +39,7 @@ final readonly class AddThingCommand implements BotCommandInterface
         try {
             ($this->addThingUseCase)($player, new Thing($thing));
         } catch (ThingIsAlreadyInTheListException) {
-            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('This thing is already exist'));
+            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('This is already on the list of madness list'));
 
             return;
         } catch (ThingsPlayerLimitReachedException) {

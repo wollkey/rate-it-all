@@ -1,72 +1,72 @@
 <?php
 
 return [
+    // Greet
+    'Hi there!' => 'Привет!',
+    'This is a game in which you have to rate everything that comes to your mind.' => 'В этой игре вы можете оценить любую вещь, которая придёт тебе в голову',
+    'Behold the' => 'Взгляните на',
+
+    // General
     'Create' => 'Создать',
     'Join' => 'Присоединиться',
-    'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' => 'В этой игре вам предстоит оценивать любые вещи, которые придут вам в голову: *красный цвет*, *мытьё рук*, *маленькая зарплата*...',
 
-    'Create a game or join an existing one' => 'Создайте игру или присоединитесь к существующей',
-    'Invite your friends' => 'Пригласите друзей',
-    'Add any things that come to your mind' => 'Добавьте любую вещь, которая придёт вам в голову',
-    'Rate these things with your friends' => 'Оцените эти вещи со своими друзьями',
-    'You have successfully joined.' => 'Вы присоединились к игре.',
-    'Wait until the game starts...' => 'Ожидайте начала игры...',
-    'Player player has joined' => 'Игрок player присоединился',
-    'You have already joined the game with id gameId' => 'Вы уже в игре под номером gameId',
-
-    'You are not in any game' => 'Вы не находитесь ни в одной игре',
-
-    'Wait other players...' => 'Ждите остальных игроков...',
-    'Rules of the game:' => 'Правила игры:',
-    'Great job. Wait other players...' => 'Отлично! Ожидайте других игроков...',
-    'Every players is ready.' => 'Все игроки готовы.',
-    "Let's have some fun!" => 'Погнали веселиться!',
-    'Great, enter the next thing:' => 'Неплохо, введите что-нибудь ещё:',
-    'Invite your friends with this code: gameId' => 'Пригласите своих друзей по этому коду: gameId',
-    "And then start the game as soon as you're ready" => 'Начните игру как только будете готовы',
-
-    'You must not change you rating.' => 'Вы не можете изменить оценку',
     'Start the game' => 'Начать игру',
-
-    'Rating must be a number' => 'Рейтинг должен быть числом',
-
-    'Congrats! You really rated all this nonsense' => 'Поздравляю! Вы действительно оценили весь этот бред',
-
-    'Show result' => 'Показать результат',
-    'Okay.' => 'Окей.',
-
-    'Rate the next thing: nextWord' => 'Оцените следующее: nextWord',
-
-    'As master you can only finish the game. Do you really want it?' => 'Как мастер вы можете только завершить игру. Хотите закончить игру?',
-    'Only master can finish this game. You can only leave it.' => 'Только Мастер может завершить игру! Вы можете только покинуть её.',
-    'The game is over!' => 'Игра окончена!',
-
-    'Hi there!' => 'Приветствую!',
-    'This is a game in which you have to rate everything that comes to your mind.' => 'В этой игре ты можешь оценить любую вещь, которая придёт тебе в голову',
-    'See the' => 'Смотри',
-
-    'First create a new game' => 'Сначала создайте новую игру',
-    'Enter any thing:' => 'Введите что-нибудь',
-
-    'Rate the next thing: anyThing' => 'Оцените следующее: anyThing',
-    'Enter the game id:' => 'Введите номер игры:',
-
-    'Create a game' => 'Создать игру',
-    'Join the game' => 'Присоединиться к игре',
-
+    'Leave the game' => 'Покинуть игру',
     'Finish the game' => 'Завершить игру',
 
-    'This thing is already exist' => 'Эта хрень уже существует',
+    'The game is over!' => 'Игра окончена!',
+    'Have fun!' => 'Веселитесь!',
 
-    'Enter number of rated things per player:' => 'Введите количество оцениваемых вещей на одного игрока:',
+    // Rules
+    'Gameplay rules:' => 'Правила игры:',
 
-    'The game with this id not found' => 'Игра с таким номером не найдена',
+    'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' => 'В этой игре вам предстоит оценивать любые вещи, которые придут вам в голову: *красный цвет*, *мытьё рук*, *маленькая зарплата*, всё что угодно...',
 
-    'You are already in the game. Would you like to finish the current one?' => 'Вы уже участвуете в игре. Хотели бы вы завершить текущую?',
-    'You are in another game, do you want to leave it?' => 'Вы находитесь в другой игре, желаете покинуть её?',
-    'As soon as you are ready, start the game' => 'Начните игру как только будете готовы 🚀',
+    'Create a game or join an existing one' => 'Создайте игру или присоединитесь к существующей',
+    'Invite more friends' => 'Пригласите побольше друзей',
+    'Add any things that come to your mind - the weirder, the better' => 'Добавьте любые вещи, которые придут вам в голову. Чем безумней, тем лучше',
+    'Debate and rate with your fellow these madness things' => 'Обсуждайте и оценивайте с друзьями эти безумные вещи',
+
+    // Game
+    'Enter the number of rated things per player:' => 'Введите количество оцениваемых вещей на одного игрока:',
+
+    'Invite your friends using this code: gameId' => 'Пригласите друзей с помощью этого кода: gameId',
+    "And then start the game as soon as you're ready" => 'Начните игру как только будете готовы',
+
+    'Enter the game ID:' => 'Введите номер игры:',
+    'You\'ve successfully joined the game.' => 'Вы успешно присоединились к игре.',
+    'Be ready, the adventure is about to begin...' => 'Приготовьтесь, безумие скоро начнется...',
 
     'Players joined the game:' => 'Присоединённые игроки:',
+    'As soon as you are ready, start the game' => 'Начните игру как только будете готовы 🚀',
 
-    'Leave the game' => 'Покинуть игру',
+    'Add any crazy thing that came into your head:' => 'Добавьте любую безумную вещь, которая пришла вам в голову:',
+    'Great, enter the next thing:' => 'Неплохо, введите что-нибудь ещё:',
+    'Great job! Just waiting on others now...' => 'Отлично! Теперь ждём остальных...',
+    'Wait other players...' => 'Ожидайте других игроков...',
+
+    'All players are ready' => 'Все игроки готовы',
+    "Let's have some madness!" => 'Приступить к безумию!',
+
+    'Rate the next thing: anyThing' => 'Оцените следующее: anyThing',
+
+    'Congrats! You really rated all this nonsense!' => 'Поздравляю! Вы действительно оценили все эти безумные вещи!',
+    'Reveal the result' => 'Показать результат',
+
+    // Exception
+    'Already playing. Would you like to finish the current one?' => 'Уже в игре. Хотели бы завершить текущую?',
+    'You have already joined the game with ID: gameId' => 'Вы уже в игре под номером: gameId',
+    'You are in another game, do you want to leave it?' => 'Вы находитесь в другой игре, желаете покинуть её?',
+    'You are not in any game' => 'Вы не находитесь ни в одной игре',
+
+    'As master you can only finish the game. Do you really want it?' => 'Как мастер вы можете только завершить игру. Хотите закончить игру?',
+    'Only the game master can end this party. You can gracefully exit, though.' => 'Только Мастер может завершить игру! Но вы можете изящно её покинуть',
+
+    'The game with this ID not found' => 'Игра с этим номером не найдена',
+    'Kick things off with a new game' => 'Начните с создания новой игры',
+
+    'This is already on the list of madness list' => 'Это уже есть в списке безумств',
+
+    'Rating must be a number' => 'Оценка должна быть числом',
+    'You must not change you rating. Choose wisely.' => 'Изменение оценки невозможно. Оценивайте мудро!',
 ];
