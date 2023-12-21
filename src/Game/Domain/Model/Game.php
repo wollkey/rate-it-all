@@ -33,9 +33,9 @@ final readonly class Game
     {
         return array_map($this->translator->trans(...), [
             'Create a game or join an existing one',
-            'Invite your friends',
-            'Add any things that come to your mind',
-            'Rate these things with your friends',
+            'Invite more friends',
+            'Add any things that come to your mind - the weirder, the better',
+            'Debate and rate with your fellow these madness things',
         ]);
     }
 
@@ -43,7 +43,7 @@ final readonly class Game
     {
         return implode(PHP_EOL, [
             $this->description() . PHP_EOL,
-            $this->translator->trans('Rules of the game:'),
+            $this->translator->trans('Gameplay rules:'),
             ...array_map(static fn (string $rule) => "- $rule", $this->rules()),
             '',
             $this->translator->trans('Have fun!'),
@@ -112,7 +112,7 @@ final readonly class Game
     {
         return
             $this->sessionRepository->find($gameSessionId)
-            ?? throw new GameNotFoundException($this->translator->trans('The game with this id not found'));
+            ?? throw new GameNotFoundException($this->translator->trans('The game with this ID not found'));
     }
 
     public function findSessionByPlayer(Player $player): ?GameSession

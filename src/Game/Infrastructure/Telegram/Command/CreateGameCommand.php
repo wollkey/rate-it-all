@@ -35,7 +35,7 @@ final readonly class CreateGameCommand implements BotCommandInterface
 
         $this->telegramApi->sendMessage(
             $player->getTelegramId(),
-            $this->translator->trans('Enter number of rated things per player:'),
+            $this->translator->trans('Enter the number of rated things per player:'),
             [
                 'reply_markup' => [
                     'inline_keyboard' => [

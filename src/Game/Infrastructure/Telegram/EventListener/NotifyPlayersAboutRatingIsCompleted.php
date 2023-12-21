@@ -31,12 +31,12 @@ final readonly class NotifyPlayersAboutRatingIsCompleted
         foreach ($gameSession->getPlayers() as $player) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                $this->translator->trans('Congrats! You really rated all this nonsense'),
+                $this->translator->trans('Congrats! You really rated all this nonsense!'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
                             [
-                                'text' => $this->translator->trans('Show result'),
+                                'text' => $this->translator->trans('Reveal the result'),
                                 'callback_data' => ShowResultCommand::COMMAND_NAME,
                             ],
                         ]],

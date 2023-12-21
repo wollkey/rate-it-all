@@ -44,7 +44,7 @@ final readonly class RateTheThingCommand implements BotCommandInterface
         } catch (ThingIsAlreadyRatedException) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                implode(PHP_EOL, [$this->translator->trans('You must not change you rating.'), $this->translator->trans('Wait other players...')]),
+                implode(PHP_EOL, [$this->translator->trans('You must not change you rating. Choose wisely.')]),
             );
 
             return;

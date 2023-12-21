@@ -36,7 +36,7 @@ final readonly class JoinCommand implements BotCommandInterface
         if ($gameSession !== null && $gameSession->isPlayerMaster($player)) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
-                $this->translator->trans('You are already in the game. Would you like to finish the current one?'),
+                $this->translator->trans('Already playing. Would you like to finish the current one?'),
                 [
                     'reply_markup' => [
                         'inline_keyboard' => [[
@@ -72,7 +72,7 @@ final readonly class JoinCommand implements BotCommandInterface
         }
 
         $this->telegramBot->startProcessingCommand($player->getTelegramId(), EnterGameIdCommand::class);
-        $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Enter the game id:'));
+        $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Enter the game ID:'));
     }
 
     public function supports(TelegramDto $telegramDto): bool

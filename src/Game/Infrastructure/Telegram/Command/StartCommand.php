@@ -29,7 +29,7 @@ final readonly class StartCommand implements BotCommandInterface
             implode(PHP_EOL, [
                 $this->translator->trans('Hi there!'),
                 $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
-                $this->translator->trans('See the') . ' ' . RulesCommand::COMMAND_NAME,
+                $this->translator->trans('Behold the') . ' ' . RulesCommand::COMMAND_NAME,
             ]),
         );
     }
