@@ -22,7 +22,7 @@ final readonly class Rating
     private function validate(int $rating): void
     {
         if ($rating < 1 || $rating > 10) {
-            throw new \InvalidArgumentException('You must use only from 1 to 10 numbers');
+            throw new \InvalidArgumentException('The number must from 1 to 10');
         }
     }
 }

@@ -65,7 +65,7 @@ final readonly class TelegramBot
         $cacheKey = $this->getProcessingCommandCacheKey($chatId);
 
         $this->cache->get($cacheKey, function (ItemInterface $item) use ($fqcn): ?string {
-            $item->expiresAfter(3600);
+            $item->expiresAfter(3600 * 24);
 
             return $fqcn;
         });
@@ -110,6 +110,11 @@ final readonly class TelegramBot
 
             return $message;
         });
+    }
+
+    public function removeEditedMessage(int $chatId): void
+    {
+        $this->cache->delete($this->getEditedMessageCacheKey($chatId));
     }
 
     private function getProcessingCommandCacheKey(int $chatId): string

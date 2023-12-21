@@ -1,3 +1,11 @@
+up: docker-up run-server
+
+docker-up:
+	docker-compose up -d
+
+run-server:
+	symfony server:start
+
 deptrac:
 	./vendor/bin/deptrac --verbose
 

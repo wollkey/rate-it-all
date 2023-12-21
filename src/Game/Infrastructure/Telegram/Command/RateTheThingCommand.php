@@ -48,6 +48,8 @@ final readonly class RateTheThingCommand implements BotCommandInterface
             );
 
             return;
+        } catch (\InvalidArgumentException) {
+            throw new TelegramException($this->translator->trans('Enter a number from 1 to 10'));
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());
         }

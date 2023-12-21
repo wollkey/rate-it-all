@@ -3,7 +3,7 @@
 return [
     // Greet
     'Hi there!' => 'Привет!',
-    'This is a game in which you have to rate everything that comes to your mind.' => 'В этой игре вы можете оценить любую вещь, которая придёт тебе в голову',
+    'This is a game in which you have to rate everything that comes to your mind.' => 'В этой игре вы можете оценить любую вещь, которая придёт вам в голову.',
     'Behold the' => 'Взгляните на',
 
     // General
@@ -68,5 +68,8 @@ return [
     'This is already on the list of madness list' => 'Это уже есть в списке безумств',
 
     'Rating must be a number' => 'Оценка должна быть числом',
+    'Enter a number from 1 to 10' => 'Введите число от 1 до 10',
     'You must not change you rating. Choose wisely.' => 'Изменение оценки невозможно. Оценивайте мудро!',
+
+    'The action is not available' => 'Действие недоступно',
 ];
