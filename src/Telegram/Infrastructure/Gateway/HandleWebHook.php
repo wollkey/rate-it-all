@@ -73,7 +73,13 @@ final readonly class HandleWebHook
 
             $command?->execute($telegramDto);
         } catch (TelegramException $exception) {
-            $this->telegramApi->sendMessage($telegramDto->getUser()->getId(), $exception->getMessage());
+            $this->logger->error(json_encode([
+                'error' => $exception->getMessage(),
+                'previous' => $exception->getPrevious()?->getMessage(),
+                'trace' => $exception->getTrace(),
+            ]));
+            $exceptionMessage = !empty($exception->getMessage()) ? $exception->getMessage() : 'Unknown error';
+            $this->telegramApi->sendMessage($telegramDto->getUser()->getId(), $exceptionMessage);
         }
     }
 

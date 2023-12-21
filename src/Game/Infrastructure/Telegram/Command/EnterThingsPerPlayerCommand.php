@@ -40,13 +40,10 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
 
         $this->telegramApi->sendMessage(
             $player->getTelegramId(),
-            $this->translator->trans(
-                'Invite your friends using this code: gameId',
-                ['gameId' => "`{$newGame->getId()}`"],
-            ),
-            [
-                'parse_mode' => 'markdown',
-            ],
+            implode(PHP_EOL, [
+                $this->translator->trans('Join the game at this link:'),
+                "https://t.me/rate_it_all_dev_bot?start={$newGame->getId()}",
+            ]),
         );
 
         $telegramResponse = $this->telegramApi->sendMessage(

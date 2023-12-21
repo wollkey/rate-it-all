@@ -30,7 +30,7 @@ return [
     // Game
     'Enter the number of rated things per player:' => 'Введите количество оцениваемых вещей на одного игрока:',
 
-    'Invite your friends using this code: gameId' => 'Пригласите друзей с помощью этого кода: gameId',
+    'Join the game at this link:' => 'Присоединяйтесь к игре по этой ссылке:',
     "And then start the game as soon as you're ready" => 'Начните игру как только будете готовы',
 
     'Enter the game ID:' => 'Введите номер игры:',
