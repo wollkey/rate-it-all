@@ -43,7 +43,7 @@ final readonly class FinishGameCommand implements BotCommandInterface
             throw new TelegramException($this->translator->trans('Only the game master can end this party. You can gracefully exit, though.'));
         }
 
-        $this->game->finishGame($gameSession);
+        $this->game->finishGameSession($gameSession);
         $this->telegramApi->sendMessage($gameSession->getMaster()->getTelegramId(), $this->translator->trans('The game is over!'));
     }
 

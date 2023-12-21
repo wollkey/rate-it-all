@@ -96,7 +96,7 @@ final readonly class Game
         $this->sessionRepository->removePlayerFromGame($player);
     }
 
-    public function finishGame(GameSession $gameSession): void
+    public function finishGameSession(GameSession $gameSession): void
     {
         foreach ($gameSession->getPlayers() as $player) {
             $this->sessionRepository->removePlayerFromGame($player);

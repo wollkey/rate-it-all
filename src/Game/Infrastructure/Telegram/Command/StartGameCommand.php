@@ -36,6 +36,17 @@ final readonly class StartGameCommand implements BotCommandInterface
 
         try {
             $gameSession = $this->game->continue($player);
+
+            if (!$gameSession->isPlayerMaster($player)) {
+                $this->telegramApi->sendMessage(
+                    $player->getTelegramId(),
+                    $this->translator->trans('The action is not available'),
+                );
+
+                return;
+            }
+
+            $this->telegramBot->removeEditedMessage($player->getTelegramId());
         } catch (GameNotFoundException) {
             $this->sendCreateNewGameMessage($player);
 
