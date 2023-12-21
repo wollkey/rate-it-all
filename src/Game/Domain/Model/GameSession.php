@@ -5,73 +5,170 @@ declare(strict_types=1);
 namespace App\Game\Domain\Model;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Repository\GameSessionRepositoryInterface;
-use App\Telegram\Domain\Exception\TelegramException;
-use Ramsey\Uuid\Uuid;
+use App\Game\Domain\Exception\PlayerAlreadyInGameException;
+use App\Game\Domain\Exception\ThingNotInTheListException;
+use App\Game\Domain\ValueObject\Rating;
+use App\Game\Domain\ValueObject\Thing;
+use App\Game\Domain\ValueObject\ThingsPerPlayer;
 
-final readonly class GameSession
+final class GameSession
 {
+    /**
+     * @param Player[]                  $players
+     * @param array<int, Thing[]>       $playerThings
+     * @param array<string, RatedThing> $ratedThings
+     *
+     * @throws PlayerAlreadyInGameException
+     */
     public function __construct(
-        private GameSessionRepositoryInterface $sessionRepository,
+        private readonly string $id,
+        private readonly Player $master,
+        private readonly ThingsPerPlayer $thingPerPlayer,
+        private array $players = [],
+        private array $playerThings = [],
+        private array $ratedThings = [],
+        private ?RatedThing $currentRatedThing = null,
     ) {
+        $this->addPlayer($this->master);
     }
 
-    public function create(Player $master): Game
+    public function getId(): string
     {
-        $newGame = (new Game($this->generateShortUuid(), $master, 1));
-
-        $this->sessionRepository->addPlayerToGame($master, $newGame->getId());
-
-        return $newGame;
+        return $this->id;
     }
 
-    private function generateShortUuid(): string
+    public function getMaster(): Player
     {
-        return Uuid::uuid7()->getTimeHiAndVersionHex();
+        return $this->master;
     }
 
-    public function restart(Game $game): Game
+    public function getThingPerPlayer(): ThingsPerPlayer
     {
-        $this->sessionRepository->delete($game);
-
-        return $this->create($game->getMaster());
+        return $this->thingPerPlayer;
     }
 
-    public function get(string $gameId): Game
+    /**
+     * @throws PlayerAlreadyInGameException
+     */
+    public function addPlayer(Player $player): self
     {
-        return
-            $this->sessionRepository->find($gameId)
-            ?? throw new TelegramException('The game with this id not found');
-    }
-
-    public function continueGame(Player $player): ?Game
-    {
-        return $this->sessionRepository->findByPlayer($player->getId());
-    }
-
-    public function save(Game $game): void
-    {
-        $this->sessionRepository->save($game);
-    }
-
-    public function addPlayerToGame(Player $player, Game $game): void
-    {
-        $game->addPlayer($player);
-        $this->sessionRepository->addPlayerToGame($player, $game->getId());
-    }
-
-    public function leaveGame(Player $player, Game $game): void
-    {
-        $game->removePlayer($player);
-        $this->sessionRepository->removePlayerFromGame($player);
-    }
-
-    public function finishGame(Game $game)
-    {
-        foreach ($game->getPlayers() as $player) {
-            $this->sessionRepository->removePlayerFromGame($player);
+        if (array_key_exists($player->getId(), $this->players)) {
+            throw new PlayerAlreadyInGameException('Player is already in the game');
         }
 
-        $this->sessionRepository->delete($game);
+        $this->players[$player->getId()] = $player;
+
+        return $this;
+    }
+
+    public function removePlayer(Player $player): void
+    {
+        unset($this->players[$player->getId()]);
+    }
+
+    /**
+     * @return Player[]
+     */
+    public function getPlayers(): array
+    {
+        return $this->players;
+    }
+
+    public function addThing(Player $player, Thing $thing): self
+    {
+        $this->ratedThings[$thing->getHash()] = new RatedThing($thing);
+        $this->playerThings[$player->getId()][] = $thing;
+
+        return $this;
+    }
+
+    /**
+     * @throws ThingNotInTheListException
+     */
+    public function rateThing(Thing $thing, Player $player, Rating $rating): void
+    {
+        if (!$this->thingExists($thing)) {
+            throw new ThingNotInTheListException("This thing {$thing->getValue()} not in the list");
+        }
+
+        $ratedThing = $this->ratedThings[$thing->getHash()];
+        $ratedThing->rateThing($player, $rating);
+    }
+
+    public function thingExists(Thing $thing): bool
+    {
+        return array_key_exists($thing->getHash(), $this->ratedThings);
+    }
+
+    public function playerThingLimitReached(int $playerId): bool
+    {
+        return
+            array_key_exists($playerId, $this->playerThings)
+            && count($this->playerThings[$playerId]) >= $this->thingPerPlayer->getValue();
+    }
+
+    public function totalThingLimitReached(): bool
+    {
+        return count($this->ratedThings) >= count($this->players) * $this->thingPerPlayer->getValue();
+    }
+
+    public function getRandomUnratedThing(): ?Thing
+    {
+        $unratedThings = $this->getUnratedThings();
+
+        return !empty($unratedThings)
+            ? $unratedThings[array_rand($unratedThings)]->getThing()
+            : null;
+    }
+
+    /**
+     * @return array<string, RatedThing>
+     */
+    public function getUnratedThings(): array
+    {
+        $unratedThings = [];
+
+        foreach ($this->ratedThings as $thingHash => $ratedThing) {
+            if (!$ratedThing->isRated()) {
+                $unratedThings[$thingHash] = $ratedThing;
+            }
+        }
+
+        return $unratedThings;
+    }
+
+    public function getCurrentRatedThing(): ?RatedThing
+    {
+        return $this->currentRatedThing;
+    }
+
+    public function setCurrentRatedThing(Thing $currentRatedThing): void
+    {
+        $ratedThing = $this->ratedThings[$currentRatedThing->getHash()];
+
+        $this->currentRatedThing = $ratedThing;
+    }
+
+    public function isThingFullyRated(Thing $ratedThing): bool
+    {
+        return $this->ratedThings[$ratedThing->getHash()]->countRatedPlayers() === count($this->players);
+    }
+
+    public function generateResult(): array
+    {
+        $thingsRatings = [];
+
+        foreach ($this->ratedThings as $ratedThing) {
+            $thingsRatings[$ratedThing->getThing()->getValue()] = $ratedThing->averageRating();
+        }
+
+        arsort($thingsRatings);
+
+        return $thingsRatings;
+    }
+
+    public function isPlayerMaster(?Player $player): bool
+    {
+        return $this->getMaster()->getId() === $player->getId();
     }
 }

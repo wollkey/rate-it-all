@@ -4,29 +4,27 @@ declare(strict_types=1);
 
 namespace App\Game\Application\UseCase;
 
-use App\Game\Application\Dto\PlayerDto;
+use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Model\Game;
 use App\Game\Domain\Model\GameSession;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
+use App\Game\Domain\ValueObject\ThingsPerPlayer;
 
 final readonly class CreateGameUseCase
 {
     public function __construct(
-        private GameSession $gameSession,
-        private PlayerRepositoryInterface $playerRepository,
+        private Game $game,
     ) {
     }
 
-    public function newGame(PlayerDto $playerDto): Game
+    public function __invoke(Player $master, ThingsPerPlayer $thingPerPlayer): GameSession
     {
-        $master = $this->playerRepository->find($playerDto->getId());
-        $game = $this->gameSession->continueGame($master);
+        $gameSession = $this->game->findSessionByPlayer($master);
 
-        $newGame = $game !== null
-            ? $this->gameSession->restart($game)
-            : $this->gameSession->create($master);
+        $newGame = $gameSession !== null
+            ? $this->game->restartSession($gameSession)
+            : $this->game->createSession($master, $thingPerPlayer);
 
-        $this->gameSession->save($newGame);
+        $this->game->saveSession($newGame);
 
         return $newGame;
     }

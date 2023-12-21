@@ -5,161 +5,118 @@ declare(strict_types=1);
 namespace App\Game\Domain\Model;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Exception\GameException;
+use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Repository\GameSessionRepositoryInterface;
+use App\Game\Domain\ValueObject\ThingsPerPlayer;
+use Ramsey\Uuid\Uuid;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class Game
+final readonly class Game
 {
-    /**
-     * @param Player[]             $players
-     * @param array<int, string[]> $playerThings
-     *
-     * @TODO add param types
-     */
+    public const MIN_THINGS_PER_PLAYER = 1;
+    public const MAX_THINGS_PER_PLAYER = 5;
+
     public function __construct(
-        private readonly string $id,
-        private readonly Player $master,
-        private readonly int $thingPerPlayer,
-        private array $players = [],
-        private array $playerThings = [],
-        private array $thingRatings = [],
-        private ?Thing $ratedThing = null,
+        private GameSessionRepositoryInterface $sessionRepository,
+        private TranslatorInterface $translator,
     ) {
-        $this->addPlayer($this->master);
     }
 
-    public function getId(): string
+    public function description(): string
     {
-        return $this->id;
+        return $this->translator->trans(
+            'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...'
+        );
     }
 
-    public function getMaster(): Player
+    public function rules(): array
     {
-        return $this->master;
+        return array_map($this->translator->trans(...), [
+            'Create a game or join an existing one',
+            'Invite your friends',
+            'Add any things that come to your mind',
+            'Rate these things with your friends',
+        ]);
     }
 
-    public function addPlayer(Player $player): self
+    public function prettyInfo(): string
     {
-        if (array_key_exists($player->getId(), $this->players)) {
-            throw new GameException('Player is already in the game');
-        }
-
-        $this->players[$player->getId()] = $player;
-
-        return $this;
+        return implode(PHP_EOL, [
+            $this->description() . PHP_EOL,
+            $this->translator->trans('Rules of the game:'),
+            ...array_map(static fn (string $rule) => "- $rule", $this->rules()),
+            '',
+            $this->translator->trans('Have fun!'),
+        ]);
     }
 
-    public function removePlayer(Player $player): void
+    public function createSession(Player $master, ThingsPerPlayer $thingPerPlayer): GameSession
     {
-        unset($this->players[$player->getId()]);
+        $newGame = (new GameSession($this->generateShortUuid(), $master, $thingPerPlayer));
+
+        $this->sessionRepository->addPlayerToGame($master, $newGame->getId());
+
+        return $newGame;
+    }
+
+    private function generateShortUuid(): string
+    {
+        return Uuid::uuid7()->getTimeHiAndVersionHex();
+    }
+
+    public function restartSession(GameSession $gameSession): GameSession
+    {
+        $this->sessionRepository->delete($gameSession);
+
+        return $this->createSession($gameSession->getMaster(), $gameSession->getThingPerPlayer());
     }
 
     /**
-     * @return Player[]
+     * @throws GameNotFoundException
      */
-    public function getPlayers(): array
+    public function continue(Player $player): GameSession
     {
-        return $this->players;
+        return $this->findSessionByPlayer($player) ?? throw new GameNotFoundException('The game not found');
     }
 
-    public function addThing(Player $player, Thing $thing): self
+    public function saveSession(GameSession $gameSession): void
     {
-        $this->thingRatings[$thing->getValue()] = [];
-        $this->playerThings[$player->getId()][] = $thing;
+        $this->sessionRepository->save($gameSession);
+    }
 
-        return $this;
+    public function addPlayerToGameSession(Player $player, GameSession $gameSession): void
+    {
+        $gameSession->addPlayer($player);
+        $this->sessionRepository->addPlayerToGame($player, $gameSession->getId());
+    }
+
+    public function leaveGame(Player $player, GameSession $gameSession): void
+    {
+        $gameSession->removePlayer($player);
+        $this->sessionRepository->removePlayerFromGame($player);
+    }
+
+    public function finishGame(GameSession $gameSession): void
+    {
+        foreach ($gameSession->getPlayers() as $player) {
+            $this->sessionRepository->removePlayerFromGame($player);
+        }
+
+        $this->sessionRepository->delete($gameSession);
     }
 
     /**
-     * @param int<1, 10> $rating
+     * @throws GameNotFoundException
      */
-    public function rateThing(Thing $thing, int $playerId, int $rating): void
-    {
-        if ($rating < 1 || $rating > 10) {
-            throw new GameException('You must use only from 1 to 10 numbers');
-        }
-
-        if (!$this->thingExists($thing)) {
-            throw new GameException("This thing {$thing->getValue()} not in the list");
-        }
-
-        $this->thingRatings[$thing->getValue()][$playerId] = $rating;
-    }
-
-    public function thingExists(Thing $thing): bool
-    {
-        return array_key_exists($thing->getValue(), $this->thingRatings);
-    }
-
-    public function playerThingLimitReached(int $playerId): bool
+    public function findSession(string $gameSessionId): GameSession
     {
         return
-            array_key_exists($playerId, $this->playerThings)
-            && count($this->playerThings[$playerId]) >= $this->thingPerPlayer;
+            $this->sessionRepository->find($gameSessionId)
+            ?? throw new GameNotFoundException($this->translator->trans('The game with this id not found'));
     }
 
-    public function totalThingLimitReached(): bool
+    public function findSessionByPlayer(Player $player): ?GameSession
     {
-        return count($this->thingRatings) >= count($this->players) * $this->thingPerPlayer;
-    }
-
-    public function getRandomThing(): ?Thing
-    {
-        $unratedThings = $this->getUnratedThings();
-
-        if (empty($unratedThings)) {
-            return null;
-        }
-
-        return $unratedThings[array_rand($unratedThings)];
-    }
-
-    public function getUnratedThings(): array
-    {
-        $unratedThings = [];
-
-        foreach ($this->thingRatings as $thing => $playerRatings) {
-            if (empty($playerRatings)) {
-                $unratedThings[] = new Thing($thing);
-            }
-        }
-
-        return $unratedThings;
-    }
-
-    public function getRatedThing(): ?Thing
-    {
-        return $this->ratedThing;
-    }
-
-    public function setRatedThing(Thing $ratedThing): void
-    {
-        $this->ratedThing = $ratedThing;
-    }
-
-    public function alreadyRated(Thing $ratedThing, int $playerId): bool
-    {
-        return array_key_exists($playerId, $this->thingRatings[$ratedThing->getValue()]);
-    }
-
-    public function isThingFullyRated(Thing $ratedThing): bool
-    {
-        return count($this->thingRatings[$ratedThing->getValue()]) === count($this->players);
-    }
-
-    public function generateResult(): array
-    {
-        $thingsRatings = array_map(
-            fn ($rating) => (int) (array_sum($rating) / count($this->players)),
-            $this->thingRatings,
-        );
-
-        asort($thingsRatings);
-
-        return $thingsRatings;
-    }
-
-    public function isPlayerMaster(?Player $player): bool
-    {
-        return $this->getMaster()->getId() === $player->getId();
+        return $this->sessionRepository->findByPlayer($player->getId());
     }
 }

@@ -10,4 +10,5 @@ enum EntityType: string
     case Hashtag = 'hashtag';
     case Email = 'email';
     case Bold = 'bold';
+    case Code = 'code';
 }

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Game\Infrastructure\Telegram\Command\CreateGameCommand;
+use App\Game\Infrastructure\UserResolver\PlayerResolver;
+use App\Game\Infrastructure\UserResolver\TelegramPlayerResolver;
 use App\Shared\Application\LocaleSubscriber;
 use App\Telegram\Infrastructure\Command\SetWebHook;
 use Longman\TelegramBot\Telegram;
@@ -34,4 +37,7 @@ return function (ContainerConfigurator $container): void {
 
     $services->set(LocaleSubscriber::class)
         ->arg('$defaultLocale', '%kernel.default_locale%');
+
+    $services->set(CreateGameCommand::class)
+        ->alias(PlayerResolver::class, TelegramPlayerResolver::class);
 };
