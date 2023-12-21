@@ -29,7 +29,8 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
         $player = $this->playerResolver->getPlayer($telegramDto->getUser());
 
         try {
-            $this->joinGameUseCase->join($player, $telegramDto->getMessage()->getText());
+            $gameId = $this->resolveGameId($telegramDto->getMessage()->getText());
+            $this->joinGameUseCase->join($player, $gameId);
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());
         }
@@ -39,6 +40,21 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
 
     public function supports(TelegramDto $telegramDto): bool
     {
-        return false;
+        return str_starts_with($telegramDto->getMessage()->getText(), '/start ');
+    }
+
+    private function resolveGameId(?string $text): string
+    {
+        if ($text === null) {
+            return '';
+        }
+
+        if (!str_starts_with($text, '/start ')) {
+            return $text;
+        }
+
+        [, $gameId] = explode(' ', $text);
+
+        return $gameId;
     }
 }

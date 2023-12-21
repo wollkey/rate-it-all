@@ -11,4 +11,5 @@ enum EntityType: string
     case Email = 'email';
     case Bold = 'bold';
     case Code = 'code';
+    case Url = 'url';
 }
