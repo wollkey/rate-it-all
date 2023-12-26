@@ -26,8 +26,8 @@ final readonly class NotifyPlayerAboutJoiningGame
         $this->telegramApi->sendMessage(
             $event->getPlayer()->getTelegramId(),
             $this->translator->trans('You\'ve successfully joined the game.')
-            .PHP_EOL
-            .$this->translator->trans('Be ready, the adventure is about to begin...')
+            . PHP_EOL
+            . $this->translator->trans('Be ready, the adventure is about to begin...')
         );
     }
 }

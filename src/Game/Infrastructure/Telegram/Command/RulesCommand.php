@@ -44,7 +44,7 @@ final readonly class RulesCommand implements BotCommandInterface
                                 'text' => $this->translator->trans('Join'),
                                 'callback_data' => JoinCommand::COMMAND_NAME,
                             ],
-                        ]
+                        ],
                     ],
                 ],
             ],
