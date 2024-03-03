@@ -15,19 +15,19 @@
         "predis/predis": "^2.2",
         "ramsey/uuid": "^4.7",
         "sentry/sentry-symfony": "*",
-        "symfony/cache": "6.3.*",
-        "symfony/console": "6.3.*",
-        "symfony/dotenv": "6.3.*",
-        "symfony/event-dispatcher": "6.3.*",
+        "symfony/cache": "7.0.*",
+        "symfony/console": "7.0.*",
+        "symfony/dotenv": "7.0.*",
+        "symfony/event-dispatcher": "7.0.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "6.3.*",
+        "symfony/framework-bundle": "7.0.*",
         "symfony/monolog-bundle": "^3.8",
-        "symfony/property-access": "6.3.*",
-        "symfony/property-info": "6.3.*",
-        "symfony/runtime": "6.3.*",
-        "symfony/serializer": "6.3.*",
-        "symfony/translation": "6.3.*",
-        "symfony/yaml": "6.3.*"
+        "symfony/property-access": "7.0.*",
+        "symfony/property-info": "7.0.*",
+        "symfony/runtime": "7.0.*",
+        "symfony/serializer": "7.0.*",
+        "symfony/translation": "7.0.*",
+        "symfony/yaml": "7.0.*"
     },
     "config": {
         "allow-plugins": {
@@ -74,7 +74,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "6.3.*"
+            "require": "7.0.*"
         }
     },
     "require-dev": {
