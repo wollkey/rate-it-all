@@ -23,6 +23,7 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
         private TelegramBot $telegramBot,
         private TranslatorInterface $translator,
         private CreateGameUseCase $createGameUseCase,
+        private string $telegramBotName,
     ) {
     }
 
@@ -42,7 +43,7 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
             $player->getTelegramId(),
             implode(PHP_EOL, [
                 $this->translator->trans('Join the game at this link:'),
-                "https://t.me/rate_it_all_dev_bot?start={$newGame->getId()}",
+                "https://t.me/{$this->telegramBotName}?start={$newGame->getId()}",
             ]),
         );
 

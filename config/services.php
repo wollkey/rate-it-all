@@ -15,6 +15,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 return function (ContainerConfigurator $container): void {
     $services = $container->services()
         ->defaults()
+            ->bind('$telegramBotName', env('TELEGRAM_BOT_USERNAME'))
             ->autowire()
             ->autoconfigure();
 
