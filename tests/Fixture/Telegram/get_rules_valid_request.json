@@ -1,0 +1,31 @@
+{
+  "update_id": 267950339,
+  "message": {
+    "message_id": 3,
+    "from": {
+      "id": 396005956,
+      "is_bot": false,
+      "first_name": "Alexey",
+      "last_name": "Tashmatov",
+      "username": "AlexKuzz",
+      "language_code": "en",
+      "is_premium": true
+    },
+    "chat": {
+      "id": 396005956,
+      "first_name": "Alexey",
+      "last_name": "Tashmatov",
+      "username": "AlexKuzz",
+      "type": "private"
+    },
+    "date": 1696525079,
+    "text": "/rules",
+    "entities": [
+      {
+        "offset": 0,
+        "length": 6,
+        "type": "bot_command"
+      }
+    ]
+  }
+}

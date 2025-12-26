@@ -8,7 +8,7 @@ use App\Game\Domain\Repository\PlayerRepositoryInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PlayerRepositoryInterface::class)]
-class Player
+final class Player
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
