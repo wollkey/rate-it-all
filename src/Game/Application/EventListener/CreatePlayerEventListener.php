@@ -28,7 +28,7 @@ final readonly class CreatePlayerEventListener
             return;
         }
 
-        $player = (new Player())
+        $player = new Player()
             ->setFirstName($user->getFirstName())
             ->setTelegramId($user->getId());
 

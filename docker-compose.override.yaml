@@ -1,6 +1,9 @@
-version: "3.3"
-
 services:
+    web:
+        ports:
+            - "8000:8000"
+            - "443:443"
+
     postgres:
         ports:
             - "5432:5432"

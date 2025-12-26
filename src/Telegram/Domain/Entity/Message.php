@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Annotation\SerializedPath;
 final readonly class Message
 {
     /**
-     * @param array<Entity> $entities
+     * @param list<Entity> $entities
      */
     public function __construct(
         #[SerializedName('message_id')]

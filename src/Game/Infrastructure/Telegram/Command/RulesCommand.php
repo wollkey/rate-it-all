@@ -53,9 +53,13 @@ final readonly class RulesCommand implements BotCommandInterface
 
     public function supports(TelegramDto $telegramDto): bool
     {
-        return match (self::COMMAND_NAME) {
+        $result = match (self::COMMAND_NAME) {
             $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
             default => false,
         };
+
+        var_dump($result);
+
+        return $result;
     }
 }
