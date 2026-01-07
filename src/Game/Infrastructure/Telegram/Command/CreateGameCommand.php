@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\Game;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Game\Domain\ValueObject\ThingsPerPlayer;
+use App\Telegram\AsTelegramCommand;
+use App\Telegram\ConversationalCommand;
+use App\Telegram\ConversationStep;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
+use Phptg\BotApi\Type\CallbackQuery;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
+use Phptg\BotApi\Type\Message;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class CreateGameCommand implements BotCommandInterface
+#[AsTelegramCommand(CreateGameCommand::COMMAND_NAME)]
+final readonly class CreateGameCommand implements ConversationalCommand
 {
-    public const COMMAND_NAME = '/create_game';
+    public const string COMMAND_NAME = '/create_game';
 
     public function __construct(
-        private PlayerResolver $playerResolver,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
     ) {
     }
@@ -27,33 +32,51 @@ final readonly class CreateGameCommand implements BotCommandInterface
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto, ?ConversationStep $step = null): ?ConversationStep
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
-        $this->telegramBot->startProcessingCommand($player->getTelegramId(), EnterThingsPerPlayerCommand::class);
-
-        $this->telegramApi->sendMessage(
-            $player->getTelegramId(),
-            $this->translator->trans('Enter the number of rated things per player:'),
+        $callbackQuery = $telegramDto->callbackQuery;
+        $inlineKeyboard = new InlineKeyboardMarkup([
+            array_map(static fn (int $numberOfThings): InlineKeyboardButton => new InlineKeyboardButton(
+                text: (string) $numberOfThings,
+                callbackData: (string) $numberOfThings,
+            ), range(ThingsPerPlayer::MIN_THINGS_PER_PLAYER, ThingsPerPlayer::MAX_THINGS_PER_PLAYER)),
             [
-                'reply_markup' => [
-                    'inline_keyboard' => [
-                        array_map(static fn (int $numberOfThings): array => [
-                            'text' => $numberOfThings,
-                            'callback_data' => $numberOfThings,
-                        ], range(Game::MIN_THINGS_PER_PLAYER, Game::MAX_THINGS_PER_PLAYER)),
-                    ],
-                ],
+                new InlineKeyboardButton(
+                    text: '⬅️ '.$this->translator->trans('Back to menu'),
+                    callbackData: RulesCommand::COMMAND_NAME,
+                ),
             ],
+        ]);
+
+        match (true) {
+            null !== $callbackQuery => $this->handleCallbackQuery($callbackQuery, $inlineKeyboard),
+            default => $this->handleDirectMessage($telegramDto->message, $inlineKeyboard),
+        };
+    }
+
+    private function handleCallbackQuery(CallbackQuery $callbackQuery, InlineKeyboardMarkup $inlineKeyboard): void
+    {
+        $this->telegram->answerCallbackQuery(
+            callbackQueryId: $callbackQuery->id,
+            showAlert: false,
+        );
+
+        $this->telegram->editMessageText(
+            text: $this->translator->trans('Enter the number of rated things per player:'),
+            chatId: $callbackQuery->message->chat->id,
+            messageId: $callbackQuery->message->messageId,
+            replyMarkup: $inlineKeyboard,
         );
     }
 
-    public function supports(TelegramDto $telegramDto): bool
+    private function handleDirectMessage(Message $message, InlineKeyboardMarkup $inlineKeyboard): void
     {
-        return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
-            default => false,
-        };
+        $this->telegram->sendMessage(
+            chatId: $message->chat->id,
+            text: $this->translator->trans('Enter the number of rated things per player:'),
+            replyMarkup: $inlineKeyboard,
+        );
     }
 }

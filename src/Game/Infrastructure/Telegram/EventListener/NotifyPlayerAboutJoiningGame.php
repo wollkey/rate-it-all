@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\PlayerHasJoined;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -13,7 +13,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final readonly class NotifyPlayerAboutJoiningGame
 {
     public function __construct(
-        private TelegramApi $telegramApi,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
     ) {
     }
@@ -26,8 +26,8 @@ final readonly class NotifyPlayerAboutJoiningGame
         $this->telegramApi->sendMessage(
             $event->getPlayer()->getTelegramId(),
             $this->translator->trans('You\'ve successfully joined the game.')
-            . PHP_EOL
-            . $this->translator->trans('Be ready, the adventure is about to begin...')
+            .PHP_EOL
+            .$this->translator->trans('Be ready, the adventure is about to begin...')
         );
     }
 }

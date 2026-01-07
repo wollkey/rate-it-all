@@ -9,14 +9,12 @@ use App\Game\Domain\Event\ThingHasBeenRated;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Exception\ThingNotInTheListException;
-use App\Game\Domain\Model\Game;
 use App\Game\Domain\ValueObject\Rating;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class RateThingUseCase
 {
     public function __construct(
-        private Game $game,
         private EventDispatcherInterface $eventDispatcher,
     ) {
     }

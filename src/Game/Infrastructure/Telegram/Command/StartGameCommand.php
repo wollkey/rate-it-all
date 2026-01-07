@@ -6,23 +6,18 @@ namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Exception\GameNotFoundException;
-use App\Game\Domain\Model\Game;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class StartGameCommand implements BotCommandInterface
+final readonly class StartGameCommand
 {
-    public const COMMAND_NAME = '/start_game';
+    public const string COMMAND_NAME = '/start_game';
 
     public function __construct(
-        private Game $game,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
-        private PlayerResolver $playerResolver,
+        private TelegramBotApi $telegramApi,
+        private PlayerRepository $playerRepository,
         private TranslatorInterface $translator,
     ) {
     }
@@ -32,7 +27,7 @@ final readonly class StartGameCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
         try {
             $gameSession = $this->game->continue($player);
@@ -62,14 +57,6 @@ final readonly class StartGameCommand implements BotCommandInterface
         }
     }
 
-    public function supports(TelegramDto $telegramDto): bool
-    {
-        return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
-            default => false,
-        };
-    }
-
     /**
      * @throws \Exception
      */
@@ -79,14 +66,8 @@ final readonly class StartGameCommand implements BotCommandInterface
             $player->getTelegramId(),
             $this->translator->trans('Kick things off with a new game'),
             [
-                'reply_markup' => [
-                    'inline_keyboard' => [[
-                        [
-                            'text' => $this->translator->trans('Create'),
-                            'callback_data' => CreateGameCommand::COMMAND_NAME,
-                        ],
-                    ]],
-                ],
+                'text' => $this->translator->trans('Create'),
+                'callback_data' => CreateGameCommand::COMMAND_NAME,
             ],
         );
     }

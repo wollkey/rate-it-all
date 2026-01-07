@@ -6,18 +6,15 @@ namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Application\UseCase\JoinGameUseCase;
 use App\Game\Domain\Exception\GameException;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
+use App\Telegram\TelegramDto;
 
-final readonly class EnterGameIdCommand implements BotCommandInterface
+final readonly class EnterGameIdCommand
 {
     public function __construct(
-        private TelegramBot $telegramBot,
         private JoinGameUseCase $joinGameUseCase,
-        private PlayerResolver $playerResolver,
+        private PlayerRepository $playerRepository,
     ) {
     }
 
@@ -26,7 +23,7 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
         try {
             $gameId = $this->resolveGameId($telegramDto->getMessage()->getText());
@@ -34,18 +31,16 @@ final readonly class EnterGameIdCommand implements BotCommandInterface
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());
         }
-
-        $this->telegramBot->stopProcessingCommand($player->getTelegramId());
     }
 
     public function supports(TelegramDto $telegramDto): bool
     {
-        return str_starts_with($telegramDto->getMessage()->getText(), '/start ');
+        return str_starts_with($telegramDto->message->text, '/start ');
     }
 
     private function resolveGameId(?string $text): string
     {
-        if ($text === null) {
+        if (null === $text) {
             return '';
         }
 

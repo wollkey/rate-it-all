@@ -1,5 +1,5 @@
 controllers:
     resource:
-        path: ../src/Telegram/Infrastructure/Gateway
-        namespace: App\Telegram\Infrastructure\Gateway
+        path: ../src/Telegram/Infrastructure/Http
+        namespace: App\Telegram\Infrastructure\Http
     type: attribute

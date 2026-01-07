@@ -8,33 +8,30 @@ use App\Game\Application\UseCase\AddThingUseCase;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Thing;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class AddThingCommand implements BotCommandInterface
+final readonly class AddThingCommand
 {
     public function __construct(
         private AddThingUseCase $addThingUseCase,
-        private PlayerResolver $playerResolver,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
-        private TranslatorInterface $translator
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegramApi,
+        private TranslatorInterface $translator,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
-        $thing = $telegramDto->getMessage()->getText();
+        $player = $this->playerRepository->find($telegramDto->user->id);
+        $thing = $telegramDto->message->text;
 
         try {
             ($this->addThingUseCase)($player, new Thing($thing));
@@ -48,10 +45,5 @@ final readonly class AddThingCommand implements BotCommandInterface
         } catch (GameException|\InvalidArgumentException $exception) {
             throw new TelegramException($exception->getMessage(), previous: $exception);
         }
-    }
-
-    public function supports(TelegramDto $telegramDto): bool
-    {
-        return false;
     }
 }

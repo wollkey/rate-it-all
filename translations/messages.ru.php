@@ -17,9 +17,14 @@ return [
     'The game is over!' => 'Игра окончена!',
     'Have fun!' => 'Веселитесь!',
 
+    'Back' => 'Назад',
+    'Back to menu' => 'На главную',
+
     // Rules
+    'Rules' => 'Правила',
     'Gameplay rules:' => 'Правила игры:',
 
+    'How to Play' => 'Как играть',
     'In this game you need to rate any things that come to your mind: *red color*, *hand washing*, *a small salary*, *anything*...' => 'В этой игре вам предстоит оценивать любые вещи, которые придут вам в голову: *красный цвет*, *мытьё рук*, *маленькая зарплата*, всё что угодно...',
 
     'Create a game or join an existing one' => 'Создайте игру или присоединитесь к существующей',

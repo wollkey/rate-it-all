@@ -5,19 +5,16 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Application\UseCase\TakeNextThingUseCase;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\TelegramDto;
 
-final readonly class StartRatingThingCommand implements BotCommandInterface
+final readonly class StartRatingThingCommand
 {
-    public const COMMAND_NAME = '/start_rating';
+    public const string COMMAND_NAME = '/start_rating';
 
     public function __construct(
         private TakeNextThingUseCase $startRatingThingUseCase,
-        private TelegramBot $telegramBot,
-        private PlayerResolver $playerResolver,
+        private PlayerRepository $playerRepository,
     ) {
     }
 
@@ -26,14 +23,14 @@ final readonly class StartRatingThingCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
         ($this->startRatingThingUseCase)($player);
     }
 
     public function supports(TelegramDto $telegramDto): bool
     {
         return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
             default => false,
         };
     }

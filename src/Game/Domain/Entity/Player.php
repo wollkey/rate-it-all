@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Game\Domain\Entity;
 
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
+use App\Game\Domain\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PlayerRepositoryInterface::class)]
+#[ORM\Entity(repositoryClass: PlayerRepository::class)]
 final class Player
 {
     #[ORM\Id]
@@ -19,7 +19,7 @@ final class Player
     private string $firstName;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private string|null $lastName = null;
+    private ?string $lastName = null;
 
     #[ORM\Column(type: 'bigint')]
     private int $telegramId;

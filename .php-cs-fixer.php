@@ -1,15 +1,14 @@
 <?php
 
-$finder = (new PhpCsFixer\Finder())
-    ->in(__DIR__)
-    ->exclude('var')
-;
+declare(strict_types=1);
 
-return (new PhpCsFixer\Config())
+$finder = new PhpCsFixer\Finder()->in(__DIR__);
+
+return new PhpCsFixer\Config()
     ->setRules([
+        '@PSR12' => true,
         '@Symfony' => true,
-        'yoda_style' => false,
-        'concat_space' => ['spacing' => 'one'],
+        '@PHP8x4Migration' => true,
     ])
     ->setFinder($finder)
-;
+    ->setCacheFile(__DIR__.'/var/.php-cs-fixer.cache');

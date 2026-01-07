@@ -17,7 +17,7 @@ ifdef CI
     PHP := web
     COMPOSER := composer
 else
-    PHP := $(DC) exec -T $(DISABLE_XDEBUG) web
+    PHP := $(DC) exec $(DISABLE_XDEBUG) web
     COMPOSER := $(PHP) composer
 endif
 
@@ -43,7 +43,7 @@ help: ## Show this help message
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
 .PHONY: help
 
-fresh: down cache-clear setup up install ## Fresh start (stop, clear cache, rebuild)
+fresh: down cache setup up install ## Fresh start (stop, clear cache, rebuild)
 	@echo -e "$(GREEN)✓ Fresh environment ready$(RESET)"
 .PHONY: fresh
 
@@ -116,13 +116,13 @@ psalm-baseline: ## Update Psalm baseline
 	$(PHP) vendor/bin/psalm --set-baseline=psalm-baseline.xml
 .PHONY: psalm-baseline
 
-cs-check: ## Check code style with PHP CS Fixer
-	$(PHP) vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
-.PHONY: cs-check
-
-cs-fix: ## Fix code style with PHP CS Fixer
+lint: ## Fix code style with PHP CS Fixer
 	$(PHP) vendor/bin/php-cs-fixer fix --verbose
-.PHONY: cs-fix
+.PHONY: lint
+
+lint-check: ## Check code style with PHP CS Fixer
+	$(PHP) vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
+.PHONY: lint-check
 
 rector: ## Run Rector refactoring
 	$(PHP) vendor/bin/rector process
@@ -195,10 +195,10 @@ db-reset: db-drop db-create migration-up fixtures ## Reset database with fixture
 ## Cache & Cleanup
 ## ---------------
 
-cache-clear: ## Clean var directory (cache, logs)
+cache: ## Clean var directory (cache, logs)
 	rm -rf var/cache/* var/log/*
-	@echo -e "$(GREEN)✓ Cache cleared$(RESET)"
-.PHONY: cache-clear
+	$(PHP) bin/console cache:warmup --env=dev
+.PHONY: cache
 
 ##
 ## Utilities

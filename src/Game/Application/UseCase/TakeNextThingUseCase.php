@@ -8,13 +8,11 @@ use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\NextRatedThingTaken;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
-use App\Game\Domain\Model\Game;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class TakeNextThingUseCase
 {
     public function __construct(
-        private Game $game,
         private EventDispatcherInterface $eventDispatcher,
     ) {
     }
@@ -28,7 +26,7 @@ final readonly class TakeNextThingUseCase
         $gameSession = $this->game->continue($player);
         $randomThing = $gameSession->getRandomUnratedThing();
 
-        if ($randomThing === null) {
+        if (null === $randomThing) {
             throw new ThingListIsEmptyException();
         }
 

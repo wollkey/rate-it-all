@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\AsTelegramCommand;
+use App\Telegram\Domain\Enum\ChatType;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class StartCommand implements BotCommandInterface
+#[AsTelegramCommand('/start', chatType: ChatType::Private)]
+final readonly class StartCommand
 {
     public function __construct(
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
     ) {
     }
@@ -22,20 +24,35 @@ final readonly class StartCommand implements BotCommandInterface
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto): void
     {
-        $this->telegramApi->sendMessage(
-            $telegramDto->getUser()->getId(),
-            implode(PHP_EOL, [
+        $keyboard = [
+            [
+                new InlineKeyboardButton(
+                    text: '🎮 '.$this->translator->trans('Create'),
+                    callbackData: CreateGameCommand::COMMAND_NAME,
+                ),
+                new InlineKeyboardButton(
+                    text: '🔗 '.$this->translator->trans('Join'),
+                    callbackData: JoinCommand::COMMAND_NAME,
+                ),
+            ],
+            [
+                new InlineKeyboardButton(
+                    text: '📋 '.$this->translator->trans('How to Play'),
+                    callbackData: RulesCommand::COMMAND_NAME,
+                ),
+            ],
+        ];
+
+        $this->telegram->sendMessage(
+            chatId: $telegramDto->message->chat->id,
+            text: implode(PHP_EOL, [
                 $this->translator->trans('Hi there!'),
                 $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
-                $this->translator->trans('Behold the') . ' ' . RulesCommand::COMMAND_NAME,
             ]),
+            parseMode: 'markdown',
+            replyMarkup: new InlineKeyboardMarkup($keyboard),
         );
-    }
-
-    public function supports(TelegramDto $telegramDto): bool
-    {
-        return $this->telegramBot->getMessageCommand($telegramDto->getMessage()) === '/start';
     }
 }

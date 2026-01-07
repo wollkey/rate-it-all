@@ -8,22 +8,19 @@ use App\Game\Application\UseCase\LeaveGameUseCase;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class LeaveGameCommand implements BotCommandInterface
+final readonly class LeaveGameCommand
 {
-    public const COMMAND_NAME = '/leave_game';
+    public const string COMMAND_NAME = '/leave_game';
 
     public function __construct(
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
-        private PlayerResolver $playerResolver,
+        private PlayerRepository $playerRepository,
         private LeaveGameUseCase $leaveGameUseCase,
     ) {
     }
@@ -33,7 +30,7 @@ final readonly class LeaveGameCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
         try {
             ($this->leaveGameUseCase)($player);
@@ -57,7 +54,7 @@ final readonly class LeaveGameCommand implements BotCommandInterface
     public function supports(TelegramDto $telegramDto): bool
     {
         return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
             default => false,
         };
     }
@@ -69,7 +66,7 @@ final readonly class LeaveGameCommand implements BotCommandInterface
     {
         $this->telegramApi->sendMessage(
             $player->getTelegramId(),
-            $this->translator->trans('You are not in any game') . PHP_EOL . $this->translator->trans('Create a game or join an existing one'),
+            $this->translator->trans('You are not in any game').PHP_EOL.$this->translator->trans('Create a game or join an existing one'),
             [
                 'reply_markup' => [
                     'inline_keyboard' => [[

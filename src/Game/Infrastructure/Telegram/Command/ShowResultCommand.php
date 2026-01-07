@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\Game;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 
-final readonly class ShowResultCommand implements BotCommandInterface
+final readonly class ShowResultCommand
 {
-    public const COMMAND_NAME = '/show_result';
+    public const string COMMAND_NAME = '/show_result';
 
     public function __construct(
-        private Game $game,
-        private PlayerRepositoryInterface $playerRepository,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegramApi,
     ) {
     }
 
@@ -39,7 +34,7 @@ final readonly class ShowResultCommand implements BotCommandInterface
     public function supports(TelegramDto $telegramDto): bool
     {
         return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
             default => false,
         };
     }
@@ -49,7 +44,7 @@ final readonly class ShowResultCommand implements BotCommandInterface
         $preparedResult = '';
 
         foreach ($generateResult as $thing => $rating) {
-            $preparedResult .= $rating . ' 👉 ' . $thing . PHP_EOL;
+            $preparedResult .= $rating.' 👉 '.$thing.PHP_EOL;
         }
 
         return $preparedResult;

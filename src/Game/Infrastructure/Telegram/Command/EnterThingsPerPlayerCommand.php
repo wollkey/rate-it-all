@@ -5,22 +5,19 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Application\UseCase\CreateGameUseCase;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
+final readonly class EnterThingsPerPlayerCommand
 {
-    public const COMMAND_NAME = '/start_game';
+    public const string COMMAND_NAME = '/start_game';
 
     public function __construct(
-        private PlayerResolver $playerResolver,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
         private CreateGameUseCase $createGameUseCase,
         private string $telegramBotName,
@@ -32,8 +29,8 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
-        $numberOfThings = new ThingsPerPlayer((int) $telegramDto->getData());
+        $player = $this->playerRepository->find($telegramDto->user->id);
+        $numberOfThings = new ThingsPerPlayer((int) $telegramDto->callbackQuery->data);
 
         $newGame = ($this->createGameUseCase)($player, $numberOfThings);
 
@@ -62,7 +59,7 @@ final readonly class EnterThingsPerPlayerCommand implements BotCommandInterface
             ],
         );
 
-        $this->telegramBot->saveEditedMessage($telegramResponse->getMessage());
+        $this->telegramBot->saveEditedMessage($telegramResponse->message);
     }
 
     public function supports(TelegramDto $telegramDto): bool
