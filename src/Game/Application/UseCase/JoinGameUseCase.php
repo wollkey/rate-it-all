@@ -8,14 +8,14 @@ use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\PlayerHasJoined;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\GameNotFoundException;
-use App\Game\Domain\Model\Game;
+use App\Game\Domain\Repository\GameRepository;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class JoinGameUseCase
 {
     public function __construct(
-        private Game $game,
         private EventDispatcherInterface $eventDispatcher,
+        private GameRepository $gameRepository,
     ) {
     }
 
@@ -25,7 +25,7 @@ final readonly class JoinGameUseCase
      */
     public function join(Player $player, string $gameId): void
     {
-        $gameSession = $this->game->findSession($gameId);
+        $gameSession = $this->gameRepository->find($gameId) ?? throw new GameNotFoundException($this->translator->trans('The game with this ID not found'));
 
         $this->game->addPlayerToGameSession($player, $gameSession);
         $this->game->saveSession($gameSession);

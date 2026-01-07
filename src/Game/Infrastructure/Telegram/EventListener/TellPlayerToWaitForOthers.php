@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\ThingHasBeenRated;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -13,7 +13,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final readonly class TellPlayerToWaitForOthers
 {
     public function __construct(
-        private TelegramApi $telegramApi,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
     ) {
     }

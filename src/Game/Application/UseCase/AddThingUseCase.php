@@ -9,14 +9,12 @@ use App\Game\Domain\Event\ThingHasBeenAdded;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
-use App\Game\Domain\Model\Game;
 use App\Game\Domain\ValueObject\Thing;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class AddThingUseCase
 {
     public function __construct(
-        private Game $game,
         private EventDispatcherInterface $eventDispatcher,
     ) {
     }

@@ -4,36 +4,35 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\Game;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\AsTelegramCommand;
+use App\Telegram\ConversationalCommand;
+use App\Telegram\ConversationStep;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class JoinCommand implements BotCommandInterface
+#[AsTelegramCommand('/join_game', supportReplyMarkup: true)]
+final readonly class JoinCommand implements ConversationalCommand
 {
-    public const COMMAND_NAME = '/join_game';
+    public const string COMMAND_NAME = '/join_game';
 
     public function __construct(
-        private Game $game,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
-        private PlayerResolver $playerResolver,
+        private PlayerRepository $playerRepository,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto, ?ConversationStep $step = null): ?ConversationStep
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
+        $player = $this->playerRepository->find($telegramDto->user->id);
         $gameSession = $this->game->findSessionByPlayer($player);
 
-        if ($gameSession !== null && $gameSession->isPlayerMaster($player)) {
+        if (null !== $gameSession && $gameSession->isPlayerMaster($player)) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('Already playing. Would you like to finish the current one?'),
@@ -49,10 +48,10 @@ final readonly class JoinCommand implements BotCommandInterface
                 ],
             );
 
-            return;
+            return null;
         }
 
-        if ($gameSession !== null) {
+        if (null !== $gameSession) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('You are in another game, do you want to leave it?'),
@@ -68,18 +67,12 @@ final readonly class JoinCommand implements BotCommandInterface
                 ],
             );
 
-            return;
+            return null;
         }
 
         $this->telegramBot->startProcessingCommand($player->getTelegramId(), EnterGameIdCommand::class);
         $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Enter the game ID:'));
-    }
 
-    public function supports(TelegramDto $telegramDto): bool
-    {
-        return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
-            default => false,
-        };
+        return null;
     }
 }

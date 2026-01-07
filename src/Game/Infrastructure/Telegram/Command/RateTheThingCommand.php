@@ -7,19 +7,18 @@ namespace App\Game\Infrastructure\Telegram\Command;
 use App\Game\Application\UseCase\RateThingUseCase;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
-use App\Game\Infrastructure\UserResolver\PlayerResolver;
-use App\Telegram\Application\Dto\TelegramDto;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class RateTheThingCommand implements BotCommandInterface
+final readonly class RateTheThingCommand
 {
     public function __construct(
-        private PlayerResolver $playerResolver,
-        private TelegramApi $telegramApi,
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
         private RateThingUseCase $rateThingUseCase,
     ) {
@@ -30,8 +29,8 @@ final readonly class RateTheThingCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerResolver->getPlayer($telegramDto->getUser());
-        $ratingText = $telegramDto->getMessage()->getText();
+        $player = $this->playerRepository->find($telegramDto->user->id);
+        $ratingText = $telegramDto->message->text;
 
         if (!is_numeric($ratingText)) {
             throw new TelegramException($this->translator->trans('Rating must be a number'));

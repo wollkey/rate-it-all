@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EndToEnd\Game\Infrastructure\Telegram;
 
 use App\Game\Infrastructure\Telegram\Command\AddThingCommand;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\Entity\From;
+use App\Telegram\TelegramDto;
 use App\Tests\Trait\FileAwareTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -26,7 +25,5 @@ class RulesCommandTest extends KernelTestCase
         $request = $this->read('Telegram/get_rules_valid_request.json');
 
         $addThingCommand->execute($serializer->deserialize($request, TelegramDto::class, JsonEncoder::FORMAT));
-
-
     }
 }

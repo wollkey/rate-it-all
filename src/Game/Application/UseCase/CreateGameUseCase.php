@@ -5,27 +5,33 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Model\Game;
-use App\Game\Domain\Model\GameSession;
+use App\Game\Domain\Game;
+use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
 
 final readonly class CreateGameUseCase
 {
     public function __construct(
-        private Game $game,
+        private GameRepository $gameRepository,
     ) {
     }
 
-    public function __invoke(Player $master, ThingsPerPlayer $thingPerPlayer): GameSession
+    public function __invoke(Player $master, ThingsPerPlayer $thingsPerPlayer): Game
     {
-        $gameSession = $this->game->findSessionByPlayer($master);
+        $game = $this->gameRepository->findActiveByPlayer($master);
 
-        $newGame = $gameSession !== null
-            ? $this->game->restartSession($gameSession)
-            : $this->game->createSession($master, $thingPerPlayer);
+        if (null !== $game) {
+            return $game;
+        }
 
-        $this->game->saveSession($newGame);
+        $game = new Game(
+            master: $master,
+            thingsPerPlayer: $thingsPerPlayer,
+        );
 
-        return $newGame;
+        $game->join($master);
+        $this->gameRepository->save($game);
+
+        return $game;
     }
 }

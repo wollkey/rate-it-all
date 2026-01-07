@@ -4,24 +4,19 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\Game;
-use App\Game\Domain\Repository\PlayerRepositoryInterface;
-use App\Telegram\Application\Dto\TelegramDto;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class FinishGameCommand implements BotCommandInterface
+final readonly class FinishGameCommand
 {
-    public const COMMAND_NAME = '/finish_game';
+    public const string COMMAND_NAME = '/finish_game';
 
     public function __construct(
-        private Game $game,
-        private PlayerRepositoryInterface $playerRepository,
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private PlayerRepository $playerRepository,
+        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
     ) {
     }
@@ -31,9 +26,9 @@ final readonly class FinishGameCommand implements BotCommandInterface
      */
     public function execute(TelegramDto $telegramDto): void
     {
-        $player = $this->playerRepository->find($telegramDto->getUser()->getId());
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
-        if ($player === null) {
+        if (null === $player) {
             return;
         }
 
@@ -50,7 +45,7 @@ final readonly class FinishGameCommand implements BotCommandInterface
     public function supports(TelegramDto $telegramDto): bool
     {
         return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
+            $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
             default => false,
         };
     }

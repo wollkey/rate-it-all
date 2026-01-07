@@ -6,5 +6,4 @@ namespace App\Tests\Fixture\Telegram;
 
 class TelegramDtoFixture
 {
-
 }

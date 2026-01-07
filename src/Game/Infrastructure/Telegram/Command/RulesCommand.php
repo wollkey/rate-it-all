@@ -4,62 +4,76 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Model\Game;
-use App\Telegram\Application\Dto\TelegramDto;
-use App\Telegram\Domain\TelegramBot;
-use App\Telegram\Infrastructure\Contract\BotCommandInterface;
-use App\Telegram\Infrastructure\Gateway\TelegramApi;
+use App\Game\Domain\GameInfo;
+use App\Telegram\AsTelegramCommand;
+use App\Telegram\TelegramDto;
+use Phptg\BotApi\TelegramBotApi;
+use Phptg\BotApi\Type\CallbackQuery;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
+use Phptg\BotApi\Type\Message;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class RulesCommand implements BotCommandInterface
+#[AsTelegramCommand('/rules', supportReplyMarkup: true)]
+final readonly class RulesCommand
 {
-    public const COMMAND_NAME = '/rules';
+    public const string COMMAND_NAME = '/rules';
 
     public function __construct(
-        private TelegramApi $telegramApi,
-        private TelegramBot $telegramBot,
+        private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
-        private Game $game,
+        private GameInfo $gameInfo,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto): void
     {
-        $this->telegramApi->sendMessage(
-            $telegramDto->getUser()->getId(),
-            $this->game->prettyInfo(),
+        $callbackQuery = $telegramDto->callbackQuery;
+        $inlineKeyboard = new InlineKeyboardMarkup([
             [
-                'parse_mode' => 'markdown',
-                'reply_markup' => [
-                    'inline_keyboard' => [
-                        [
-                            [
-                                'text' => $this->translator->trans('Create'),
-                                'callback_data' => CreateGameCommand::COMMAND_NAME,
-                            ],
-                            [
-                                'text' => $this->translator->trans('Join'),
-                                'callback_data' => JoinCommand::COMMAND_NAME,
-                            ],
-                        ],
-                    ],
-                ],
+                new InlineKeyboardButton(
+                    text: '🎮 '.$this->translator->trans('Create'),
+                    callbackData: CreateGameCommand::COMMAND_NAME,
+                ),
+                new InlineKeyboardButton(
+                    text: '🔗 '.$this->translator->trans('Join'),
+                    callbackData: JoinCommand::COMMAND_NAME,
+                ),
             ],
+        ]);
+
+        match (true) {
+            null !== $callbackQuery => $this->handleCallbackQuery($callbackQuery, $inlineKeyboard),
+            default => $this->handleDirectMessage($telegramDto->message, $inlineKeyboard),
+        };
+    }
+
+    private function handleCallbackQuery(CallbackQuery $callbackQuery, InlineKeyboardMarkup $inlineKeyboard): void
+    {
+        $this->telegram->answerCallbackQuery(
+            callbackQueryId: $callbackQuery->id,
+            showAlert: false,
+        );
+
+        $this->telegram->editMessageText(
+            text: $this->gameInfo->prettyInfo(),
+            chatId: $callbackQuery->message->chat->id,
+            messageId: $callbackQuery->message->messageId,
+            parseMode: 'markdown',
+            replyMarkup: $inlineKeyboard,
         );
     }
 
-    public function supports(TelegramDto $telegramDto): bool
+    private function handleDirectMessage(Message $message, InlineKeyboardMarkup $inlineKeyboard): void
     {
-        $result = match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->getMessage()), $telegramDto->getData() => true,
-            default => false,
-        };
-
-        var_dump($result);
-
-        return $result;
+        $this->telegram->sendMessage(
+            chatId: $message->chat->id,
+            text: $this->gameInfo->prettyInfo(),
+            parseMode: 'markdown',
+            replyMarkup: $inlineKeyboard,
+        );
     }
 }
