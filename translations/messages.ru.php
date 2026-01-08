@@ -49,6 +49,7 @@ return [
     'Great, enter the next thing:' => 'Неплохо, введите что-нибудь ещё:',
     'Great job! Just waiting on others now...' => 'Отлично! Теперь ждём остальных...',
     'Wait other players...' => 'Ожидайте других игроков...',
+    'Send the message below to your friends to join the game' => 'Перешлите сообщение ниже друзьям, чтобы они присоединились к игре',
 
     'All players are ready' => 'Все игроки готовы',
     "Let's have some madness!" => 'Приступить к безумию!',
@@ -63,6 +64,7 @@ return [
     'You have already joined the game with ID: gameId' => 'Вы уже в игре под номером: gameId',
     'You are in another game, do you want to leave it?' => 'Вы находитесь в другой игре, желаете покинуть её?',
     'You are not in any game' => 'Вы не находитесь ни в одной игре',
+    'You have already joined this game' => 'Вы уже находитесь в игре',
 
     'As master you can only finish the game. Do you really want it?' => 'Как мастер вы можете только завершить игру. Хотите закончить игру?',
     'Only the game master can end this party. You can gracefully exit, though.' => 'Только Мастер может завершить игру! Но вы можете изящно её покинуть',

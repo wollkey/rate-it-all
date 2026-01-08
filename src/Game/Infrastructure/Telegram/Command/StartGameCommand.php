@@ -7,10 +7,12 @@ namespace App\Game\Infrastructure\Telegram\Command;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\AsTelegramCommand;
 use App\Telegram\TelegramDto;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[AsTelegramCommand(self::COMMAND_NAME)]
 final readonly class StartGameCommand
 {
     public const string COMMAND_NAME = '/start_game';
@@ -25,7 +27,7 @@ final readonly class StartGameCommand
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function __invoke(TelegramDto $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
 

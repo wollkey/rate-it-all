@@ -5,20 +5,25 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Application\UseCase\JoinGameUseCase;
+use App\Game\Domain\Exception\PlayerAlreadyInGameException;
+use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramCommand;
+use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\TelegramDto;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand('/start')]
+#[AsTelegramCommand('/start', inputTypes: [InputType::Text])]
 final readonly class StartCommand
 {
     public function __construct(
         private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
         private JoinGameUseCase $joinGameUseCase,
+        private PlayerRepository $playerRepository,
     ) {
     }
 
@@ -27,41 +32,44 @@ final readonly class StartCommand
      */
     public function __invoke(TelegramDto $telegramDto): void
     {
-        $gameId = $this->extractGameId($telegramDto->message->text);
+        $gameCode = $this->extractGameCode($telegramDto->message->text);
 
-        if ($gameId !== null) {
-            $this->joinGame($telegramDto, $gameId);
-
-            return;
-        }
-
-        $this->showWelcome($telegramDto);
+        $gameCode !== null
+            ? $this->joinGame($telegramDto, $gameCode)
+            : $this->showWelcome($telegramDto);
     }
 
-    private function extractGameId(?string $text): ?string
+    private function extractGameCode(?string $text): ?Uuid
     {
-        if (!is_numeric($text)) {
+        if ($text === null) {
             return null;
         }
 
         $parts = explode(' ', $text, 2);
 
-        return $parts[1] ?? null;
+        return Uuid::isValid($parts[1] ?? '') ? Uuid::fromString($parts[1]) : null;
     }
 
-    private function joinGame(TelegramDto $telegramDto, string $gameId): void
+    private function joinGame(TelegramDto $telegramDto, Uuid $gameCode): void
     {
-        ($this->joinGameUseCase)($telegramDto, $gameId);
+        $player = $this->playerRepository->find($telegramDto->user->id);
 
-        $this->telegram->sendMessage(
-            chatId: $telegramDto->message->chat->id,
-            text: implode(PHP_EOL, [
-                $this->translator->trans('Hi there!'),
-                $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
-            ]),
-            parseMode: 'markdown',
-            replyMarkup: new InlineKeyboardMarkup($keyboard),
-        );
+        try {
+            ($this->joinGameUseCase)($player, $gameCode);
+        } catch (PlayerAlreadyInGameException) {
+            $this->telegram->sendMessage(
+                chatId: $player->getTelegramId(),
+                text: $this->translator->trans('Already playing. Would you like to finish the current one?'),
+                replyMarkup: new InlineKeyboardMarkup([
+                    [
+                        new InlineKeyboardButton(
+                            text: '☠️'.$this->translator->trans('Leave the game'),
+                            callbackData: LeaveGameCommand::COMMAND_NAME,
+                        ),
+                    ],
+                ])
+            );
+        }
     }
 
     private function showWelcome(TelegramDto $telegramDto): void
@@ -71,10 +79,6 @@ final readonly class StartCommand
                 new InlineKeyboardButton(
                     text: '🎮 '.$this->translator->trans('Create'),
                     callbackData: CreateGameCommand::COMMAND_NAME,
-                ),
-                new InlineKeyboardButton(
-                    text: '🔗 '.$this->translator->trans('Join'),
-                    callbackData: JoinCommand::COMMAND_NAME,
                 ),
             ],
             [

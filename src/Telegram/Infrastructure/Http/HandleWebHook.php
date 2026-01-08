@@ -9,6 +9,7 @@ use App\Telegram\ConversationalCommand;
 use App\Telegram\ConversationStep;
 use App\Telegram\Domain\Enum\ChatType;
 use App\Telegram\Domain\Enum\EntityType;
+use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Domain\Event\BeginHandleWebHook;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Domain\Service\MessageExtractor;
@@ -82,8 +83,7 @@ final class HandleWebHook
         try {
             $this->executeCommand($telegramDto);
         } catch (TelegramException $exception) {
-            $chatId = $telegramDto->user->id;
-            $this->conversation->clear($chatId);
+            $this->conversation->clear($telegramDto->message->chat->id);
             $this->logger->error(json_encode([
                 'error' => $exception->getMessage(),
                 'previous' => $exception->getPrevious()?->getMessage(),
@@ -100,16 +100,15 @@ final class HandleWebHook
     private function executeCommand(TelegramDto $telegramDto): void
     {
         $commandFqcn = $this->resolveCommandFromMessage($telegramDto);
-        $chatId = $telegramDto->user->id;
 
         if ($commandFqcn !== null) {
-            $this->conversation->clear($chatId);
+            $this->conversation->clear($telegramDto->message->chat->id);
             $this->runCommand($commandFqcn, $telegramDto);
 
             return;
         }
 
-        $conversation = $this->conversation->get($chatId);
+        $conversation = $this->conversation->get($telegramDto->message->chat->id);
 
         if ($conversation === null) {
             return;
@@ -125,7 +124,7 @@ final class HandleWebHook
      */
     private function runCommand(string $commandFqcn, TelegramDto $telegramDto, ?ConversationStep $step = null): void
     {
-        $chatId = $telegramDto->user->id;
+        $chatId = $telegramDto->message->chat->id;
         $command = $this->commandsMap[$commandFqcn] ?? null;
 
         if ($command === null) {
@@ -144,7 +143,7 @@ final class HandleWebHook
         }
 
         $command($telegramDto);
-        $this->conversation->clear($telegramDto->user->id);
+        $this->conversation->clear($chatId);
     }
 
     /**
@@ -202,7 +201,8 @@ final class HandleWebHook
             return true;
         }
 
-        if ($attribute->supportReplyMarkup && $attribute->command === $telegramDto->callbackQuery?->data) {
+        $inputType = $telegramDto->isCallback() ? InputType::Callback : InputType::Text;
+        if (in_array($inputType, $attribute->inputTypes) && $attribute->command === $telegramDto->callbackQuery?->data) {
             return true;
         }
 

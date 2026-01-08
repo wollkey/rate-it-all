@@ -10,6 +10,7 @@ use App\Game\Domain\GameStatus;
 use App\Game\Domain\Repository\GameRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<Game>
@@ -21,9 +22,9 @@ final class DoctrineGameRepository extends ServiceEntityRepository implements Ga
         parent::__construct($registry, Game::class);
     }
 
-    public function findById(mixed $id): ?Game
+    public function findByCode(Uuid $code): ?Game
     {
-        return $this->find($id);
+        return $this->findOneBy(['code' => $code]);
     }
 
     public function save(Game $game): void

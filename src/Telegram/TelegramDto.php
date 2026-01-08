@@ -16,4 +16,9 @@ final readonly class TelegramDto
         public ?CallbackQuery $callbackQuery = null,
     ) {
     }
+
+    public function isCallback(): bool
+    {
+        return $this->callbackQuery !== null;
+    }
 }

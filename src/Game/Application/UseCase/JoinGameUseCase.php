@@ -9,13 +9,16 @@ use App\Game\Domain\Event\PlayerHasJoined;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\GameRepository;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class JoinGameUseCase
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private GameRepository $gameRepository,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -23,13 +26,14 @@ final readonly class JoinGameUseCase
      * @throws GameNotFoundException
      * @throws GameException
      */
-    public function join(Player $player, string $gameId): void
+    public function __invoke(Player $player, Uuid $gameCode): void
     {
-        $gameSession = $this->gameRepository->find($gameId) ?? throw new GameNotFoundException($this->translator->trans('The game with this ID not found'));
+        $game = $this->gameRepository->findByCode($gameCode)
+            ?? throw new GameNotFoundException($this->translator->trans('The game with this ID not found'));
 
-        $this->game->addPlayerToGameSession($player, $gameSession);
-        $this->game->saveSession($gameSession);
+        $game->join($player);
+        $this->gameRepository->save($game);
 
-        $this->eventDispatcher->dispatch(new PlayerHasJoined($player, $gameSession));
+        $this->eventDispatcher->dispatch(new PlayerHasJoined($player, $game));
     }
 }
