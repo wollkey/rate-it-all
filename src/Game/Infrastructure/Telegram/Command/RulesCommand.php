@@ -6,6 +6,7 @@ namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Domain\GameInfo;
 use App\Telegram\AsTelegramCommand;
+use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\TelegramDto;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\CallbackQuery;
@@ -14,7 +15,7 @@ use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Phptg\BotApi\Type\Message;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand('/rules', supportReplyMarkup: true)]
+#[AsTelegramCommand('/rules', inputTypes: [InputType::Text, InputType::Callback])]
 final readonly class RulesCommand
 {
     public const string COMMAND_NAME = '/rules';
@@ -37,10 +38,6 @@ final readonly class RulesCommand
                 new InlineKeyboardButton(
                     text: '🎮 '.$this->translator->trans('Create'),
                     callbackData: CreateGameCommand::COMMAND_NAME,
-                ),
-                new InlineKeyboardButton(
-                    text: '🔗 '.$this->translator->trans('Join'),
-                    callbackData: JoinCommand::COMMAND_NAME,
                 ),
             ],
         ]);

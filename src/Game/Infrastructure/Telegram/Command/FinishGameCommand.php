@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\AsTelegramCommand;
+use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\TelegramDto;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[AsTelegramCommand(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
 final readonly class FinishGameCommand
 {
     public const string COMMAND_NAME = '/finish_game';

@@ -222,6 +222,11 @@ final class Game
         return $this->status === GameStatus::Finished;
     }
 
+    public function getMaster(): Player
+    {
+        return $this->master;
+    }
+
     public function isMaster(Player $player): bool
     {
         return $this->getMaster()->getId() === $player->getId();
@@ -324,10 +329,5 @@ final class Game
     private function getPlayersCount(): int
     {
         return $this->players->count();
-    }
-
-    private function getMaster(): Player
-    {
-        return $this->master;
     }
 }

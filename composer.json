@@ -27,6 +27,7 @@
         "ramsey/uuid": "^4.9",
         "sentry/sentry-symfony": "*",
         "symfony/console": "7.4.*",
+        "symfony/doctrine-bridge": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/event-dispatcher": "7.4.*",
         "symfony/flex": "^2",

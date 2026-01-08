@@ -24,7 +24,7 @@ final readonly class NotifyPlayerAboutJoiningGame
     public function __invoke(PlayerHasJoined $event): void
     {
         $this->telegramApi->sendMessage(
-            $event->getPlayer()->getTelegramId(),
+            $event->player->getTelegramId(),
             $this->translator->trans('You\'ve successfully joined the game.')
             .PHP_EOL
             .$this->translator->trans('Be ready, the adventure is about to begin...')
