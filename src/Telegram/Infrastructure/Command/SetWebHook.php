@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Command;
 
+use Phptg\BotApi\FailResult;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,14 @@ final readonly class SetWebHook
 
     public function __invoke(OutputInterface $output): int
     {
-        $this->telegram->setWebHook($this->webhookUrl);
+        $result = $this->telegram->setWebHook($this->webhookUrl);
+
+        if ($result instanceof FailResult) {
+            $output->writeln("<error>{$result->response->body}</error>");
+            $output->writeln('<error>Error setting webhook!</error>');
+
+            return Command::FAILURE;
+        }
 
         $output->writeln('<info>Webhook was successfully set!</info>');
 

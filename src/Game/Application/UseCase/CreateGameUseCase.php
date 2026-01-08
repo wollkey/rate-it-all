@@ -20,7 +20,7 @@ final readonly class CreateGameUseCase
     {
         $game = $this->gameRepository->findActiveByPlayer($master);
 
-        if (null !== $game) {
+        if ($game !== null) {
             return $game;
         }
 
@@ -29,7 +29,6 @@ final readonly class CreateGameUseCase
             thingsPerPlayer: $thingsPerPlayer,
         );
 
-        $game->join($master);
         $this->gameRepository->save($game);
 
         return $game;

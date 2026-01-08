@@ -9,9 +9,9 @@ use App\Game\Domain\Game;
 
 interface GameRepository
 {
-    public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Game;
+    public function findById(mixed $id): ?Game;
 
-    public function save(Game $gameSession): void;
+    public function save(Game $game): void;
 
     public function findActiveByPlayer(Player $player): ?Game;
 

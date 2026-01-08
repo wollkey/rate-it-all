@@ -9,10 +9,13 @@ use App\Telegram\Domain\Enum\ChatType;
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class AsTelegramCommand
 {
+    /**
+     * @param non-empty-list<ChatType> $chatTypes
+     */
     public function __construct(
         public string $command,
         public bool $supportReplyMarkup = false,
-        public ?ChatType $chatType = null,
+        public array $chatTypes = [ChatType::Private],
     ) {
     }
 }
