@@ -7,6 +7,7 @@ namespace App\Telegram\Infrastructure\Http;
 use App\Telegram\AsTelegramCommand;
 use App\Telegram\ConversationalCommand;
 use App\Telegram\ConversationStep;
+use App\Telegram\Domain\Enum\ChatType;
 use App\Telegram\Domain\Enum\EntityType;
 use App\Telegram\Domain\Event\BeginHandleWebHook;
 use App\Telegram\Domain\Exception\TelegramException;
@@ -81,6 +82,8 @@ final class HandleWebHook
         try {
             $this->executeCommand($telegramDto);
         } catch (TelegramException $exception) {
+            $chatId = $telegramDto->user->id;
+            $this->conversation->clear($chatId);
             $this->logger->error(json_encode([
                 'error' => $exception->getMessage(),
                 'previous' => $exception->getPrevious()?->getMessage(),
@@ -99,7 +102,7 @@ final class HandleWebHook
         $commandFqcn = $this->resolveCommandFromMessage($telegramDto);
         $chatId = $telegramDto->user->id;
 
-        if (null !== $commandFqcn) {
+        if ($commandFqcn !== null) {
             $this->conversation->clear($chatId);
             $this->runCommand($commandFqcn, $telegramDto);
 
@@ -108,7 +111,7 @@ final class HandleWebHook
 
         $conversation = $this->conversation->get($chatId);
 
-        if (null === $conversation) {
+        if ($conversation === null) {
             return;
         }
 
@@ -125,7 +128,7 @@ final class HandleWebHook
         $chatId = $telegramDto->user->id;
         $command = $this->commandsMap[$commandFqcn] ?? null;
 
-        if (null === $command) {
+        if ($command === null) {
             $this->conversation->clear($chatId);
 
             return;
@@ -133,7 +136,7 @@ final class HandleWebHook
 
         if ($command instanceof ConversationalCommand) {
             $nextStep = $command($telegramDto, $step);
-            null !== $nextStep
+            $nextStep !== null
                 ? $this->conversation->save($chatId, $commandFqcn, $nextStep)
                 : $this->conversation->clear($chatId);
 
@@ -171,7 +174,7 @@ final class HandleWebHook
 
     private function extractCommand(Message $message): ?string
     {
-        if (null === $message->text) {
+        if ($message->text === null) {
             return null;
         }
 
@@ -190,11 +193,12 @@ final class HandleWebHook
         TelegramDto $telegramDto,
         ?string $textCommand,
     ): bool {
-        if (null !== $attribute->chatType && $telegramDto->message->chat->type !== $attribute->chatType->value) {
+        $chatType = ChatType::tryFrom($telegramDto->message->chat->type);
+        if ($chatType !== null && !in_array($chatType, $attribute->chatTypes)) {
             return false;
         }
 
-        if (null !== $textCommand && $attribute->command === $textCommand) {
+        if ($textCommand !== null && $attribute->command === $textCommand) {
             return true;
         }
 
@@ -211,7 +215,7 @@ final class HandleWebHook
             $reflection = new \ReflectionClass($command);
             $attributes = $reflection->getAttributes(AsTelegramCommand::class);
 
-            if ([] === $attributes) {
+            if ($attributes === []) {
                 continue;
             }
 

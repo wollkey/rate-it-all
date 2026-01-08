@@ -28,7 +28,7 @@ final readonly class FinishGameCommand
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
 
-        if (null === $player) {
+        if ($player === null) {
             return;
         }
 

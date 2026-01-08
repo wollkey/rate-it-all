@@ -26,7 +26,7 @@ final readonly class TakeNextThingUseCase
         $gameSession = $this->game->continue($player);
         $randomThing = $gameSession->getRandomUnratedThing();
 
-        if (null === $randomThing) {
+        if ($randomThing === null) {
             throw new ThingListIsEmptyException();
         }
 

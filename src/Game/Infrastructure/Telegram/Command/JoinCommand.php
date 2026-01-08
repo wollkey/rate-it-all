@@ -32,7 +32,7 @@ final readonly class JoinCommand implements ConversationalCommand
         $player = $this->playerRepository->find($telegramDto->user->id);
         $gameSession = $this->game->findSessionByPlayer($player);
 
-        if (null !== $gameSession && $gameSession->isPlayerMaster($player)) {
+        if ($gameSession !== null && $gameSession->isPlayerMaster($player)) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('Already playing. Would you like to finish the current one?'),
@@ -51,7 +51,7 @@ final readonly class JoinCommand implements ConversationalCommand
             return null;
         }
 
-        if (null !== $gameSession) {
+        if ($gameSession !== null) {
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('You are in another game, do you want to leave it?'),

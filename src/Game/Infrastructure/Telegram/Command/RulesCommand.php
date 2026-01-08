@@ -46,7 +46,7 @@ final readonly class RulesCommand
         ]);
 
         match (true) {
-            null !== $callbackQuery => $this->handleCallbackQuery($callbackQuery, $inlineKeyboard),
+            $callbackQuery !== null => $this->handleCallbackQuery($callbackQuery, $inlineKeyboard),
             default => $this->handleDirectMessage($telegramDto->message, $inlineKeyboard),
         };
     }

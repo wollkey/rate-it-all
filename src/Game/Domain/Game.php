@@ -93,7 +93,7 @@ final class Game
 
     public function hasPlayer(Player $targetPlayer): bool
     {
-        return array_any((array) $this->players, fn ($player) => $player->getId() === $targetPlayer->getId());
+        return $this->players->exists(fn (int $key, Player $player): bool => $player->getId() === $targetPlayer->getId());
     }
 
     public function addThing(Player $author, string $value): Thing
@@ -161,7 +161,7 @@ final class Game
             throw new ForbiddenActionException('Cannot rate in current status');
         }
 
-        if (null === $this->currentThing) {
+        if ($this->currentThing === null) {
             throw new ForbiddenActionException('No thing to rate currently');
         }
 
@@ -179,7 +179,7 @@ final class Game
 
     public function isCurrentThingFullyRated(): bool
     {
-        if (null === $this->currentThing) {
+        if ($this->currentThing === null) {
             return false;
         }
 
@@ -189,7 +189,7 @@ final class Game
     /** @return list<Player> */
     public function getPlayersWhoNotRated(): array
     {
-        if (null === $this->currentThing) {
+        if ($this->currentThing === null) {
             return [];
         }
 
@@ -219,7 +219,7 @@ final class Game
 
     public function isFinished(): bool
     {
-        return GameStatus::Finished === $this->status;
+        return $this->status === GameStatus::Finished;
     }
 
     public function isMaster(Player $player): bool

@@ -13,16 +13,16 @@ enum GameStatus: string
 
     public function canJoin(): bool
     {
-        return self::Waiting === $this;
+        return $this === self::Waiting;
     }
 
     public function canAddThings(): bool
     {
-        return self::Collecting === $this;
+        return $this === self::Collecting;
     }
 
     public function canRate(): bool
     {
-        return self::Rating === $this;
+        return $this === self::Rating;
     }
 }

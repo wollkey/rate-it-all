@@ -24,7 +24,7 @@ final readonly class CreatePlayerOnWebhook
         $user = $event->telegramDto->user;
         $player = $this->playerRepository->find($user->id);
 
-        if (null !== $player) {
+        if ($player !== null) {
             return;
         }
 
@@ -32,7 +32,7 @@ final readonly class CreatePlayerOnWebhook
             ->setFirstName($user->firstName)
             ->setTelegramId($user->id);
 
-        if (null !== $user->lastName) {
+        if ($user->lastName !== null) {
             $player->setLastName($user->lastName);
         }
 

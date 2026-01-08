@@ -40,7 +40,7 @@ final readonly class EnterGameIdCommand
 
     private function resolveGameId(?string $text): string
     {
-        if (null === $text) {
+        if ($text === null) {
             return '';
         }
 
