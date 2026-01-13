@@ -6,6 +6,7 @@ namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Application\UseCase\CreateGameUseCase;
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Game;
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
@@ -46,7 +47,7 @@ final readonly class CreateGameCommand implements ConversationalCommand
         $game = $this->gameRepository->findActiveByPlayer($player);
 
         if ($game !== null) {
-            $this->handleMasterAlreadyInGame($telegramDto, $player);
+            $this->handlePlayerAlreadyInGame($telegramDto, $game, $player);
 
             return null;
         }
@@ -57,8 +58,30 @@ final readonly class CreateGameCommand implements ConversationalCommand
         };
     }
 
-    private function handleMasterAlreadyInGame(TelegramDto $telegramDto, Player $player): void
+    private function handlePlayerAlreadyInGame(TelegramDto $telegramDto, Game $game, Player $player): void
     {
+        if ($game->isMaster($player)) {
+            $message = $this->translator->trans('Already playing. Would you like to finish the current one?');
+            $keyboard = new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton(
+                        text: '💀' . $this->translator->trans('Finish the game'),
+                        callbackData: FinishGameCommand::COMMAND_NAME,
+                    ),
+                ],
+            ]);
+        } else {
+            $message = $this->translator->trans('You are in another game, do you want to leave it?');
+            $keyboard = new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton(
+                        text: '💀' . $this->translator->trans('Leave the game'),
+                        callbackData: LeaveGameCommand::COMMAND_NAME,
+                    ),
+                ],
+            ]);
+        }
+
         if ($telegramDto->isCallback()) {
             $this->telegram->answerCallbackQuery(
                 callbackQueryId: $telegramDto->callbackQuery->id,
@@ -66,17 +89,10 @@ final readonly class CreateGameCommand implements ConversationalCommand
             );
 
             $this->telegram->editMessageText(
-                text: $this->translator->trans('Already playing. Would you like to finish the current one?'),
+                text: $message,
                 chatId: $player->getTelegramId(),
                 messageId: $telegramDto->message->messageId,
-                replyMarkup: new InlineKeyboardMarkup([
-                    [
-                        new InlineKeyboardButton(
-                            text: '💀' . $this->translator->trans('Finish the game'),
-                            callbackData: FinishGameCommand::COMMAND_NAME,
-                        ),
-                    ],
-                ])
+                replyMarkup: $keyboard,
             );
 
             return;
@@ -84,15 +100,8 @@ final readonly class CreateGameCommand implements ConversationalCommand
 
         $this->telegram->sendMessage(
             chatId: $player->getTelegramId(),
-            text: $this->translator->trans('Already playing. Would you like to finish the current one?'),
-            replyMarkup: new InlineKeyboardMarkup([
-                [
-                    new InlineKeyboardButton(
-                        text: '💀' . $this->translator->trans('Finish the game'),
-                        callbackData: FinishGameCommand::COMMAND_NAME,
-                    ),
-                ],
-            ])
+            text: $message,
+            replyMarkup: $keyboard,
         );
     }
 
@@ -127,7 +136,7 @@ final readonly class CreateGameCommand implements ConversationalCommand
             replyMarkup: $inlineKeyboard,
         );
 
-        return new ConversationStep(self::STEP_AWAITING_THINGS_COUNT, $telegramDto->user->id);
+        return new ConversationStep(self::STEP_AWAITING_THINGS_COUNT);
     }
 
     private function createGame(TelegramDto $telegramDto, Player $player, ConversationStep $step): ConversationStep|null

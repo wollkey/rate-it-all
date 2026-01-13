@@ -217,6 +217,11 @@ final class Game
         return $results;
     }
 
+    public function finish(): void
+    {
+        $this->status = GameStatus::Finished;
+    }
+
     public function isFinished(): bool
     {
         return $this->status === GameStatus::Finished;

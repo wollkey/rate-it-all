@@ -16,5 +16,7 @@ interface GameRepository
 
     public function findActiveByPlayer(Player $player): ?Game;
 
+    public function findActiveByMaster(Player $player): ?Game;
+
     public function delete(Game $game): void;
 }

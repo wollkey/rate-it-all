@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\GameRepository;
 
-final readonly class LeaveGameUseCase
+final readonly class FinishGameUseCase
 {
     public function __construct(
         private GameRepository $gameRepository,
@@ -17,19 +16,14 @@ final readonly class LeaveGameUseCase
     }
 
     /**
-     * @throws GameNotFoundException|ForbiddenActionException
+     * @throws GameNotFoundException
      */
     public function __invoke(Player $player): void
     {
-        $game = $this->gameRepository->findActiveByPlayer($player)
+        $game = $this->gameRepository->findActiveByMaster($player)
             ?? throw new GameNotFoundException();
 
-        $game->leave($player);
-
-        if ($game->getPlayers()->count() <= 1) {
-            $game->finish();
-        }
-
+        $game->finish();
         $this->gameRepository->save($game);
     }
 }

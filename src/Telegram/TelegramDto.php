@@ -8,6 +8,7 @@ use Phptg\BotApi\Type\CallbackQuery;
 use Phptg\BotApi\Type\Message;
 use Phptg\BotApi\Type\User;
 
+// TODO rename to TelegramInput
 final readonly class TelegramDto
 {
     public function __construct(

@@ -50,6 +50,18 @@ final class DoctrineGameRepository extends ServiceEntityRepository implements Ga
             ->getOneOrNullResult();
     }
 
+    public function findActiveByMaster(Player $player): ?Game
+    {
+        return $this->createQueryBuilder('g')
+            ->where('g.master = (:master)')
+            ->andWhere('g.status NOT IN (:status)')
+            ->setParameter('master', $player)
+            ->setParameter('status', GameStatus::Finished)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function delete(Game $game): void
     {
         $this->getEntityManager()->remove($game);

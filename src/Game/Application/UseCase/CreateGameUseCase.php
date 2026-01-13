@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\PlayerAlreadyInGameException;
 use App\Game\Domain\Game;
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
@@ -21,7 +22,7 @@ final readonly class CreateGameUseCase
         $game = $this->gameRepository->findActiveByPlayer($master);
 
         if ($game !== null) {
-            return $game;
+            throw new PlayerAlreadyInGameException();
         }
 
         $game = new Game(

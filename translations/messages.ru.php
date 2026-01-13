@@ -10,6 +10,7 @@ return [
     'Create' => 'Создать',
     'Join' => 'Присоединиться',
 
+    'Create new game' => 'Создать новую игру',
     'Start the game' => 'Начать игру',
     'Leave the game' => 'Покинуть игру',
     'Finish the game' => 'Завершить игру',
@@ -60,13 +61,14 @@ return [
     'Reveal the result' => 'Показать результат',
 
     // Exception
-    'Already playing. Would you like to finish the current one?' => 'Уже в игре. Хотели бы завершить текущую?',
+    'Already playing. Would you like to finish the current one?' => 'Вы уже в игре. Хотели бы её завершить?',
     'You have already joined the game with ID: gameId' => 'Вы уже в игре под номером: gameId',
     'You are in another game, do you want to leave it?' => 'Вы находитесь в другой игре, желаете покинуть её?',
     'You are not in any game' => 'Вы не находитесь ни в одной игре',
     'You have already joined this game' => 'Вы уже находитесь в игре',
 
     'As master you can only finish the game. Do you really want it?' => 'Как мастер вы можете только завершить игру. Хотите закончить игру?',
+    'As player you can only leave the game. Do you really want it?' => 'Вы можете только покинуть игру. Хотите покинуть игру?',
     'Only the game master can end this party. You can gracefully exit, though.' => 'Только Мастер может завершить игру! Но вы можете изящно её покинуть',
 
     'The game with this ID not found' => 'Игра с этим номером не найдена',
