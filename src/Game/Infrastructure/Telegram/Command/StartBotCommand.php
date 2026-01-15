@@ -9,21 +9,21 @@ use App\Game\Domain\Exception\PlayerAlreadyInGameException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramCommand;
 use App\Telegram\Domain\Enum\InputType;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsTelegramCommand('/start', inputTypes: [InputType::Text])]
-final readonly class StartCommand
+final readonly class StartBotCommand
 {
     public function __construct(
-        private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
         private JoinGameUseCase $joinGameUseCase,
         private PlayerRepository $playerRepository,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
@@ -57,10 +57,10 @@ final readonly class StartCommand
         try {
             ($this->joinGameUseCase)($player, $gameCode);
         } catch (PlayerAlreadyInGameException) {
-            $this->telegram->sendMessage(
+            $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
                 text: $this->translator->trans('Already playing. Would you like to finish the current one?'),
-                replyMarkup: new InlineKeyboardMarkup([
+                keyboardMarkup: new InlineKeyboardMarkup([
                     [
                         new InlineKeyboardButton(
                             text: '☠️'.$this->translator->trans('Leave the game'),
@@ -89,14 +89,13 @@ final readonly class StartCommand
             ],
         ];
 
-        $this->telegram->sendMessage(
+        $this->telegramResponder->send(
             chatId: $telegramDto->message->chat->id,
             text: implode(PHP_EOL, [
                 $this->translator->trans('Hi there!'),
                 $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
             ]),
-            parseMode: 'markdown',
-            replyMarkup: new InlineKeyboardMarkup($keyboard),
+            keyboardMarkup: new InlineKeyboardMarkup($keyboard),
         );
     }
 }

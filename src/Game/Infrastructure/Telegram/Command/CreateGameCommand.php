@@ -15,8 +15,8 @@ use App\Telegram\AsTelegramCommand;
 use App\Telegram\ConversationalCommand;
 use App\Telegram\ConversationStep;
 use App\Telegram\Domain\Enum\InputType;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -29,12 +29,12 @@ final readonly class CreateGameCommand implements ConversationalCommand
 
     public function __construct(
         private PlayerRepository $playerRepository,
-        private TelegramBotApi $telegram,
         private TranslatorInterface $translator,
         private CreateGameUseCase $createGameUseCase,
         private string $telegramBotName,
         private GameTelegramContext $gameTelegramContext,
         private GameRepository $gameRepository,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
@@ -82,26 +82,10 @@ final readonly class CreateGameCommand implements ConversationalCommand
             ]);
         }
 
-        if ($telegramDto->isCallback()) {
-            $this->telegram->answerCallbackQuery(
-                callbackQueryId: $telegramDto->callbackQuery->id,
-                showAlert: false,
-            );
-
-            $this->telegram->editMessageText(
-                text: $message,
-                chatId: $player->getTelegramId(),
-                messageId: $telegramDto->message->messageId,
-                replyMarkup: $keyboard,
-            );
-
-            return;
-        }
-
-        $this->telegram->sendMessage(
-            chatId: $player->getTelegramId(),
-            text: $message,
-            replyMarkup: $keyboard,
+        $this->telegramResponder->reply(
+            $telegramDto,
+            $message,
+            $keyboard,
         );
     }
 
@@ -124,16 +108,10 @@ final readonly class CreateGameCommand implements ConversationalCommand
             ],
         ]);
 
-        $this->telegram->answerCallbackQuery(
-            callbackQueryId: $telegramDto->callbackQuery->id,
-            showAlert: false,
-        );
-
-        $this->telegram->editMessageText(
-            text: $this->translator->trans('Enter the number of rated things per player:'),
-            chatId: $telegramDto->callbackQuery->message->chat->id,
-            messageId: $telegramDto->callbackQuery->message->messageId,
-            replyMarkup: $inlineKeyboard,
+        $this->telegramResponder->replyCallback(
+            $telegramDto,
+            $this->translator->trans('Enter the number of rated things per player:'),
+            $inlineKeyboard,
         );
 
         return new ConversationStep(self::STEP_AWAITING_THINGS_COUNT);
@@ -151,18 +129,12 @@ final readonly class CreateGameCommand implements ConversationalCommand
 
         $newGame = ($this->createGameUseCase)($player, $numberOfThings);
 
-        $this->telegram->answerCallbackQuery(
-            callbackQueryId: $telegramDto->callbackQuery->id,
-            showAlert: false,
-        );
-
         $joinLink = "https://t.me/{$this->telegramBotName}?start={$newGame->getCode()->toRfc4122()}";
 
-        $this->telegram->editMessageText(
-            text: 'Отправьте ссылку друзьям, чтобы они присоединились',
-            chatId: $telegramDto->message->chat->id,
-            messageId: $telegramDto->message->messageId,
-            replyMarkup: new InlineKeyboardMarkup([
+        $this->telegramResponder->replyCallback(
+            $telegramDto,
+            'Отправьте ссылку друзьям, чтобы они присоединились',
+            new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
                         text: '📤 Поделиться с друзьями',

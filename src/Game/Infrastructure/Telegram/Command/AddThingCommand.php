@@ -11,8 +11,8 @@ use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Thing;
 use App\Telegram\Domain\Exception\TelegramException;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class AddThingCommand
@@ -20,7 +20,7 @@ final readonly class AddThingCommand
     public function __construct(
         private AddThingUseCase $addThingUseCase,
         private PlayerRepository $playerRepository,
-        private TelegramBotApi $telegramApi,
+        private TelegramResponder $telegramApi,
         private TranslatorInterface $translator,
     ) {
     }

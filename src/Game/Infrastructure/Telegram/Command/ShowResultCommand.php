@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Command;
 
 use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 
 final readonly class ShowResultCommand
 {
@@ -14,7 +14,7 @@ final readonly class ShowResultCommand
 
     public function __construct(
         private PlayerRepository $playerRepository,
-        private TelegramBotApi $telegramApi,
+        private TelegramResponder $telegramApi,
     ) {
     }
 
