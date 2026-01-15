@@ -10,17 +10,17 @@ use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
 use App\Telegram\Domain\Exception\TelegramException;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class RateTheThingCommand
 {
     public function __construct(
         private PlayerRepository $playerRepository,
-        private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
         private RateThingUseCase $rateThingUseCase,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
@@ -41,9 +41,9 @@ final readonly class RateTheThingCommand
 
             ($this->rateThingUseCase)($player, $rating);
         } catch (ThingIsAlreadyRatedException) {
-            $this->telegramApi->sendMessage(
+            $this->telegramResponder->send(
                 $player->getTelegramId(),
-                implode(PHP_EOL, [$this->translator->trans('You must not change you rating. Choose wisely.')]),
+                implode(PHP_EOL, [$this->translator->trans('You must not change you rating. Choose wisely.')])
             );
 
             return;

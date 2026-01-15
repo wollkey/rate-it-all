@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Command;
 
-use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramCommand;
+use App\Telegram\Domain\Enum\InputType;
+use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
-use Phptg\BotApi\TelegramBotApi;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand(self::COMMAND_NAME)]
+#[AsTelegramCommand(self::COMMAND_NAME, [InputType::Callback])]
 final readonly class StartGameCommand
 {
     public const string COMMAND_NAME = '/start_game';
 
     public function __construct(
-        private TelegramBotApi $telegramApi,
+        private TelegramResponder $telegram,
         private PlayerRepository $playerRepository,
         private TranslatorInterface $translator,
+        private GameRepository $gameRepository,
     ) {
     }
 
@@ -30,29 +31,32 @@ final readonly class StartGameCommand
     public function __invoke(TelegramDto $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
+        $game = $this->gameRepository->findActiveByPlayer($player);
 
-        try {
-            $gameSession = $this->game->continue($player);
-
-            if (!$gameSession->isPlayerMaster($player)) {
-                $this->telegramApi->sendMessage(
-                    $player->getTelegramId(),
-                    $this->translator->trans('The action is not available'),
-                );
-
-                return;
-            }
-
-            $this->telegramBot->removeEditedMessage($player->getTelegramId());
-        } catch (GameNotFoundException) {
-            $this->sendCreateNewGameMessage($player);
+        if ($game === null) {
+            $this->sendCreateNewGameMessage($telegramDto);
 
             return;
         }
 
-        foreach ($gameSession->getPlayers() as $player) {
-            $this->telegramBot->startProcessingCommand($player->getTelegramId(), AddThingCommand::class);
-            $this->telegramApi->sendMessage(
+        if (!$game->isMaster($player)) {
+            $this->telegram->answerCallbackQuery(
+                callbackQueryId: $telegramDto->callbackQuery->id,
+                text: $this->translator->trans('The action is not available'),
+                showAlert: true,
+            );
+
+            return;
+        }
+
+        $this->telegram->answerCallbackQuery(
+            callbackQueryId: $telegramDto->callbackQuery->id,
+            showAlert: false,
+        );
+
+        foreach ($game->getPlayers() as $player) {
+            $this->telegram->startProcessingCommand($player->getTelegramId(), AddUsernameCommand::class);
+            $this->telegram->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('Add any crazy thing that came into your head:')
             );
@@ -62,10 +66,10 @@ final readonly class StartGameCommand
     /**
      * @throws \Exception
      */
-    private function sendCreateNewGameMessage(Player $player): void
+    private function sendCreateNewGameMessage(TelegramDto $telegramDto): void
     {
-        $this->telegramApi->sendMessage(
-            $player->getTelegramId(),
+        $this->telegram->send(
+            $telegramDto->message->chat->id,
             $this->translator->trans('Kick things off with a new game'),
             [
                 'text' => $this->translator->trans('Create'),
