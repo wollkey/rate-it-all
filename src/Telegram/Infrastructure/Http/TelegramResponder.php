@@ -18,11 +18,11 @@ final readonly class TelegramResponder {
         TelegramDto $dto,
         string $text,
         ?InlineKeyboardMarkup $keyboardMarkup = null,
-        ?string $parseMode = 'MarkdownV2', // TODO узнать в чём разница между markdown и MarkdownV2
+        ?string $parseMode = 'markdown',
     ): void {
         $dto->isCallback()
-            ? $this->replyCallback($dto, $text, $parseMode, $keyboardMarkup)
-            : $this->send($dto->message->chat->id, $text, $parseMode, $keyboardMarkup);
+            ? $this->replyCallback($dto, $text, $keyboardMarkup, $parseMode)
+            : $this->send($dto->message->chat->id, $text, $keyboardMarkup, $parseMode);
     }
 
     public function send(
