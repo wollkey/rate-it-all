@@ -46,10 +46,7 @@ final readonly class TelegramResponder {
         ?string $parseMode = 'markdown',
     ): void
     {
-        $this->api->answerCallbackQuery(
-            callbackQueryId: $dto->callbackQuery->id,
-            showAlert: false,
-        );
+        $this->answerCallbackQuery($dto->callbackQuery->id);
 
         $this->api->editMessageText(
             text: $text,
@@ -57,6 +54,18 @@ final readonly class TelegramResponder {
             messageId: $dto->callbackQuery->message->messageId,
             parseMode: $parseMode,
             replyMarkup: $keyboardMarkup,
+        );
+    }
+
+    public function answerCallbackQuery(
+        string $callbackQueryId,
+        ?string $text = null,
+        bool $showAlert = false,
+    ): void {
+        $this->api->answerCallbackQuery(
+            callbackQueryId: $callbackQueryId,
+            text: $text,
+            showAlert: $showAlert,
         );
     }
 }
