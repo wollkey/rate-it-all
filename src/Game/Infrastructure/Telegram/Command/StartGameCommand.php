@@ -10,6 +10,8 @@ use App\Telegram\AsTelegramCommand;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Infrastructure\Http\TelegramResponder;
 use App\Telegram\TelegramDto;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsTelegramCommand(self::COMMAND_NAME, [InputType::Callback])]
@@ -49,10 +51,7 @@ final readonly class StartGameCommand
             return;
         }
 
-        $this->telegram->answerCallbackQuery(
-            callbackQueryId: $telegramDto->callbackQuery->id,
-            showAlert: false,
-        );
+        $this->telegram->answerCallbackQuery($telegramDto->callbackQuery->id);
 
         foreach ($game->getPlayers() as $player) {
             $this->telegram->startProcessingCommand($player->getTelegramId(), AddUsernameCommand::class);
@@ -71,10 +70,14 @@ final readonly class StartGameCommand
         $this->telegram->send(
             $telegramDto->message->chat->id,
             $this->translator->trans('Kick things off with a new game'),
-            [
-                'text' => $this->translator->trans('Create'),
-                'callback_data' => CreateGameCommand::COMMAND_NAME,
-            ],
+            new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton(
+                        text: '🎮 '.$this->translator->trans('Create'),
+                        callbackData: CreateGameCommand::COMMAND_NAME,
+                    ),
+                ],
+            ]),
         );
     }
 }
