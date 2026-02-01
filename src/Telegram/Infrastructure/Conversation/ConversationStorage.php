@@ -10,28 +10,27 @@ use Psr\Cache\InvalidArgumentException;
 
 final readonly class ConversationStorage
 {
+    private const int TTL_ONE_DAY = 3600 * 24;
+
     public function __construct(
         private CacheItemPoolInterface $cache,
     ) {
     }
 
     /**
-     * @throws InvalidArgumentException
-     */
-    public function save(int $chatId, string $commandClass, ConversationStep $step): void
-    {
-        $item = $this->cache->getItem($this->key($chatId));
-        $item->set(['command' => $commandClass, 'step' => $step]);
-        $item->expiresAfter(3600 * 24);
-        $this->cache->save($item);
-    }
-
-    /**
-     * @return array{command: class-string, step: ConversationStep}|null
+     * @param class-string $handlerClass
      *
      * @throws InvalidArgumentException
      */
-    public function get(int $chatId): ?array
+    public function save(int $chatId, string $handlerClass, ?string $step = null, array $data = []): void
+    {
+        $item = $this->cache->getItem($this->key($chatId));
+        $item->set(new ConversationStep($handlerClass, $step, $data));
+        $item->expiresAfter(self::TTL_ONE_DAY);
+        $this->cache->save($item);
+    }
+
+    public function get(int $chatId): ?ConversationStep
     {
         $item = $this->cache->getItem($this->key($chatId));
 
@@ -41,11 +40,7 @@ final readonly class ConversationStorage
 
         $data = $item->get();
 
-        if (!is_array($data) || !isset($data['command'], $data['step'])) {
-            return null;
-        }
-
-        return $data;
+        return $data instanceof ConversationStep ? $data : null;
     }
 
     /**

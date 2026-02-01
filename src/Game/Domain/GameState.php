@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Domain;
 
-enum GameStatus: string
+enum GameState: string
 {
     case Waiting = 'waiting';
     case Collecting = 'collecting';

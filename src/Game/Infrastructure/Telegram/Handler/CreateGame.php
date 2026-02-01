@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\CreateGameUseCase;
 use App\Game\Domain\Entity\Player;
@@ -11,18 +11,18 @@ use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
 use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
-use App\Telegram\AsTelegramCommand;
-use App\Telegram\ConversationalCommand;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\ConversationStep;
 use App\Telegram\Domain\Enum\InputType;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\Infrastructure\Conversation\ConversationStorage;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
-final readonly class CreateGameCommand implements ConversationalCommand
+#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
+final readonly class CreateGame
 {
     public const string COMMAND_NAME = '/create_game';
     private const string STEP_AWAITING_THINGS_COUNT = 'awaiting_things_count';
@@ -35,30 +35,31 @@ final readonly class CreateGameCommand implements ConversationalCommand
         private GameTelegramContext $gameTelegramContext,
         private GameRepository $gameRepository,
         private TelegramResponder $telegramResponder,
+        private ConversationStorage $conversationStorage,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramDto $telegramDto, null|ConversationStep $step = null): ConversationStep|null
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
+        $player = $this->playerRepository->find($telegramInput->user->id);
         $game = $this->gameRepository->findActiveByPlayer($player);
 
         if ($game !== null) {
-            $this->handlePlayerAlreadyInGame($telegramDto, $game, $player);
+            $this->handlePlayerAlreadyInGame($telegramInput, $game, $player);
 
-            return null;
+            return;
         }
 
-        return match ($step?->name) {
-            null => $this->askThingsCount($telegramDto),
-            self::STEP_AWAITING_THINGS_COUNT => $this->createGame($telegramDto, $player, $step),
+        match ($telegramInput->conversationStep?->name) {
+            null => $this->askThingsCount($telegramInput),
+            self::STEP_AWAITING_THINGS_COUNT => $this->createGame($telegramInput, $player),
         };
     }
 
-    private function handlePlayerAlreadyInGame(TelegramDto $telegramDto, Game $game, Player $player): void
+    private function handlePlayerAlreadyInGame(TelegramInput $telegramDto, Game $game, Player $player): void
     {
         if ($game->isMaster($player)) {
             $message = $this->translator->trans('Already playing. Would you like to finish the current one?');
@@ -66,7 +67,7 @@ final readonly class CreateGameCommand implements ConversationalCommand
                 [
                     new InlineKeyboardButton(
                         text: '💀' . $this->translator->trans('Finish the game'),
-                        callbackData: FinishGameCommand::COMMAND_NAME,
+                        callbackData: FinishGame::COMMAND_NAME,
                     ),
                 ],
             ]);
@@ -76,7 +77,7 @@ final readonly class CreateGameCommand implements ConversationalCommand
                 [
                     new InlineKeyboardButton(
                         text: '💀' . $this->translator->trans('Leave the game'),
-                        callbackData: LeaveGameCommand::COMMAND_NAME,
+                        callbackData: LeaveGame::COMMAND_NAME,
                     ),
                 ],
             ]);
@@ -89,10 +90,10 @@ final readonly class CreateGameCommand implements ConversationalCommand
         );
     }
 
-    private function askThingsCount(TelegramDto $telegramDto): ConversationStep|null
+    private function askThingsCount(TelegramInput $telegramDto): void
     {
         if (!$telegramDto->isCallback()) {
-            return null;
+            return;
         }
 
         $inlineKeyboard = new InlineKeyboardMarkup([
@@ -103,7 +104,7 @@ final readonly class CreateGameCommand implements ConversationalCommand
             [
                 new InlineKeyboardButton(
                     text: '⬅️ '.$this->translator->trans('Back to menu'),
-                    callbackData: RulesCommand::COMMAND_NAME,
+                    callbackData: ShowRules::COMMAND_NAME,
                 ),
             ],
         ]);
@@ -114,13 +115,17 @@ final readonly class CreateGameCommand implements ConversationalCommand
             $inlineKeyboard,
         );
 
-        return new ConversationStep(self::STEP_AWAITING_THINGS_COUNT);
+        $this->conversationStorage->save(
+            $telegramDto->message->chat->id,
+            self::class,
+            self::STEP_AWAITING_THINGS_COUNT,
+        );
     }
 
-    private function createGame(TelegramDto $telegramDto, Player $player, ConversationStep $step): ConversationStep|null
+    private function createGame(TelegramInput $telegramDto, Player $player): void
     {
         if (!$telegramDto->isCallback()) {
-            return $step;
+            return; // TODO тут надо сохранить текущий шаг
         }
 
         $this->gameTelegramContext->saveEditedMessage($telegramDto->message);
@@ -143,7 +148,5 @@ final readonly class CreateGameCommand implements ConversationalCommand
                 ],
             ]),
         );
-
-        return null;
     }
 }

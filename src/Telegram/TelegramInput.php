@@ -8,13 +8,13 @@ use Phptg\BotApi\Type\CallbackQuery;
 use Phptg\BotApi\Type\Message;
 use Phptg\BotApi\Type\User;
 
-// TODO rename to TelegramInput
-final readonly class TelegramDto
+final readonly class TelegramInput
 {
     public function __construct(
         public User $user,
         public Message $message,
         public ?CallbackQuery $callbackQuery = null,
+        public ?ConversationStep $conversationStep = null,
     ) {
     }
 

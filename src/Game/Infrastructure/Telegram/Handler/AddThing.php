@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\AddThingUseCase;
 use App\Game\Domain\Exception\GameException;
@@ -11,11 +11,11 @@ use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Thing;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class AddThingCommand
+final readonly class AddThing
 {
     public function __construct(
         private AddThingUseCase $addThingUseCase,
@@ -28,7 +28,7 @@ final readonly class AddThingCommand
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramDto $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
         $thing = $telegramDto->message->text;

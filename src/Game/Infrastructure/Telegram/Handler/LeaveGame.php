@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\LeaveGameUseCase;
 use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
-use App\Telegram\AsTelegramCommand;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
-final readonly class LeaveGameCommand
+#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
+final readonly class LeaveGame
 {
     public const string COMMAND_NAME = '/leave_game';
 
@@ -32,7 +32,7 @@ final readonly class LeaveGameCommand
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramDto $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
 
@@ -65,7 +65,7 @@ final readonly class LeaveGameCommand
     /**
      * @throws \Exception
      */
-    private function sendGameNotFoundMessage(TelegramDto $telegramDto): void
+    private function sendGameNotFoundMessage(TelegramInput $telegramDto): void
     {
         $this->telegramResponder->reply(
             $telegramDto,
@@ -84,7 +84,7 @@ final readonly class LeaveGameCommand
     /**
      * @throws \Exception
      */
-    private function sendForbiddenActionMessage(TelegramDto $telegramDto): void
+    private function sendForbiddenActionMessage(TelegramInput $telegramDto): void
     {
         $this->telegramResponder->reply(
             $telegramDto,

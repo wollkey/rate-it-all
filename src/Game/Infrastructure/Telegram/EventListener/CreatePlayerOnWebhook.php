@@ -21,7 +21,7 @@ final readonly class CreatePlayerOnWebhook
 
     public function __invoke(BeginHandleWebHook $event): void
     {
-        $user = $event->telegramDto->user;
+        $user = $event->telegramInput->user;
         $player = $this->playerRepository->find($user->id);
 
         if ($player !== null) {

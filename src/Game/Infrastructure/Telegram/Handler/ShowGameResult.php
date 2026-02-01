@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Domain\Repository\PlayerRepository;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 
-final readonly class ShowResultCommand
+final readonly class ShowGameResult
 {
     public const string COMMAND_NAME = '/show_result';
 
@@ -21,7 +21,7 @@ final readonly class ShowResultCommand
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function execute(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->getUser()->getId());
         $gameSession = $this->game->continue($player);
@@ -31,7 +31,7 @@ final readonly class ShowResultCommand
         $this->telegramApi->sendMessage($player->getTelegramId(), $result);
     }
 
-    public function supports(TelegramDto $telegramDto): bool
+    public function supports(TelegramInput $telegramDto): bool
     {
         return match (self::COMMAND_NAME) {
             $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
