@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\NextRatedThingTaken;
-use App\Game\Infrastructure\Telegram\Command\RateTheThingCommand;
+use App\Game\Infrastructure\Telegram\Command\RateTheThing;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,7 +27,7 @@ final readonly class SendNextRatedThingToPlayers
         $gameSession = $event->getGameSession();
 
         foreach ($gameSession->getPlayers() as $player) {
-            $this->telegramBot->startProcessingCommand($player->getTelegramId(), RateTheThingCommand::class);
+            $this->telegramBot->startProcessingCommand($player->getTelegramId(), RateTheThing::class);
             $this->telegramApi->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans(

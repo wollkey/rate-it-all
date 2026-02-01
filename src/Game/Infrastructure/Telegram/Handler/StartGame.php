@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\Repository\PlayerRepository;
-use App\Telegram\AsTelegramCommand;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\Infrastructure\Conversation\ConversationStorage;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand(self::COMMAND_NAME, [InputType::Callback])]
-final readonly class StartGameCommand
+#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Callback])]
+final readonly class StartGame
 {
     public const string COMMAND_NAME = '/start_game';
 
@@ -24,13 +25,14 @@ final readonly class StartGameCommand
         private PlayerRepository $playerRepository,
         private TranslatorInterface $translator,
         private GameRepository $gameRepository,
+        private ConversationStorage $conversations,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramDto $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
         $game = $this->gameRepository->findActiveByPlayer($player);
@@ -53,19 +55,25 @@ final readonly class StartGameCommand
 
         $this->telegram->answerCallbackQuery($telegramDto->callbackQuery->id);
 
+        $playerIds = [];
         foreach ($game->getPlayers() as $player) {
-            $this->telegram->startProcessingCommand($player->getTelegramId(), AddUsernameCommand::class);
+            $this->telegram->startProcessingCommand($player->getTelegramId(), AddThingCommand::class);
             $this->telegram->sendMessage(
                 $player->getTelegramId(),
                 $this->translator->trans('Add any crazy thing that came into your head:')
             );
         }
+
+        $this->conversations->saveForUsers(
+            $playerIds,
+            AddThingCommand::class,
+        );
     }
 
     /**
      * @throws \Exception
      */
-    private function sendCreateNewGameMessage(TelegramDto $telegramDto): void
+    private function sendCreateNewGameMessage(TelegramInput $telegramDto): void
     {
         $this->telegram->send(
             $telegramDto->message->chat->id,

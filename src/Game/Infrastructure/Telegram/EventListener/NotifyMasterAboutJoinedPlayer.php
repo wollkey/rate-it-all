@@ -6,7 +6,7 @@ namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\PlayerHasJoined;
-use App\Game\Infrastructure\Telegram\Command\StartGameCommand;
+use App\Game\Infrastructure\Telegram\Command\StartGame;
 use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardButton;
@@ -51,7 +51,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
                 [
                     new InlineKeyboardButton(
                         text: $this->translator->trans('Start the game'),
-                        callbackData: StartGameCommand::COMMAND_NAME,
+                        callbackData: StartGame::COMMAND_NAME,
                     ),
                 ],
                 [

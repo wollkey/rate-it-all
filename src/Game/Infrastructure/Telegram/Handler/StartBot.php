@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\JoinGameUseCase;
 use App\Game\Domain\Exception\PlayerAlreadyInGameException;
 use App\Game\Domain\Repository\PlayerRepository;
-use App\Telegram\AsTelegramCommand;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramCommand('/start', inputTypes: [InputType::Text])]
-final readonly class StartBotCommand
+#[AsTelegramHandler('/start', inputTypes: [InputType::Text])]
+final readonly class StartBot
 {
     public function __construct(
         private TranslatorInterface $translator,
@@ -30,7 +30,7 @@ final readonly class StartBotCommand
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramDto $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $gameCode = $this->extractGameCode($telegramDto->message->text);
 
@@ -50,7 +50,7 @@ final readonly class StartBotCommand
         return Uuid::isValid($parts[1] ?? '') ? Uuid::fromString($parts[1]) : null;
     }
 
-    private function joinGame(TelegramDto $telegramDto, Uuid $gameCode): void
+    private function joinGame(TelegramInput $telegramDto, Uuid $gameCode): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
 
@@ -64,7 +64,7 @@ final readonly class StartBotCommand
                     [
                         new InlineKeyboardButton(
                             text: '☠️'.$this->translator->trans('Leave the game'),
-                            callbackData: LeaveGameCommand::COMMAND_NAME,
+                            callbackData: LeaveGame::COMMAND_NAME,
                         ),
                     ],
                 ])
@@ -72,19 +72,19 @@ final readonly class StartBotCommand
         }
     }
 
-    private function showWelcome(TelegramDto $telegramDto): void
+    private function showWelcome(TelegramInput $telegramDto): void
     {
         $keyboard = [
             [
                 new InlineKeyboardButton(
                     text: '🎮 '.$this->translator->trans('Create'),
-                    callbackData: CreateGameCommand::COMMAND_NAME,
+                    callbackData: CreateGame::COMMAND_NAME,
                 ),
             ],
             [
                 new InlineKeyboardButton(
                     text: '📋 '.$this->translator->trans('How to Play'),
-                    callbackData: RulesCommand::COMMAND_NAME,
+                    callbackData: ShowRules::COMMAND_NAME,
                 ),
             ],
         ];

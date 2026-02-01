@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Infrastructure\Http;
+namespace App\Telegram;
 
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 
@@ -15,7 +15,7 @@ final readonly class TelegramResponder {
     }
 
     public function reply(
-        TelegramDto $dto,
+        TelegramInput $dto,
         string $text,
         ?InlineKeyboardMarkup $keyboardMarkup = null,
         ?string $parseMode = 'markdown',
@@ -40,7 +40,7 @@ final readonly class TelegramResponder {
     }
 
     public function replyCallback(
-        TelegramDto $dto,
+        TelegramInput $dto,
         string $text,
         ?InlineKeyboardMarkup $keyboardMarkup = null,
         ?string $parseMode = 'markdown',

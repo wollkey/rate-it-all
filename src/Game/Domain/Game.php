@@ -30,8 +30,8 @@ final class Game
     #[ORM\Column(type: 'uuid', unique: true)]
     private Uuid $code;
 
-    #[ORM\Column(length: 20, enumType: GameStatus::class)]
-    private GameStatus $status;
+    #[ORM\Column(length: 20, enumType: GameState::class)]
+    private GameState $state;
 
     #[ORM\Column(type: 'smallint')]
     private int $thingsPerPlayer;
@@ -60,7 +60,7 @@ final class Game
         ThingsPerPlayer $thingsPerPlayer,
     ) {
         $this->code = new UuidV7();
-        $this->status = GameStatus::Waiting;
+        $this->state = GameState::Waiting;
         $this->thingsPerPlayer = $thingsPerPlayer->getValue();
         $this->createdAt = new \DateTimeImmutable();
         $this->players = new ArrayCollection();
@@ -75,8 +75,8 @@ final class Game
             throw new PlayerAlreadyInGameException("Player {$player->getId()} already in game");
         }
 
-        if (!$this->status->canJoin()) {
-            throw new ForbiddenActionException('Cannot join game in current status');
+        if (!$this->state->canJoin()) {
+            throw new ForbiddenActionException('Cannot join game in current state');
         }
 
         $this->players->add($player);
@@ -102,8 +102,8 @@ final class Game
             throw new ForbiddenActionException('Only players can add things');
         }
 
-        if (!$this->status->canAddThings()) {
-            throw new ForbiddenActionException('Cannot add things in current status');
+        if (!$this->state->canAddThings()) {
+            throw new ForbiddenActionException('Cannot add things in current state');
         }
 
         if ($this->isPlayerThingLimitReached($author)) {
@@ -138,7 +138,7 @@ final class Game
             throw new ForbiddenActionException('Need at least 2 players to start');
         }
 
-        $this->status = GameStatus::Collecting;
+        $this->state = GameState::Collecting;
     }
 
     public function startRating(): void
@@ -147,7 +147,7 @@ final class Game
             throw new ThingListIsEmptyException('Cannot start rating without things');
         }
 
-        $this->status = GameStatus::Rating;
+        $this->state = GameState::Rating;
         $this->pickNextThing();
     }
 
@@ -157,8 +157,8 @@ final class Game
             throw new ForbiddenActionException('Only players can rate');
         }
 
-        if (!$this->status->canRate()) {
-            throw new ForbiddenActionException('Cannot rate in current status');
+        if (!$this->state->canRate()) {
+            throw new ForbiddenActionException('Cannot rate in current state');
         }
 
         if ($this->currentThing === null) {
@@ -219,12 +219,12 @@ final class Game
 
     public function finish(): void
     {
-        $this->status = GameStatus::Finished;
+        $this->state = GameState::Finished;
     }
 
     public function isFinished(): bool
     {
-        return $this->status === GameStatus::Finished;
+        return $this->state === GameState::Finished;
     }
 
     public function getMaster(): Player
@@ -247,9 +247,9 @@ final class Game
         return $this->code;
     }
 
-    public function getStatus(): GameStatus
+    public function getState(): GameState
     {
-        return $this->status;
+        return $this->state;
     }
 
     public function getThingsPerPlayer(): int
@@ -283,7 +283,7 @@ final class Game
 
         if (empty($unratedThings)) {
             $this->currentThing = null;
-            $this->status = GameStatus::Finished;
+            $this->state = GameState::Finished;
 
             return false;
         }

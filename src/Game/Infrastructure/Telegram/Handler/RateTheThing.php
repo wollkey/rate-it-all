@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Telegram\Command;
+namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\RateThingUseCase;
 use App\Game\Domain\Exception\GameException;
@@ -10,11 +10,11 @@ use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\Infrastructure\Http\TelegramResponder;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramResponder;
+use App\Telegram\TelegramInput;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class RateTheThingCommand
+final readonly class RateTheThing
 {
     public function __construct(
         private PlayerRepository $playerRepository,
@@ -27,7 +27,7 @@ final readonly class RateTheThingCommand
     /**
      * @throws \Exception
      */
-    public function execute(TelegramDto $telegramDto): void
+    public function execute(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
         $ratingText = $telegramDto->message->text;
@@ -54,7 +54,7 @@ final readonly class RateTheThingCommand
         }
     }
 
-    public function supports(TelegramDto $telegramDto): bool
+    public function supports(TelegramInput $telegramDto): bool
     {
         return false;
     }

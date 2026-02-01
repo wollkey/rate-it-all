@@ -9,6 +9,7 @@ use App\Game\Domain\Event\ThingHasBeenAdded;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
+use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\Thing;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -16,6 +17,7 @@ final readonly class AddThingUseCase
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
+        private GameRepository $gameRepository,
     ) {
     }
 
@@ -26,7 +28,7 @@ final readonly class AddThingUseCase
      */
     public function __invoke(Player $player, Thing $thing): void
     {
-        $gameSession = $this->game->continue($player);
+        $gameSession = $this->gameRepository->continue($player);
 
         if ($gameSession->thingExists($thing)) {
             throw new ThingIsAlreadyInTheListException();

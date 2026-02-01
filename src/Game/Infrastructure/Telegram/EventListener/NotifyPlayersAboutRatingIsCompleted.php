@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\ThingsRatingIsCompleted;
-use App\Game\Infrastructure\Telegram\Command\ShowResultCommand;
+use App\Game\Infrastructure\Telegram\Command\ShowGameResult;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -35,7 +35,7 @@ final readonly class NotifyPlayersAboutRatingIsCompleted
                         'inline_keyboard' => [[
                             [
                                 'text' => $this->translator->trans('Reveal the result'),
-                                'callback_data' => ShowResultCommand::COMMAND_NAME,
+                                'callback_data' => ShowGameResult::COMMAND_NAME,
                             ],
                         ]],
                     ],

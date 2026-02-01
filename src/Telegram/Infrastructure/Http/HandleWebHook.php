@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Http;
 
-use App\Telegram\AsTelegramCommand;
-use App\Telegram\ConversationalCommand;
-use App\Telegram\ConversationStep;
+use App\Game\Domain\Repository\GameRepository;
+use App\Game\Infrastructure\Telegram\Repository\TelegramPlayerRepository;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\ChatType;
 use App\Telegram\Domain\Enum\EntityType;
 use App\Telegram\Domain\Enum\InputType;
@@ -15,7 +15,7 @@ use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Domain\Service\MessageExtractor;
 use App\Telegram\Domain\Service\UserExtractor;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
-use App\Telegram\TelegramDto;
+use App\Telegram\TelegramInput;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\Message;
 use Phptg\BotApi\Type\Update\Update;
@@ -33,37 +33,43 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final class HandleWebHook
 {
     /**
-     * @var array<class-string, AsTelegramCommand>
+     * @var array<class-string, AsTelegramHandler>
      */
     private array $attributeCache;
 
-    /**
-     * @var array<class-string, callable>
-     */
-    private array $commandsMap;
+    /** @var array<string, callable(TelegramInput):void> */
+    private array $commandHandlers = [];
+
+    /** @var array<string, callable(TelegramInput):void> */
+    private array $gameStateHandlers = [];
+
+    /** @var array<class-string, callable(TelegramInput):void> */
+    private array $allHandlers = [];
 
     /**
-     * @param iterable<callable> $telegramCommands
+     * @param iterable<callable> $telegramHandlers
      */
     public function __construct(
-        #[AutowireIterator('app.telegram_bot.command')]
-        private readonly iterable $telegramCommands,
+        #[AutowireIterator('app.telegram.handler')]
+        private readonly iterable $telegramHandlers,
         private readonly ConversationStorage $conversation,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly LoggerInterface $logger,
         private readonly MessageExtractor $messageExtractor,
         private readonly TelegramBotApi $telegramApi,
         private readonly UserExtractor $userExtractor,
+        private readonly GameRepository $gameRepository,
+        private readonly TelegramPlayerRepository $playerRepository,
     ) {
-        $this->buildAttributeCache();
+        $this->buildHandlersCache();
     }
 
     public function __invoke(Request $request): Response
     {
         try {
-            $this->tryHandleWebHook($request);
+            $this->handleWebHook($request);
         } catch (\Throwable $throwable) {
-            $this->logger->error($throwable);
+            $this->logger->error($throwable->getMessage(), ['exception' => $throwable]);
         }
 
         return new Response('Ok');
@@ -73,15 +79,78 @@ final class HandleWebHook
      * @throws \Exception
      * @throws InvalidArgumentException
      */
-    private function tryHandleWebHook(Request $request): void
+    private function handleWebHook(Request $request): void
     {
         $update = Update::fromJson($request->getContent());
-        $telegramDto = $this->createTelegramDto($update);
+        $telegramInput = $this->createTelegramInput($update);
 
-        $this->eventDispatcher->dispatch(new BeginHandleWebHook($telegramDto));
+        $this->eventDispatcher->dispatch(new BeginHandleWebHook($telegramInput));
 
+        if (null === $handler = $this->resolveTelegramHandler($telegramInput)) {
+            return;
+        }
+
+        if (!$this->isInputTypeAllowed($telegramInput, $handler::class)) {
+            return;
+        }
+
+        $this->executeHandler($handler, $telegramInput);
+    }
+
+    /**
+     * @param TelegramInput $telegramInput
+     * @return callable(TelegramInput):void|null
+     */
+    private function resolveTelegramHandler(TelegramInput $telegramInput): callable|null
+    {
+        $commandName = $this->extractCommandName($telegramInput);
+        if (isset($this->commandHandlers[$commandName])) {
+            $this->conversation->clear($telegramInput->message->chat->id);
+            return $this->commandHandlers[$commandName];
+        }
+
+        $player = $this->playerRepository->find($telegramInput->message->chat->id);
+        $game = $this->gameRepository->findActiveByPlayer($player);
+        if ($game !== null) {
+            $state = $game->getState()->value;
+            if (isset($this->gameStateHandlers[$state])) {
+                return $this->gameStateHandlers[$state];
+            }
+        }
+
+        $conversationStep = $this->conversation->get($telegramInput->message->chat->id);
+        if ($conversationStep !== null) {
+            $this->conversation->clear($telegramInput->message->chat->id);
+            return $this->allHandlers[$conversationStep->handler];
+        }
+
+        return null;
+    }
+
+    private function isInputTypeAllowed(TelegramInput $telegramInput, string $handlerFqcn): bool
+    {
+        $attribute = $this->attributeCache[$handlerFqcn] ?? null;
+
+        $chatType = ChatType::tryFrom($telegramInput->message->chat->type);
+        if ($chatType !== null && !in_array($chatType, $attribute->chatTypes)) {
+            return false;
+        }
+
+        $inputType = $telegramInput->isCallback() ? InputType::Callback : InputType::Text;
+        if (!in_array($inputType, $attribute->inputTypes, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function executeHandler(callable $handler, TelegramInput $telegramDto): void
+    {
         try {
-            $this->executeCommand($telegramDto);
+            $handler($telegramDto);
         } catch (TelegramException $exception) {
             $this->conversation->clear($telegramDto->message->chat->id);
             $this->logger->error(json_encode([
@@ -95,132 +164,65 @@ final class HandleWebHook
     }
 
     /**
-     * @throws InvalidArgumentException
-     */
-    private function executeCommand(TelegramDto $telegramDto): void
-    {
-        $commandFqcn = $this->resolveCommandFromMessage($telegramDto);
-
-        if ($commandFqcn !== null) {
-            $this->conversation->clear($telegramDto->message->chat->id);
-            $this->runCommand($commandFqcn, $telegramDto);
-
-            return;
-        }
-
-        $conversation = $this->conversation->get($telegramDto->message->chat->id);
-
-        if ($conversation === null) {
-            return;
-        }
-
-        $this->runCommand($conversation['command'], $telegramDto, $conversation['step']);
-    }
-
-    /**
-     * @param class-string $commandFqcn
-     *
-     * @throws InvalidArgumentException
-     */
-    private function runCommand(string $commandFqcn, TelegramDto $telegramDto, ?ConversationStep $step = null): void
-    {
-        $chatId = $telegramDto->message->chat->id;
-        $command = $this->commandsMap[$commandFqcn] ?? null;
-
-        if ($command === null) {
-            $this->conversation->clear($chatId);
-
-            return;
-        }
-
-        if ($command instanceof ConversationalCommand) {
-            $nextStep = $command($telegramDto, $step);
-            $nextStep !== null
-                ? $this->conversation->save($chatId, $commandFqcn, $nextStep)
-                : $this->conversation->clear($chatId);
-
-            return;
-        }
-
-        $command($telegramDto);
-        $this->conversation->clear($chatId);
-    }
-
-    /**
-     * @return class-string|null
-     */
-    private function resolveCommandFromMessage(TelegramDto $telegramDto): ?string
-    {
-        $textCommand = $this->extractCommand($telegramDto->message);
-
-        return array_find_key(
-            $this->attributeCache,
-            fn ($attribute) => $this->isCommandMatched($attribute, $telegramDto, $textCommand)
-        );
-    }
-
-    /**
      * @throws \Exception
      */
-    private function createTelegramDto(Update $update): TelegramDto
+    private function createTelegramInput(Update $update): TelegramInput
     {
-        return new TelegramDto(
-            $this->userExtractor->extract($update),
-            $this->messageExtractor->extract($update),
-            $update->callbackQuery,
+        $message = $this->messageExtractor->extract($update);
+        $conversationStep = $this->conversation->get($message->chat->id);
+
+        return new TelegramInput(
+            user: $this->userExtractor->extract($update),
+            message: $message,
+            callbackQuery: $update->callbackQuery,
+            conversationStep: $conversationStep,
         );
     }
 
-    private function extractCommand(Message $message): ?string
+    private function extractCommandName(TelegramInput $telegramInput): ?string
     {
-        if ($message->text === null) {
+        if ($telegramInput->isCallback()) {
+            return $telegramInput->callbackQuery->data;
+        }
+
+        $text = $telegramInput->message->text;
+
+        if ($text === null) {
             return null;
         }
 
-        $entities = (array) $message->entities;
-        foreach ($entities as $entity) {
+        foreach ((array) $telegramInput->message->entities as $entity) {
             if ($entity->type === EntityType::BotCommand->value) {
-                return substr($message->text, $entity->offset, $entity->length);
+                return substr($text, $entity->offset, $entity->length);
             }
         }
 
         return null;
     }
 
-    private function isCommandMatched(
-        AsTelegramCommand $attribute,
-        TelegramDto $telegramDto,
-        ?string $textCommand,
-    ): bool {
-        $chatType = ChatType::tryFrom($telegramDto->message->chat->type);
-        if ($chatType !== null && !in_array($chatType, $attribute->chatTypes)) {
-            return false;
-        }
-
-        if ($textCommand !== null && $attribute->command === $textCommand) {
-            return true;
-        }
-
-        $inputType = $telegramDto->isCallback() ? InputType::Callback : InputType::Text;
-        if (in_array($inputType, $attribute->inputTypes) && $attribute->command === $telegramDto->callbackQuery?->data) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private function buildAttributeCache(): void
+    private function buildHandlersCache(): void
     {
-        foreach ($this->telegramCommands as $command) {
-            $reflection = new \ReflectionClass($command);
-            $attributes = $reflection->getAttributes(AsTelegramCommand::class);
+        foreach ($this->telegramHandlers as $handler) {
+            $reflection = new \ReflectionClass($handler);
+            $attributes = $reflection->getAttributes(AsTelegramHandler::class);
 
-            if ($attributes === []) {
+            if (empty($attributes)) {
                 continue;
             }
 
-            $this->attributeCache[$command::class] = $attributes[0]->newInstance();
-            $this->commandsMap[$command::class] = $command;
+            $attribute = $attributes[0]->newInstance();
+            $fqcn = $handler::class;
+            $this->attributeCache[$fqcn] = $attributes[0]->newInstance();
+
+            $this->allHandlers[$fqcn] = $handler;
+
+            if ($attribute->command !== null) {
+                $this->commandHandlers[$attribute->command] = $handler;
+            }
+
+            if ($attribute->gameState !== null) {
+                $this->gameStateHandlers[$attribute->gameState->value] = $handler;
+            }
         }
     }
 }

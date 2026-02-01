@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\ThingHasBeenAdded;
-use App\Game\Infrastructure\Telegram\Command\StartRatingThingCommand;
+use App\Game\Infrastructure\Telegram\Command\StartRatingThing;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -50,7 +50,7 @@ final readonly class TellPlayerToAddNextThing
                         'inline_keyboard' => [[
                             [
                                 'text' => $this->translator->trans("Let's have some madness!"),
-                                'callback_data' => StartRatingThingCommand::COMMAND_NAME,
+                                'callback_data' => StartRatingThing::COMMAND_NAME,
                             ],
                         ]],
                     ],
