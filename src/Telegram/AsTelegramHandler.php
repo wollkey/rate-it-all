@@ -13,7 +13,7 @@ final readonly class AsTelegramHandler
 {
     /**
      * @param non-empty-list<InputType> $inputTypes
-     * @param non-empty-list<ChatType> $chatTypes
+     * @param non-empty-list<ChatType>  $chatTypes
      */
     public function __construct(
         public ?string $command = null,

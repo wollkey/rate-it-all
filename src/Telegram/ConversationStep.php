@@ -11,7 +11,7 @@ final readonly class ConversationStep
      */
     public function __construct(
         public string $handler,
-        public string $name,
+        public ?string $name = null,
         public array $data = [],
     ) {
     }

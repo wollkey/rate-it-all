@@ -6,6 +6,7 @@ namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\ThingHasBeenAdded;
+use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
@@ -25,22 +26,16 @@ final readonly class AddThingUseCase
      * @throws GameNotFoundException
      * @throws ThingIsAlreadyInTheListException
      * @throws ThingsPlayerLimitReachedException
+     * @throws ForbiddenActionException
      */
     public function __invoke(Player $player, Thing $thing): void
     {
-        $gameSession = $this->gameRepository->continue($player);
+        $game = $this->gameRepository->findActiveByPlayer($player)
+            ?? throw new GameNotFoundException();
 
-        if ($gameSession->thingExists($thing)) {
-            throw new ThingIsAlreadyInTheListException();
-        }
+        $game->addThing($player, $thing->value);
+        $this->gameRepository->save($game);
 
-        if ($gameSession->playerThingLimitReached($player->getId())) {
-            throw new ThingsPlayerLimitReachedException();
-        }
-
-        $gameSession->addThing($player, $thing);
-        $this->game->saveSession($gameSession);
-
-        $this->eventDispatcher->dispatch(new ThingHasBeenAdded($player, $gameSession));
+        $this->eventDispatcher->dispatch(new ThingHasBeenAdded($player, $game));
     }
 }

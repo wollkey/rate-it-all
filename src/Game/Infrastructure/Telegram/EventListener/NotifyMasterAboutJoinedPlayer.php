@@ -6,7 +6,7 @@ namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\PlayerHasJoined;
-use App\Game\Infrastructure\Telegram\Command\StartGame;
+use App\Game\Infrastructure\Telegram\Handler\StartGame;
 use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardButton;
@@ -40,7 +40,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
         $this->telegram->editMessageText(
             implode(PHP_EOL, [
                 $this->translator->trans('Players joined the game:'),
-                ...($game->getPlayers()->map(static fn (Player $player) => $player->getFirstName())),
+                ...$game->getPlayers()->map(static fn (Player $player) => $player->getFirstName()),
                 '',
                 $this->translator->trans('As soon as you are ready, start the game'),
             ]),
@@ -57,7 +57,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
                 [
                     new InlineKeyboardButton(
                         text: '📤 Пригласить друзей',
-                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.'Присоединяйся к игре!',
+                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text=Присоединяйся к игре!',
                     ),
                 ],
             ]),

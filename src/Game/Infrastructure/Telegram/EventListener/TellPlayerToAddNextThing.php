@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\ThingHasBeenAdded;
-use App\Game\Infrastructure\Telegram\Command\StartRatingThing;
+use App\Game\Infrastructure\Telegram\Handler\StartRatingThing;
+use App\Telegram\TelegramResponder;
 use Phptg\BotApi\TelegramBotApi;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -16,45 +19,38 @@ final readonly class TellPlayerToAddNextThing
     public function __construct(
         private TelegramBotApi $telegramApi,
         private TranslatorInterface $translator,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
-    /**
-     * @throws \Exception
-     */
     public function __invoke(ThingHasBeenAdded $event): void
     {
-        $gameSession = $event->getGameSession();
-        $player = $event->getPlayer();
-
-        if (!$gameSession->playerThingLimitReached($player->getId())) {
+        if (!$event->game->isPlayerThingLimitReached($event->player)) {
             $this->telegramApi->sendMessage(
-                $player->getTelegramId(),
+                $event->player->getTelegramId(),
                 $this->translator->trans('Great, enter the next thing:')
             );
 
             return;
         }
 
-        $this->telegramBot->stopProcessingCommand($player->getTelegramId());
-
         $allThingsMessage = $this->translator->trans('Great job! Just waiting on others now...');
-        $this->telegramApi->sendMessage($player->getTelegramId(), $allThingsMessage);
+        $this->telegramApi->sendMessage($event->player->getTelegramId(), $allThingsMessage);
 
-        if ($gameSession->totalThingLimitReached()) {
-            $this->telegramApi->sendMessage(
-                $gameSession->getMaster()->getTelegramId(),
-                $this->translator->trans('All players are ready'),
-                [
-                    'reply_markup' => [
-                        'inline_keyboard' => [[
-                            [
-                                'text' => $this->translator->trans("Let's have some madness!"),
-                                'callback_data' => StartRatingThing::COMMAND_NAME,
-                            ],
-                        ]],
+        if ($event->game->isTotalThingLimitReached()) {
+            // TODO Сделать автоматический переход игры в следующий статус как только все игроки добавят вещи
+            // Можно для этого добавить событие в самом агрегате Game или в useCase
+            $this->telegramResponder->send(
+                chatId: $event->game->getMaster()->getTelegramId(),
+                text: $this->translator->trans('All players are ready'),
+                keyboardMarkup: new InlineKeyboardMarkup([
+                    [
+                        new InlineKeyboardButton(
+                            text: $this->translator->trans("Let's have some madness!"),
+                            callbackData: StartRatingThing::COMMAND_NAME,
+                        ),
                     ],
-                ],
+                ]),
             );
         }
     }

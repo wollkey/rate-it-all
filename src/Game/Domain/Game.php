@@ -42,7 +42,7 @@ final class Game
     private Collection $players;
 
     /** @var Collection<int, Thing> */
-    #[ORM\OneToMany(targetEntity: Thing::class, mappedBy: 'game', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Thing::class, mappedBy: 'game', cascade: ['persist'])]
     private Collection $things;
 
     #[ORM\OneToOne(targetEntity: Thing::class)]
@@ -96,6 +96,11 @@ final class Game
         return $this->players->exists(fn (int $key, Player $player): bool => $player->getId() === $targetPlayer->getId());
     }
 
+    /**
+     * @throws ForbiddenActionException
+     * @throws ThingsPlayerLimitReachedException
+     * @throws ThingIsAlreadyInTheListException
+     */
     public function addThing(Player $author, string $value): Thing
     {
         if (!$this->hasPlayer($author)) {
@@ -135,7 +140,7 @@ final class Game
     public function startCollecting(): void
     {
         if ($this->players->count() < 2) {
-            throw new ForbiddenActionException('Need at least 2 players to start');
+            throw new ForbiddenActionException('Need at least 2 players to start'); // TODO Использовать более логичное исключение
         }
 
         $this->state = GameState::Collecting;
@@ -257,6 +262,9 @@ final class Game
         return $this->thingsPerPlayer;
     }
 
+    /**
+     * @return Collection<Player>
+     */
     public function getPlayers(): Collection
     {
         return $this->players;

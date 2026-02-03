@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
-use App\Telegram\TelegramInput;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 
-final readonly class TelegramResponder {
+final readonly class TelegramResponder
+{
     public function __construct(
         private TelegramBotApi $api,
     ) {
@@ -44,8 +44,7 @@ final readonly class TelegramResponder {
         string $text,
         ?InlineKeyboardMarkup $keyboardMarkup = null,
         ?string $parseMode = 'markdown',
-    ): void
-    {
+    ): void {
         $this->answerCallbackQuery($dto->callbackQuery->id);
 
         $this->api->editMessageText(
