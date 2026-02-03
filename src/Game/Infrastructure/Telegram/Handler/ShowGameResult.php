@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Domain\Repository\PlayerRepository;
-use App\Telegram\TelegramResponder;
 use App\Telegram\TelegramInput;
+use App\Telegram\TelegramResponder;
 
 final readonly class ShowGameResult
 {

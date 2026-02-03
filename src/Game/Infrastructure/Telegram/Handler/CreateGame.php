@@ -12,11 +12,10 @@ use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
 use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
 use App\Telegram\AsTelegramHandler;
-use App\Telegram\ConversationStep;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
-use App\Telegram\TelegramResponder;
 use App\Telegram\TelegramInput;
+use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -66,7 +65,7 @@ final readonly class CreateGame
             $keyboard = new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
-                        text: '💀' . $this->translator->trans('Finish the game'),
+                        text: '💀'.$this->translator->trans('Finish the game'),
                         callbackData: FinishGame::COMMAND_NAME,
                     ),
                 ],
@@ -76,7 +75,7 @@ final readonly class CreateGame
             $keyboard = new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
-                        text: '💀' . $this->translator->trans('Leave the game'),
+                        text: '💀'.$this->translator->trans('Leave the game'),
                         callbackData: LeaveGame::COMMAND_NAME,
                     ),
                 ],
@@ -143,7 +142,7 @@ final readonly class CreateGame
                 [
                     new InlineKeyboardButton(
                         text: '📤 Поделиться с друзьями',
-                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.'Присоединяйся к игре!',
+                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text=Присоединяйся к игре!',
                     ),
                 ],
             ]),

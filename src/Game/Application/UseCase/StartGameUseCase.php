@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Game\Application\UseCase;
+
+use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\ForbiddenActionException;
+use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Repository\GameRepository;
+
+final readonly class StartGameUseCase
+{
+    public function __construct(
+        private GameRepository $gameRepository,
+    ) {
+    }
+
+    /**
+     * @throws GameNotFoundException
+     * @throws ForbiddenActionException
+     */
+    public function __invoke(Player $player): void
+    {
+        $game = $this->gameRepository->findActiveByPlayer($player)
+            ?? throw new GameNotFoundException();
+
+        $game->startCollecting();
+        $this->gameRepository->save($game);
+    }
+}

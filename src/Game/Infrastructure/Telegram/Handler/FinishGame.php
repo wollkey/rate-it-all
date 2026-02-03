@@ -9,8 +9,8 @@ use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
-use App\Telegram\TelegramResponder;
 use App\Telegram\TelegramInput;
+use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -50,7 +50,7 @@ final readonly class FinishGame
                 [
                     new InlineKeyboardButton(
                         text: '🎮 '.$this->translator->trans('Create new game'),
-                        callbackData: CreateGameCommand::COMMAND_NAME,
+                        callbackData: CreateGame::COMMAND_NAME,
                     ),
                 ],
             ])
@@ -66,7 +66,7 @@ final readonly class FinishGame
                 [
                     new InlineKeyboardButton(
                         text: $this->translator->trans('Create'),
-                        callbackData: CreateGameCommand::COMMAND_NAME,
+                        callbackData: CreateGame::COMMAND_NAME,
                     ),
                 ],
             ]),
@@ -81,8 +81,8 @@ final readonly class FinishGame
             new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
-                        text: '💀' . $this->translator->trans('Leave the game'),
-                        callbackData: LeaveGameCommand::COMMAND_NAME,
+                        text: '💀'.$this->translator->trans('Leave the game'),
+                        callbackData: LeaveGame::COMMAND_NAME,
                     ),
                 ],
             ]),

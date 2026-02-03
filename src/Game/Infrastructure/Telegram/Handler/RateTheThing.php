@@ -10,8 +10,8 @@ use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
 use App\Telegram\Domain\Exception\TelegramException;
-use App\Telegram\TelegramResponder;
 use App\Telegram\TelegramInput;
+use App\Telegram\TelegramResponder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class RateTheThing

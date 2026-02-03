@@ -17,7 +17,6 @@ use App\Telegram\Domain\Service\UserExtractor;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
 use App\Telegram\TelegramInput;
 use Phptg\BotApi\TelegramBotApi;
-use Phptg\BotApi\Type\Message;
 use Phptg\BotApi\Type\Update\Update;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -98,14 +97,12 @@ final class HandleWebHook
     }
 
     /**
-     * @param TelegramInput $telegramInput
      * @return callable(TelegramInput):void|null
      */
-    private function resolveTelegramHandler(TelegramInput $telegramInput): callable|null
+    private function resolveTelegramHandler(TelegramInput $telegramInput): ?callable
     {
         $commandName = $this->extractCommandName($telegramInput);
         if (isset($this->commandHandlers[$commandName])) {
-            $this->conversation->clear($telegramInput->message->chat->id);
             return $this->commandHandlers[$commandName];
         }
 
@@ -121,6 +118,7 @@ final class HandleWebHook
         $conversationStep = $this->conversation->get($telegramInput->message->chat->id);
         if ($conversationStep !== null) {
             $this->conversation->clear($telegramInput->message->chat->id);
+
             return $this->allHandlers[$conversationStep->handler];
         }
 
