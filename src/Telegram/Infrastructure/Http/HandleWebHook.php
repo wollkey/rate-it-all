@@ -103,6 +103,7 @@ final class HandleWebHook
     {
         $commandName = $this->extractCommandName($telegramInput);
         if (isset($this->commandHandlers[$commandName])) {
+            $this->conversation->clear($telegramInput->message->chat->id);
             return $this->commandHandlers[$commandName];
         }
 

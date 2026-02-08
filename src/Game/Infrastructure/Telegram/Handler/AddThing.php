@@ -24,7 +24,7 @@ final readonly class AddThing
     public function __construct(
         private AddThingUseCase $addThingUseCase,
         private PlayerRepository $playerRepository,
-        private TelegramResponder $telegramApi,
+        private TelegramResponder $telegramResponder,
         private TranslatorInterface $translator,
     ) {
     }
@@ -40,12 +40,17 @@ final readonly class AddThing
         try {
             ($this->addThingUseCase)($player, new Thing($thing));
         } catch (ThingIsAlreadyInTheListException) {
-            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('This is already on the list of madness list'));
+            $this->telegramResponder->send(
+                $player->getTelegramId(),
+                $this->translator->trans('This is already on the list of madness list'),
+            );
 
             return;
         } catch (ThingsPlayerLimitReachedException) {
-            $this->telegramApi->sendMessage($player->getTelegramId(), $this->translator->trans('Wait other players...'));
-            $this->telegramBot->stopProcessingCommand($player->getTelegramId());
+            $this->telegramResponder->reply(
+                $player->getTelegramId(),
+                $this->translator->trans('Wait other players...'),
+            );
         } catch (GameException|\InvalidArgumentException $exception) {
             throw new TelegramException($exception->getMessage(), previous: $exception);
         }
