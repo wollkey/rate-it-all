@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\NextRatedThingTaken;
-use App\Game\Infrastructure\Telegram\Command\RateTheThing;
-use Phptg\BotApi\TelegramBotApi;
+use App\Telegram\TelegramResponder;
+use Phptg\BotApi\Type\InlineKeyboardButton;
+use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -15,7 +16,7 @@ final readonly class SendNextRatedThingToPlayers
 {
     public function __construct(
         private TranslatorInterface $translator,
-        private TelegramBotApi $telegramApi,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
@@ -24,16 +25,31 @@ final readonly class SendNextRatedThingToPlayers
      */
     public function __invoke(NextRatedThingTaken $event): void
     {
-        $gameSession = $event->getGameSession();
+        $keyboardMarkup = new InlineKeyboardMarkup([
+            array_map(
+                fn(string $i) => new InlineKeyboardButton(
+                    text: $i,
+                    callbackData: $i,
+                ),
+                range(1, 5),
+            ),
+            array_map(
+                fn(string $i) => new InlineKeyboardButton(
+                    text: $i,
+                    callbackData: $i,
+                ),
+                range(6, 10),
+            ),
+        ]);
 
-        foreach ($gameSession->getPlayers() as $player) {
-            $this->telegramBot->startProcessingCommand($player->getTelegramId(), RateTheThing::class);
-            $this->telegramApi->sendMessage(
-                $player->getTelegramId(),
-                $this->translator->trans(
+        foreach ($event->game->getPlayers() as $player) {
+            $this->telegramResponder->send(
+                chatId: $player->getTelegramId(),
+                text: $this->translator->trans(
                     'Rate the next thing: anyThing',
-                    ['anyThing' => $gameSession->getCurrentRatedThing()->getThing()->getValue()]
-                )
+                    ['anyThing' => $event->game->getCurrentThing()->getValue()]
+                ),
+                keyboardMarkup: $keyboardMarkup,
             );
         }
     }

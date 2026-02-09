@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace App\Game\Domain\Event;
 
-use App\Game\Domain\Model\GameSession;
+use App\Game\Domain\Game;
 
 final readonly class NextRatedThingTaken
 {
     public function __construct(
-        private GameSession $gameSession,
+        public Game $game,
     ) {
-    }
-
-    public function getGameSession(): GameSession
-    {
-        return $this->gameSession;
     }
 }

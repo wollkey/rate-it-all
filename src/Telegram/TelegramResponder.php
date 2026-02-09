@@ -67,4 +67,12 @@ final readonly class TelegramResponder
             showAlert: $showAlert,
         );
     }
+
+    public function deleteMessage(TelegramInput $dto): void
+    {
+        $this->api->deleteMessage(
+            $dto->message->chat->id,
+            $dto->message->messageId,
+        );
+    }
 }
