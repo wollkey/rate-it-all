@@ -4,34 +4,31 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Handler;
 
-use App\Game\Application\UseCase\TakeNextThingUseCase;
+use App\Game\Application\UseCase\StartRateThingsUseCase;
 use App\Game\Domain\Repository\PlayerRepository;
+use App\Telegram\AsTelegramHandler;
 use App\Telegram\TelegramInput;
+use App\Telegram\TelegramResponder;
 
+#[AsTelegramHandler(self::COMMAND_NAME)]
 final readonly class StartRatingThing
 {
     public const string COMMAND_NAME = '/start_rating';
 
     public function __construct(
-        private TakeNextThingUseCase $startRatingThingUseCase,
+        private StartRateThingsUseCase $startRateThingsUseCase,
         private PlayerRepository $playerRepository,
+        private TelegramResponder $telegramResponder,
     ) {
     }
 
     /**
      * @throws \Exception
      */
-    public function execute(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
-        ($this->startRatingThingUseCase)($player);
-    }
-
-    public function supports(TelegramInput $telegramDto): bool
-    {
-        return match (self::COMMAND_NAME) {
-            $this->telegramBot->getMessageCommand($telegramDto->message), $telegramDto->callbackQuery?->data => true,
-            default => false,
-        };
+        ($this->startRateThingsUseCase)($player);
+        $this->telegramResponder->deleteMessage($telegramDto);
     }
 }

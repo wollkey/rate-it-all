@@ -7,6 +7,7 @@ namespace App\Game\Domain;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Entity\Thing;
 use App\Game\Domain\Exception\ForbiddenActionException;
+use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\PlayerAlreadyInGameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
@@ -146,10 +147,18 @@ final class Game
         $this->state = GameState::Collecting;
     }
 
+    /**
+     * @throws GameException
+     * @throws ThingListIsEmptyException
+     */
     public function startRating(): void
     {
         if ($this->things->isEmpty()) {
             throw new ThingListIsEmptyException('Cannot start rating without things');
+        }
+
+        if ($this->state !== GameState::Collecting) {
+            throw new GameException('Wrong game state');
         }
 
         $this->state = GameState::Rating;
@@ -308,7 +317,7 @@ final class Game
         $unrated = [];
 
         foreach ($this->things as $thing) {
-            if (!$thing->isFullyRated($playerCount)) {
+            if (!$thing->isFullyRatedBy($playerCount)) {
                 $unrated[] = $thing;
             }
         }

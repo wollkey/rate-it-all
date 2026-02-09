@@ -7,13 +7,17 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 use App\Game\Application\UseCase\RateThingUseCase;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
+use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
+use App\Telegram\AsTelegramHandler;
+use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[AsTelegramHandler(gameState: GameState::Rating, inputTypes: [InputType::Callback])]
 final readonly class RateTheThing
 {
     public function __construct(
@@ -27,10 +31,10 @@ final readonly class RateTheThing
     /**
      * @throws \Exception
      */
-    public function execute(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
-        $ratingText = $telegramDto->message->text;
+        $ratingText = $telegramDto->callbackQuery->data;
 
         if (!is_numeric($ratingText)) {
             throw new TelegramException($this->translator->trans('Rating must be a number'));
@@ -52,10 +56,5 @@ final readonly class RateTheThing
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());
         }
-    }
-
-    public function supports(TelegramInput $telegramDto): bool
-    {
-        return false;
     }
 }
