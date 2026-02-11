@@ -6,11 +6,10 @@ namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\ThingHasBeenRated;
 use App\Telegram\TelegramResponder;
-use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsEventListener]
+#[AsEventListener(priority: 10)]
 final readonly class TellPlayerToWaitForOthers
 {
     public function __construct(
@@ -25,10 +24,7 @@ final readonly class TellPlayerToWaitForOthers
     public function __invoke(ThingHasBeenRated $event): void
     {
         if ($event->isThingFullyRated) {
-            $this->telegramResponder->send(
-                $event->player->getTelegramId(),
-                $this->translator->trans('Great job! Wait for the results...')
-            );
+            return;
         }
 
         $this->telegramResponder->send(

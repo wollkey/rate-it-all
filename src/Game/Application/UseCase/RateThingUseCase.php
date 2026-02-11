@@ -8,7 +8,7 @@ use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\ThingHasBeenRated;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
-use App\Game\Domain\Exception\ThingNotInTheListException;
+use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\Rating;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -16,28 +16,23 @@ final readonly class RateThingUseCase
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
+        private GameRepository $gameRepository,
     ) {
     }
 
     /**
      * @throws GameNotFoundException
      * @throws ThingIsAlreadyRatedException
-     * @throws ThingNotInTheListException
      */
     public function __invoke(Player $player, Rating $rating): void
     {
-        $gameSession = $this->game->continue($player);
-        $ratedThing = $gameSession->getCurrentRatedThing();
+        $game = $this->gameRepository->findActiveByPlayer($player)
+            ?? throw new GameNotFoundException();
 
-        if ($ratedThing->alreadyRated($player)) {
-            throw new ThingIsAlreadyRatedException();
-        }
+        $ratedThing = $game->getCurrentThing();
+        $ratedThing->rate($player, $rating->getRating());
+        $this->gameRepository->save($game);
 
-        $gameSession->rateThing($ratedThing->getThing(), $player, $rating);
-        $this->game->saveSession($gameSession);
-
-        // Maybe two different events instead of this flag
-        $isThingFullyRated = $gameSession->isThingFullyRated($ratedThing->getThing());
-        $this->eventDispatcher->dispatch(new ThingHasBeenRated($player, $gameSession, $isThingFullyRated));
+        $this->eventDispatcher->dispatch(new ThingHasBeenRated($player, $game, $game->isCurrentThingFullyRated()));
     }
 }

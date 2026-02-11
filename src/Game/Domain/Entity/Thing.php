@@ -48,7 +48,7 @@ final class Thing
 
     public function hasRatingFrom(Player $player): bool
     {
-        return array_any((array) $this->ratings, fn ($rating) => $rating->getPlayer()->getId() === $player->getId());
+        return array_any($this->ratings->toArray(), fn (ThingRating $rating) => $rating->getPlayer()->getId() === $player->getId());
     }
 
     public function isFullyRatedBy(int $playerCount): bool
