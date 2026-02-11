@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Game\Application\EventListener;
 
-use App\Game\Application\UseCase\TakeNextThingUseCase;
+use App\Game\Application\UseCase\PickNextThingUseCase;
+use App\Game\Domain\Event\TheGameIsOver;
 use App\Game\Domain\Event\ThingHasBeenRated;
-use App\Game\Domain\Event\ThingsRatingIsCompleted;
-use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -16,26 +15,21 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final readonly class CheckThingRatingIsCompleted
 {
     public function __construct(
-        private TakeNextThingUseCase $takeNextThingUseCase,
+        private PickNextThingUseCase $pickNextThingUseCase,
         private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
-    /**
-     * @throws GameNotFoundException
-     */
     public function __invoke(ThingHasBeenRated $event): void
     {
-        if (!$event->isThingFullyRated()) {
+        if (!$event->isThingFullyRated) {
             return;
         }
 
-        $player = $event->getPlayer();
-
         try {
-            ($this->takeNextThingUseCase)($player);
+            ($this->pickNextThingUseCase)($event->player);
         } catch (ThingListIsEmptyException) {
-            $this->eventDispatcher->dispatch(new ThingsRatingIsCompleted($player, $event->getGameSession()));
+            $this->eventDispatcher->dispatch(new TheGameIsOver($event->game));
         }
     }
 }

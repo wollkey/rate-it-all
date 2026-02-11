@@ -11,13 +11,12 @@ use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
 use App\Telegram\AsTelegramHandler;
-use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(gameState: GameState::Rating, inputTypes: [InputType::Callback])]
+#[AsTelegramHandler(gameState: GameState::Rating)]
 final readonly class RateTheThing
 {
     public function __construct(
@@ -41,6 +40,8 @@ final readonly class RateTheThing
         }
 
         try {
+            $this->telegramResponder->answerCallbackQuery($telegramDto->callbackQuery->id);
+
             $rating = new Rating((int) $ratingText);
 
             ($this->rateThingUseCase)($player, $rating);

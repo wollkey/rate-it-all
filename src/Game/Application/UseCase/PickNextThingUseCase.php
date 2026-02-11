@@ -6,13 +6,16 @@ namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Event\NextRatedThingTaken;
+use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
+use App\Game\Domain\Repository\GameRepository;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final readonly class TakeNextThingUseCase
+final readonly class PickNextThingUseCase
 {
     public function __construct(
+        private GameRepository $gameRepository,
         private EventDispatcherInterface $eventDispatcher,
     ) {
     }
@@ -20,19 +23,23 @@ final readonly class TakeNextThingUseCase
     /**
      * @throws GameNotFoundException
      * @throws ThingListIsEmptyException
+     * @throws ForbiddenActionException
      */
     public function __invoke(Player $player): void
     {
-        $gameSession = $this->game->continue($player);
-        $randomThing = $gameSession->getRandomUnratedThing();
+        $game = $this->gameRepository->findActiveByPlayer($player)
+            ?? throw new GameNotFoundException();
 
-        if ($randomThing === null) {
+        $game->nextThing();
+        $this->gameRepository->save($game);
+        $nextThing = $game->getCurrentThing();
+
+        if ($nextThing === null) {
+            $game->finish();
+            $this->gameRepository->save($game);
             throw new ThingListIsEmptyException();
         }
 
-        $gameSession->setCurrentRatedThing($randomThing);
-        $this->game->saveSession($gameSession);
-
-        $this->eventDispatcher->dispatch(new NextRatedThingTaken($gameSession));
+        $this->eventDispatcher->dispatch(new NextRatedThingTaken($game));
     }
 }
