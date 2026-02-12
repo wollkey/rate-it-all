@@ -112,8 +112,12 @@ psalm: ## Run Psalm static analysis
 	$(PHP) vendor/bin/psalm --no-cache
 .PHONY: psalm
 
-psalm-baseline: ## Update Psalm baseline
+psalm-set: ## Set Psalm baseline
 	$(PHP) vendor/bin/psalm --set-baseline=psalm-baseline.xml
+.PHONY: psalm-baseline
+
+psalm-update: ## Update Psalm baseline
+	$(PHP) vendor/bin/psalm --update-baseline
 .PHONY: psalm-baseline
 
 stan: ## Run PHPStan static analysis
