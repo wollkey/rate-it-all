@@ -116,6 +116,10 @@ psalm-baseline: ## Update Psalm baseline
 	$(PHP) vendor/bin/psalm --set-baseline=psalm-baseline.xml
 .PHONY: psalm-baseline
 
+stan: ## Run PHPStan static analysis
+	$(PHP) vendor/bin/phpstan analyse src tests
+.PHONY: stan
+
 lint: ## Fix code style with PHP CS Fixer
 	$(PHP) vendor/bin/php-cs-fixer fix --verbose
 .PHONY: lint
