@@ -2,9 +2,16 @@
 
 declare(strict_types=1);
 
-$finder = new PhpCsFixer\Finder()->in(__DIR__);
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
+
+$finder = new PhpCsFixer\Finder()
+    ->in(__DIR__.'/src')
+    ->in(__DIR__.'/tests')
+    ->in(__DIR__.'/config')
+        ->notPath('reference.php');
 
 return new PhpCsFixer\Config()
+    ->setParallelConfig(ParallelConfigFactory::detect())
     ->setRules([
         '@PSR12' => true,
         '@Symfony' => true,
