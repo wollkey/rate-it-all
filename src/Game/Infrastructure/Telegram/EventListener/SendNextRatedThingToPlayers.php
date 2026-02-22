@@ -27,14 +27,14 @@ final readonly class SendNextRatedThingToPlayers
     {
         $keyboardMarkup = new InlineKeyboardMarkup([
             array_map(
-                fn(string $i) => new InlineKeyboardButton(
+                fn (string $i) => new InlineKeyboardButton(
                     text: $i,
                     callbackData: $i,
                 ),
                 range(1, 5),
             ),
             array_map(
-                fn(string $i) => new InlineKeyboardButton(
+                fn (string $i) => new InlineKeyboardButton(
                     text: $i,
                     callbackData: $i,
                 ),

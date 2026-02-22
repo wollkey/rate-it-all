@@ -9,7 +9,8 @@ use App\Telegram\TelegramResponder;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 #[AsEventListener]
-final readonly class ShowResultToPlayers {
+final readonly class ShowResultToPlayers
+{
     public function __construct(
         private TelegramResponder $telegramResponder,
     ) {

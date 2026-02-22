@@ -12,6 +12,7 @@ use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
+use App\Telegram\OnCommand;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
@@ -19,7 +20,8 @@ use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Callback])]
+#[OnCommand(self::COMMAND_NAME)]
+#[AsTelegramHandler(inputTypes: [InputType::Callback])]
 final readonly class StartGame
 {
     public const string COMMAND_NAME = '/start_game';

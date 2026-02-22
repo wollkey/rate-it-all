@@ -14,13 +14,15 @@ use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
+use App\Telegram\OnCommand;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
+#[OnCommand(command: self::COMMAND_NAME)]
+#[AsTelegramHandler(inputTypes: [InputType::Text, InputType::Callback])]
 final readonly class CreateGame
 {
     public const string COMMAND_NAME = '/create_game';
@@ -89,12 +91,8 @@ final readonly class CreateGame
         );
     }
 
-    private function askThingsCount(TelegramInput $telegramDto): void
+    private function askThingsCount(TelegramInput $telegramInput): void
     {
-        if (!$telegramDto->isCallback()) {
-            return;
-        }
-
         $inlineKeyboard = new InlineKeyboardMarkup([
             array_map(static fn (int $numberOfThings): InlineKeyboardButton => new InlineKeyboardButton(
                 text: (string) $numberOfThings,
@@ -108,35 +106,35 @@ final readonly class CreateGame
             ],
         ]);
 
-        $this->telegramResponder->replyCallback(
-            $telegramDto,
+        $this->telegramResponder->reply(
+            $telegramInput,
             $this->translator->trans('Enter the number of rated things per player:'),
             $inlineKeyboard,
         );
 
         $this->conversationStorage->save(
-            $telegramDto->message->chat->id,
+            $telegramInput->message->chat->id,
             self::class,
             self::STEP_AWAITING_THINGS_COUNT,
         );
     }
 
-    private function createGame(TelegramInput $telegramDto, Player $player): void
+    private function createGame(TelegramInput $telegramInput, Player $player): void
     {
-        if (!$telegramDto->isCallback()) {
-            return; // TODO тут надо сохранить текущий шаг
+        if (!$telegramInput->isCallback()) {
+            return;
         }
 
-        $this->gameTelegramContext->saveEditedMessage($telegramDto->message);
+        $this->gameTelegramContext->saveEditedMessage($telegramInput->message);
 
-        $numberOfThings = new ThingsPerPlayer((int) $telegramDto->callbackQuery->data);
+        $numberOfThings = new ThingsPerPlayer((int) $telegramInput->callbackQuery->data);
 
         $newGame = ($this->createGameUseCase)($player, $numberOfThings);
 
         $joinLink = "https://t.me/{$this->telegramBotName}?start={$newGame->getCode()->toRfc4122()}";
 
         $this->telegramResponder->replyCallback(
-            $telegramDto,
+            $telegramInput,
             'Отправьте ссылку друзьям, чтобы они присоединились',
             new InlineKeyboardMarkup([
                 [

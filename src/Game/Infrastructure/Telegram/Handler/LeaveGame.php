@@ -10,13 +10,15 @@ use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
+use App\Telegram\OnCommand;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(self::COMMAND_NAME, inputTypes: [InputType::Text, InputType::Callback])]
+#[OnCommand(self::COMMAND_NAME)]
+#[AsTelegramHandler(inputTypes: [InputType::Text, InputType::Callback])]
 final readonly class LeaveGame
 {
     public const string COMMAND_NAME = '/leave_game';

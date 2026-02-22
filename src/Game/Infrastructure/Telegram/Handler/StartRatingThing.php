@@ -7,10 +7,12 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 use App\Game\Application\UseCase\StartRateThingsUseCase;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
+use App\Telegram\OnCommand;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 
-#[AsTelegramHandler(self::COMMAND_NAME)]
+#[OnCommand(self::COMMAND_NAME)]
+#[AsTelegramHandler]
 final readonly class StartRatingThing
 {
     public const string COMMAND_NAME = '/start_rating';
