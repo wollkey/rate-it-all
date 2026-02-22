@@ -11,6 +11,7 @@ use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Thing;
+use App\Game\Infrastructure\Telegram\Handler\Resolver\OnGameState;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\Domain\Exception\TelegramException;
@@ -18,7 +19,8 @@ use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(gameState: GameState::Collecting, inputTypes: [InputType::Text])]
+#[OnGameState(GameState::Collecting)]
+#[AsTelegramHandler([InputType::Text])]
 final readonly class AddThing
 {
     public function __construct(

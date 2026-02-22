@@ -10,13 +10,15 @@ use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Game\Domain\ValueObject\Rating;
+use App\Game\Infrastructure\Telegram\Handler\Resolver\OnGameState;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler(gameState: GameState::Rating)]
+#[OnGameState(GameState::Rating)]
+#[AsTelegramHandler]
 final readonly class RateTheThing
 {
     public function __construct(

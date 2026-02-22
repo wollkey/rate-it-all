@@ -9,6 +9,7 @@ use App\Game\Domain\Exception\PlayerAlreadyInGameException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
+use App\Telegram\OnCommand;
 use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
@@ -16,7 +17,8 @@ use Phptg\BotApi\Type\InlineKeyboardMarkup;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsTelegramHandler('/start', inputTypes: [InputType::Text])]
+#[OnCommand('/start')]
+#[AsTelegramHandler(inputTypes: [InputType::Text])]
 final readonly class StartBot
 {
     public function __construct(
