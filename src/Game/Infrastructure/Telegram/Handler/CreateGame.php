@@ -29,27 +29,24 @@ final readonly class CreateGame
     private const string STEP_AWAITING_THINGS_COUNT = 'awaiting_things_count';
 
     public function __construct(
-        private PlayerRepository $playerRepository,
-        private TranslatorInterface $translator,
+        private ConversationStorage $conversation,
         private CreateGameUseCase $createGameUseCase,
-        private string $telegramBotName,
-        private GameTelegramContext $gameTelegramContext,
         private GameRepository $gameRepository,
+        private GameTelegramContext $gameTelegramContext,
+        private PlayerRepository $playerRepository,
         private TelegramResponder $telegramResponder,
-        private ConversationStorage $conversationStorage,
+        private TranslatorInterface $translator,
+        private string $telegramBotName,
     ) {
     }
 
-    /**
-     * @throws \Exception
-     */
     public function __invoke(TelegramInput $telegramInput): void
     {
         $player = $this->playerRepository->find($telegramInput->user->id);
         $game = $this->gameRepository->findActiveByPlayer($player);
 
         if ($game !== null) {
-            $this->handlePlayerAlreadyInGame($telegramInput, $game, $player);
+            $this->sendPlayerAlreadyInGameMessage($telegramInput, $game, $player);
 
             return;
         }
@@ -58,37 +55,6 @@ final readonly class CreateGame
             null => $this->askThingsCount($telegramInput),
             self::STEP_AWAITING_THINGS_COUNT => $this->createGame($telegramInput, $player),
         };
-    }
-
-    private function handlePlayerAlreadyInGame(TelegramInput $telegramDto, Game $game, Player $player): void
-    {
-        if ($game->isMaster($player)) {
-            $message = $this->translator->trans('Already playing. Would you like to finish the current one?');
-            $keyboard = new InlineKeyboardMarkup([
-                [
-                    new InlineKeyboardButton(
-                        text: '💀'.$this->translator->trans('Finish the game'),
-                        callbackData: FinishGame::COMMAND_NAME,
-                    ),
-                ],
-            ]);
-        } else {
-            $message = $this->translator->trans('You are in another game, do you want to leave it?');
-            $keyboard = new InlineKeyboardMarkup([
-                [
-                    new InlineKeyboardButton(
-                        text: '💀'.$this->translator->trans('Leave the game'),
-                        callbackData: LeaveGame::COMMAND_NAME,
-                    ),
-                ],
-            ]);
-        }
-
-        $this->telegramResponder->reply(
-            $telegramDto,
-            $message,
-            $keyboard,
-        );
     }
 
     private function askThingsCount(TelegramInput $telegramInput): void
@@ -112,7 +78,7 @@ final readonly class CreateGame
             $inlineKeyboard,
         );
 
-        $this->conversationStorage->save(
+        $this->conversation->save(
             $telegramInput->message->chat->id,
             self::class,
             self::STEP_AWAITING_THINGS_COUNT,
@@ -145,5 +111,32 @@ final readonly class CreateGame
                 ],
             ]),
         );
+    }
+
+    private function sendPlayerAlreadyInGameMessage(TelegramInput $telegramInput, Game $game, Player $player): void
+    {
+        if ($game->isMaster($player)) {
+            $message = $this->translator->trans('Already playing. Would you like to finish the current one?');
+            $keyboard = new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton(
+                        text: '💀'.$this->translator->trans('Finish the game'),
+                        callbackData: FinishGame::COMMAND_NAME,
+                    ),
+                ],
+            ]);
+        } else {
+            $message = $this->translator->trans('You are in another game, do you want to leave it?');
+            $keyboard = new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton(
+                        text: '💀'.$this->translator->trans('Leave the game'),
+                        callbackData: LeaveGame::COMMAND_NAME,
+                    ),
+                ],
+            ]);
+        }
+
+        $this->telegramResponder->reply($telegramInput, $message, $keyboard);
     }
 }

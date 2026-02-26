@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Domain;
+namespace App\Game\Application;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\MasterCannotLeaveException;
 use App\Game\Domain\Repository\GameRepository;
 
 final readonly class LeaveGameUseCase
@@ -17,7 +17,7 @@ final readonly class LeaveGameUseCase
     }
 
     /**
-     * @throws GameNotFoundException|ForbiddenActionException
+     * @throws GameNotFoundException|MasterCannotLeaveException
      */
     public function __invoke(Player $player): void
     {
@@ -25,10 +25,6 @@ final readonly class LeaveGameUseCase
             ?? throw new GameNotFoundException();
 
         $game->leave($player);
-
-        if ($game->getPlayers()->count() <= 1) {
-            $game->finish();
-        }
 
         $this->gameRepository->save($game);
     }

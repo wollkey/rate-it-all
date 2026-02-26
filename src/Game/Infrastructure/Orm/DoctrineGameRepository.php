@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Game\Infrastructure\Common\Orm;
+namespace App\Game\Infrastructure\Orm;
 
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Game;

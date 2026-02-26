@@ -7,7 +7,7 @@ namespace App\Game\Domain\Event;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Game;
 
-final readonly class ThingHasBeenRated
+final readonly class ThingHasBeenRated implements DomainEvent
 {
     public function __construct(
         public Player $player,

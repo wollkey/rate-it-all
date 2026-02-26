@@ -56,6 +56,7 @@ return [
     "Let's have some madness!" => 'Приступить к безумию!',
 
     'Rate the next thing: anyThing' => 'Оцените следующее: anyThing',
+    'Rate the thing: anyThing' => 'Оцените-ка это: anyThing',
 
     'Congrats! You really rated all this nonsense!' => 'Поздравляю! Вы действительно оценили все эти безумные вещи!',
     'Reveal the result' => 'Показать результат',

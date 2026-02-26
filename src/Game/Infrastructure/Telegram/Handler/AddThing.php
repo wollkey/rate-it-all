@@ -31,9 +31,6 @@ final readonly class AddThing
     ) {
     }
 
-    /**
-     * @throws \Exception
-     */
     public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);

@@ -4,15 +4,30 @@ declare(strict_types=1);
 
 namespace App\Game\Domain;
 
+use App\Game\Domain\Aggregate\AggregateRoot;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Entity\Thing;
+use App\Game\Domain\Event\GameCollectingStarted;
+use App\Game\Domain\Event\NextRatedThingTaken;
+use App\Game\Domain\Event\PlayerHasJoined;
+use App\Game\Domain\Event\RatingStarted;
+use App\Game\Domain\Event\TheGameIsOver;
+use App\Game\Domain\Event\ThingHasBeenAdded;
+use App\Game\Domain\Event\ThingHasBeenRated;
 use App\Game\Domain\Exception\ForbiddenActionException;
-use App\Game\Domain\Exception\GameException;
-use App\Game\Domain\Exception\PlayerAlreadyInGameException;
+use App\Game\Domain\Exception\GameNotFinishedException;
+use App\Game\Domain\Exception\InvalidGameStateException;
+use App\Game\Domain\Exception\MasterCannotLeaveException;
+use App\Game\Domain\Exception\NoCurrentThingException;
+use App\Game\Domain\Exception\NotEnoughPlayersException;
+use App\Game\Domain\Exception\OnlyMasterCanStartException;
+use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
+use App\Game\Domain\Exception\PlayerNotInGameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
-use App\Game\Domain\Exception\ThingListIsEmptyException;
+use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Repository\GameRepository;
+use App\Game\Domain\ValueObject\RatedThingResult;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,7 +36,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
-final class Game
+final class Game extends AggregateRoot
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -73,7 +88,7 @@ final class Game
     public function join(Player $player): void
     {
         if ($this->hasPlayer($player)) {
-            throw new PlayerAlreadyInGameException("Player {$player->getId()} already in game");
+            throw new PlayerAlreadyInCurrentGameException($this);
         }
 
         if (!$this->state->canJoin()) {
@@ -81,15 +96,20 @@ final class Game
         }
 
         $this->players->add($player);
+        $this->addEvent(new PlayerHasJoined($player, $this));
     }
 
     public function leave(Player $player): void
     {
         if ($this->isMaster($player)) {
-            throw new ForbiddenActionException('Master cannot leave the game');
+            throw new MasterCannotLeaveException();
         }
 
         $this->players->removeElement($player);
+
+        if ($this->players->count() <= 1) {
+            $this->finish();
+        }
     }
 
     public function hasPlayer(Player $targetPlayer): bool
@@ -98,32 +118,39 @@ final class Game
     }
 
     /**
-     * @throws ForbiddenActionException
-     * @throws ThingsPlayerLimitReachedException
+     * @throws InvalidGameStateException
+     * @throws PlayerNotInGameException
      * @throws ThingIsAlreadyInTheListException
+     * @throws ThingsPlayerLimitReachedException
      */
     public function addThing(Player $author, string $value): Thing
     {
         if (!$this->hasPlayer($author)) {
-            throw new ForbiddenActionException('Only players can add things');
+            throw new PlayerNotInGameException();
         }
 
         if (!$this->state->canAddThings()) {
-            throw new ForbiddenActionException('Cannot add things in current state');
+            throw new InvalidGameStateException();
         }
 
         if ($this->isPlayerThingLimitReached($author)) {
-            throw new ThingsPlayerLimitReachedException("Player reached limit of {$this->thingsPerPlayer} things");
+            throw new ThingsPlayerLimitReachedException();
         }
 
         $normalizedValue = mb_strtolower(trim($value));
 
         if ($this->thingExists($normalizedValue)) {
-            throw new ThingIsAlreadyInTheListException("Thing '$value' already exists in this game");
+            throw new ThingIsAlreadyInTheListException();
         }
 
         $thing = new Thing($this, $author, $normalizedValue);
         $this->things->add($thing);
+
+        $this->addEvent(new ThingHasBeenAdded($author, $this));
+
+        if ($this->isTotalThingLimitReached()) {
+            $this->startRating();
+        }
 
         return $thing;
     }
@@ -133,62 +160,47 @@ final class Game
         return $this->countPlayerThings($player) >= $this->thingsPerPlayer;
     }
 
-    public function isTotalThingLimitReached(): bool
+    public function startCollecting(Player $initiator): void
     {
-        return $this->things->count() >= $this->players->count() * $this->thingsPerPlayer;
-    }
+        if (!$this->isMaster($initiator)) {
+            throw new OnlyMasterCanStartException();
+        }
 
-    public function startCollecting(): void
-    {
         if ($this->players->count() < 2) {
-            throw new ForbiddenActionException('Need at least 2 players to start'); // TODO Использовать более логичное исключение
+            throw new NotEnoughPlayersException();
         }
 
         $this->state = GameState::Collecting;
+
+        $this->addEvent(new GameCollectingStarted($this));
     }
 
     /**
-     * @throws GameException
-     * @throws ThingListIsEmptyException
+     * @throws ThingIsAlreadyRatedException
+     * @throws NoCurrentThingException
+     * @throws PlayerNotInGameException
+     * @throws InvalidGameStateException
      */
-    public function startRating(): void
-    {
-        if ($this->things->isEmpty()) {
-            throw new ThingListIsEmptyException('Cannot start rating without things');
-        }
-
-        if ($this->state !== GameState::Collecting) {
-            throw new GameException('Wrong game state');
-        }
-
-        $this->state = GameState::Rating;
-        $this->pickNextThing();
-    }
-
     public function rate(Player $player, int $score): void
     {
         if (!$this->hasPlayer($player)) {
-            throw new ForbiddenActionException('Only players can rate');
+            throw new PlayerNotInGameException();
         }
 
         if (!$this->state->canRate()) {
-            throw new ForbiddenActionException('Cannot rate in current state');
+            throw new InvalidGameStateException();
         }
 
         if ($this->currentThing === null) {
-            throw new ForbiddenActionException('No thing to rate currently');
+            throw new NoCurrentThingException();
         }
 
         $this->currentThing->rate($player, $score);
-    }
+        $this->addEvent(new ThingHasBeenRated($player, $this));
 
-    public function nextThing(): bool
-    {
-        if (!$this->isCurrentThingFullyRated()) {
-            throw new ForbiddenActionException('Current thing is not fully rated yet');
+        if ($this->isCurrentThingFullyRated()) {
+            $this->advanceToNextThing();
         }
-
-        return $this->pickNextThing();
     }
 
     public function isCurrentThingFullyRated(): bool
@@ -211,22 +223,28 @@ final class Game
     }
 
     /**
-     * @return array<string, float>
+     * @return non-empty-list<RatedThingResult>
      *
-     * @throws ForbiddenActionException
+     * @throws GameNotFinishedException
      */
     public function getResults(): array
     {
         if (!$this->isFinished()) {
-            throw new ForbiddenActionException('Game is not finished yet');
+            throw new GameNotFinishedException();
         }
 
         $results = [];
         foreach ($this->things as $thing) {
-            $results[$thing->getValue()] = $thing->getAverageScore();
+            $results[] = new RatedThingResult(
+                thing: $thing->getValue(),
+                averageScore: $thing->getAverageScore(),
+            );
         }
 
-        arsort($results);
+        usort(
+            $results,
+            static fn (RatedThingResult $a, RatedThingResult $b): int => $b->averageScore <=> $a->averageScore,
+        );
 
         return $results;
     }
@@ -292,6 +310,34 @@ final class Game
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    private function startRating(): void
+    {
+        $this->state = GameState::Rating;
+        $this->pickNextThing();
+        $this->addEvent(new RatingStarted($this));
+    }
+
+    private function isTotalThingLimitReached(): bool
+    {
+        return $this->things->count() >= $this->players->count() * $this->thingsPerPlayer;
+    }
+
+    private function advanceToNextThing(): void
+    {
+        $unratedThings = $this->getUnratedThings();
+
+        if ($unratedThings === []) {
+            $this->currentThing = null;
+            $this->state = GameState::Finished;
+            $this->addEvent(new TheGameIsOver($this));
+
+            return;
+        }
+
+        $this->currentThing = $unratedThings[array_rand($unratedThings)];
+        $this->addEvent(new NextRatedThingTaken($this));
     }
 
     private function pickNextThing(): bool

@@ -6,6 +6,7 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\FinishGameUseCase;
 use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\OnlyMasterCanFinishException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
@@ -33,20 +34,46 @@ final readonly class FinishGame
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
+        $player = $this->playerRepository->find($telegramInput->user->id);
 
         try {
             ($this->finishGameUseCase)($player);
         } catch (GameNotFoundException) {
-            $this->sendGameNotFoundMessage($telegramDto);
+            $this->telegramResponder->reply(
+                $telegramInput,
+                $this->translator->trans('You are not in any game').PHP_EOL.$this->translator->trans('Create a game or join an existing one'),
+                new InlineKeyboardMarkup([
+                    [
+                        new InlineKeyboardButton(
+                            text: $this->translator->trans('Create'),
+                            callbackData: CreateGame::COMMAND_NAME,
+                        ),
+                    ],
+                ]),
+            );
+
+            return;
+        } catch (OnlyMasterCanFinishException) {
+            $this->telegramResponder->reply(
+                $telegramInput,
+                $this->translator->trans('As player you can only leave the game. Do you really want it?'),
+                new InlineKeyboardMarkup([
+                    [
+                        new InlineKeyboardButton(
+                            text: '💀'.$this->translator->trans('Leave the game'),
+                            callbackData: LeaveGame::COMMAND_NAME,
+                        ),
+                    ],
+                ]),
+            );
 
             return;
         }
 
         $this->telegramResponder->reply(
-            $telegramDto,
+            $telegramInput,
             $this->translator->trans('The game is over!'),
             new InlineKeyboardMarkup([
                 [
@@ -56,38 +83,6 @@ final readonly class FinishGame
                     ),
                 ],
             ])
-        );
-    }
-
-    private function sendGameNotFoundMessage(TelegramInput $telegramDto): void
-    {
-        $this->telegramResponder->reply(
-            $telegramDto,
-            $this->translator->trans('You are not in any game').PHP_EOL.$this->translator->trans('Create a game or join an existing one'),
-            new InlineKeyboardMarkup([
-                [
-                    new InlineKeyboardButton(
-                        text: $this->translator->trans('Create'),
-                        callbackData: CreateGame::COMMAND_NAME,
-                    ),
-                ],
-            ]),
-        );
-    }
-
-    private function sendForbiddenActionMessage(TelegramInput $telegramDto): void
-    {
-        $this->telegramResponder->reply(
-            $telegramDto,
-            $this->translator->trans('As player you can only leave the game. Do you really want it?'),
-            new InlineKeyboardMarkup([
-                [
-                    new InlineKeyboardButton(
-                        text: '💀'.$this->translator->trans('Leave the game'),
-                        callbackData: LeaveGame::COMMAND_NAME,
-                    ),
-                ],
-            ]),
         );
     }
 }

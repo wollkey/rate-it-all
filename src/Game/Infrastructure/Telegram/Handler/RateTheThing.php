@@ -32,21 +32,22 @@ final readonly class RateTheThing
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
-        $ratingText = $telegramDto->callbackQuery->data;
-
-        if (!is_numeric($ratingText)) {
-            throw new TelegramException($this->translator->trans('Rating must be a number'));
-        }
+        $player = $this->playerRepository->find($telegramInput->user->id);
 
         try {
-            $this->telegramResponder->answerCallbackQuery($telegramDto->callbackQuery->id);
-
-            $rating = new Rating((int) $ratingText);
-
+            $rating = new Rating((int) $telegramInput->callbackQuery->data);
             ($this->rateThingUseCase)($player, $rating);
+
+            $this->telegramResponder->deleteMessage($telegramInput);
+        } catch (\InvalidArgumentException) {
+            $this->telegramResponder->reply(
+                $telegramInput,
+                $this->translator->trans('Enter a number from 1 to 10'),
+            );
+
+            return;
         } catch (ThingIsAlreadyRatedException) {
             $this->telegramResponder->send(
                 $player->getTelegramId(),
@@ -54,8 +55,6 @@ final readonly class RateTheThing
             );
 
             return;
-        } catch (\InvalidArgumentException) {
-            throw new TelegramException($this->translator->trans('Enter a number from 1 to 10'));
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());
         }
