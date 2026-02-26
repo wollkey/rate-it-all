@@ -5,20 +5,25 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Event\TheGameIsOver;
+use App\Game\Domain\ValueObject\RatedThingResult;
 use App\Telegram\TelegramResponder;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener]
 final readonly class ShowResultToPlayers
 {
     public function __construct(
         private TelegramResponder $telegramResponder,
+        private TranslatorInterface $translator,
     ) {
     }
 
     public function __invoke(TheGameIsOver $event): void
     {
-        $text = $this->formatResult($event->game->getResults());
+        $results = $this->formatResults($event->game->getResults());
+
+        $text = $this->translator->trans('The game is over!').PHP_EOL.PHP_EOL.$results;
 
         foreach ($event->game->getPlayers() as $player) {
             $this->telegramResponder->send(
@@ -28,14 +33,16 @@ final readonly class ShowResultToPlayers
         }
     }
 
-    private function formatResult(array $generateResult): string
+    /**
+     * @param non-empty-list<RatedThingResult> $results
+     */
+    private function formatResults(array $results): string
     {
-        $preparedResult = '';
+        $lines = array_map(
+            static fn (RatedThingResult $result) => round($result->averageScore, 1).' 👉 '.$result->thing,
+            $results,
+        );
 
-        foreach ($generateResult as $thing => $rating) {
-            $preparedResult .= $rating.' 👉 '.$thing.PHP_EOL;
-        }
-
-        return $preparedResult;
+        return implode(PHP_EOL, $lines);
     }
 }

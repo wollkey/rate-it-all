@@ -6,7 +6,7 @@ namespace App\Game\Domain\Event;
 
 use App\Game\Domain\Game;
 
-final readonly class TheGameIsOver
+final readonly class TheGameIsOver implements DomainEvent
 {
     public function __construct(
         public Game $game,

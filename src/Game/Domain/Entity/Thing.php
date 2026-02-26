@@ -37,10 +37,13 @@ final class Thing
         $this->ratings = new ArrayCollection();
     }
 
+    /**
+     * @throws ThingIsAlreadyRatedException
+     */
     public function rate(Player $player, int $score): void
     {
         if ($this->hasRatingFrom($player)) {
-            throw new ThingIsAlreadyRatedException("Player {$player->getId()} already rated this thing");
+            throw new ThingIsAlreadyRatedException();
         }
 
         $this->ratings->add(new ThingRating($this, $player, $score));

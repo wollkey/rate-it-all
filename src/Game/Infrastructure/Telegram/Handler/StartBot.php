@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\JoinGameUseCase;
-use App\Game\Domain\Exception\PlayerAlreadyInGameException;
+use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\PlayerAlreadyInAnotherGameException;
+use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
@@ -52,25 +54,59 @@ final readonly class StartBot
         return Uuid::isValid($parts[1] ?? '') ? Uuid::fromString($parts[1]) : null;
     }
 
-    private function joinGame(TelegramInput $telegramDto, Uuid $gameCode): void
+    private function joinGame(TelegramInput $telegramInput, Uuid $gameCode): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
+        $player = $this->playerRepository->find($telegramInput->user->id);
 
         try {
             ($this->joinGameUseCase)($player, $gameCode);
-        } catch (PlayerAlreadyInGameException) {
-            $this->telegramResponder->send(
-                chatId: $player->getTelegramId(),
-                text: $this->translator->trans('Already playing. Would you like to finish the current one?'),
-                keyboardMarkup: new InlineKeyboardMarkup([
-                    [
+        } catch (GameNotFoundException) {
+            $this->telegramResponder->reply(
+                $telegramInput,
+                $this->translator->trans('The game with this ID not found'),
+            );
+        } catch (PlayerAlreadyInAnotherGameException $exception) {
+            if ($exception->game->isMaster($player)) {
+                $this->telegramResponder->reply(
+                    $telegramInput,
+                    $this->translator->trans('You are the master of another game. Finish it first to join a new one'),
+                    new InlineKeyboardMarkup([[
                         new InlineKeyboardButton(
-                            text: '☠️'.$this->translator->trans('Leave the game'),
+                            text: '💀 '.$this->translator->trans('Finish the game'),
+                            callbackData: FinishGame::COMMAND_NAME,
+                        ),
+                    ]]),
+                );
+            } else {
+                $this->telegramResponder->reply(
+                    $telegramInput,
+                    $this->translator->trans('You are in another game. Leave it to join a new one'),
+                    new InlineKeyboardMarkup([[
+                        new InlineKeyboardButton(
+                            text: '💀 '.$this->translator->trans('Leave the game'),
                             callbackData: LeaveGame::COMMAND_NAME,
                         ),
-                    ],
-                ])
-            );
+                    ]]),
+                );
+            }
+        } catch (PlayerAlreadyInCurrentGameException $exception) {
+            if ($exception->game->isMaster($player)) {
+                $this->telegramResponder->reply(
+                    $telegramInput,
+                    $this->translator->trans('You are the master of this game. Would you like to finish it?'),
+                    new InlineKeyboardMarkup([[
+                        new InlineKeyboardButton(
+                            text: '💀 '.$this->translator->trans('Finish the game'),
+                            callbackData: FinishGame::COMMAND_NAME,
+                        ),
+                    ]]),
+                );
+            } else {
+                $this->telegramResponder->reply(
+                    $telegramInput,
+                    $this->translator->trans('You are already in this game'),
+                );
+            }
         }
     }
 

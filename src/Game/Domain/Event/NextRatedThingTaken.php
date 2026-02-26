@@ -6,7 +6,7 @@ namespace App\Game\Domain\Event;
 
 use App\Game\Domain\Game;
 
-final readonly class NextRatedThingTaken
+final readonly class NextRatedThingTaken implements DomainEvent
 {
     public function __construct(
         public Game $game,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Handler;
 
-use App\Game\Domain\GameInfo;
+use App\Game\Application\GameInfo;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\OnCommand;
