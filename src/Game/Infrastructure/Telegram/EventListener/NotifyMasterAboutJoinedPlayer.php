@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Event\PlayerHasJoined;
+use App\Game\Domain\Event\PlayerJoined;
 use App\Game\Infrastructure\Telegram\Handler\StartGame;
 use App\Game\Infrastructure\Telegram\Storage\GameTelegramContext;
 use Phptg\BotApi\TelegramBotApi;
@@ -28,7 +28,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
     /**
      * @throws \Exception
      */
-    public function __invoke(PlayerHasJoined $event): void
+    public function __invoke(PlayerJoined $event): void
     {
         $game = $event->game;
 

@@ -24,11 +24,7 @@ final readonly class FinishGameUseCase
         $game = $this->gameRepository->findActiveByPlayer($player)
             ?? throw new GameNotFoundException();
 
-        if (!$game->isMaster($player)) {
-            throw new OnlyMasterCanFinishException($game);
-        }
-
-        $game->finish();
+        $game->finish($player);
         $this->gameRepository->save($game);
     }
 }

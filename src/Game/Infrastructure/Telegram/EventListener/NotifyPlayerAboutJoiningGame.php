@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
-use App\Game\Domain\Event\PlayerHasJoined;
+use App\Game\Domain\Event\PlayerJoined;
 use Phptg\BotApi\TelegramBotApi;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -21,7 +21,7 @@ final readonly class NotifyPlayerAboutJoiningGame
     /**
      * @throws \Exception
      */
-    public function __invoke(PlayerHasJoined $event): void
+    public function __invoke(PlayerJoined $event): void
     {
         $this->telegramApi->sendMessage(
             $event->player->getTelegramId(),
