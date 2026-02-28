@@ -14,7 +14,6 @@ use App\Game\Domain\Event\RatingStarted;
 use App\Game\Domain\Event\TheGameIsOver;
 use App\Game\Domain\Event\ThingHasBeenAdded;
 use App\Game\Domain\Event\ThingHasBeenRated;
-use App\Game\Domain\Exception\ForbiddenActionException;
 use App\Game\Domain\Exception\GameNotFinishedException;
 use App\Game\Domain\Exception\InvalidGameStateException;
 use App\Game\Domain\Exception\MasterCannotLeaveException;
@@ -92,7 +91,7 @@ final class Game extends AggregateRoot
         }
 
         if (!$this->state->canJoin()) {
-            throw new ForbiddenActionException('Cannot join game in current state');
+            throw new InvalidGameStateException();
         }
 
         $this->players->add($player);
