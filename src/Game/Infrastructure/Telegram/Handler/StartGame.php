@@ -41,6 +41,7 @@ final readonly class StartGame
 
         try {
             ($this->startGameUseCase)($player);
+            $this->telegramResponder->deleteMessage($telegramInput);
         } catch (GameNotFoundException) {
             $this->telegramResponder->reply(
                 $telegramInput,
