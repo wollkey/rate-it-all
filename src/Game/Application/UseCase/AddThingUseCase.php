@@ -12,7 +12,6 @@ use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Exception\ThingValueTooShortException;
 use App\Game\Domain\Repository\GameRepository;
-use App\Game\Domain\ValueObject\Thing;
 
 final readonly class AddThingUseCase
 {
