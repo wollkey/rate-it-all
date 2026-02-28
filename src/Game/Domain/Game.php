@@ -28,6 +28,7 @@ use App\Game\Domain\Exception\PlayerNotInGameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
+use App\Game\Domain\Exception\ThingValueTooShortException;
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\RatedThingResult;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
@@ -126,6 +127,7 @@ final class Game extends AggregateRoot
      * @throws PlayerNotInGameException
      * @throws ThingIsAlreadyInTheListException
      * @throws ThingsPlayerLimitReachedException
+     * @throws ThingValueTooShortException
      */
     public function addThing(Player $author, string $value): Thing
     {
@@ -142,6 +144,10 @@ final class Game extends AggregateRoot
         }
 
         $normalizedValue = mb_strtolower(trim($value));
+
+        if (mb_strlen($normalizedValue) < 2) {
+            throw new ThingValueTooShortException();
+        }
 
         if ($this->thingExists($normalizedValue)) {
             throw new ThingIsAlreadyInTheListException();
