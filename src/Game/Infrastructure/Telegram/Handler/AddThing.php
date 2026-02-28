@@ -7,6 +7,7 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 use App\Game\Application\UseCase\AddThingUseCase;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
+use App\Game\Domain\Exception\ThingValueTooShortException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\PlayerRepository;
@@ -34,10 +35,9 @@ final readonly class AddThing
     public function __invoke(TelegramInput $telegramDto): void
     {
         $player = $this->playerRepository->find($telegramDto->user->id);
-        $thing = $telegramDto->message->text;
 
         try {
-            ($this->addThingUseCase)($player, new Thing($thing));
+            ($this->addThingUseCase)($player, (string) $telegramDto->message->text);
         } catch (ThingIsAlreadyInTheListException) {
             $this->telegramResponder->send(
                 $player->getTelegramId(),
@@ -49,6 +49,11 @@ final readonly class AddThing
             $this->telegramResponder->reply(
                 $player->getTelegramId(),
                 $this->translator->trans('Wait other players...'),
+            );
+        } catch (ThingValueTooShortException) {
+            $this->telegramResponder->reply(
+                $player->getTelegramId(),
+                $this->translator->trans('Thing value is too short'),
             );
         } catch (GameException|\InvalidArgumentException $exception) {
             throw new TelegramException($exception->getMessage(), previous: $exception);
