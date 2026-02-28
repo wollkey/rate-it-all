@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
-use App\Game\Domain\Event\ThingHasBeenAdded;
+use App\Game\Domain\Event\ThingAdded;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
 use App\Telegram\TelegramResponder;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -20,7 +20,7 @@ final readonly class TellPlayerToAddNextThing
     ) {
     }
 
-    public function __invoke(ThingHasBeenAdded $event): void
+    public function __invoke(ThingAdded $event): void
     {
         if ($event->game->isPlayerThingLimitReached($event->player)) {
             $this->telegramResponder->send(

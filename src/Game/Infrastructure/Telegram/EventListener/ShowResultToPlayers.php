@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
-use App\Game\Domain\Event\TheGameIsOver;
+use App\Game\Domain\Event\GameCompleted;
 use App\Game\Domain\ValueObject\RatedThingResult;
 use App\Telegram\TelegramResponder;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -19,7 +19,7 @@ final readonly class ShowResultToPlayers
     ) {
     }
 
-    public function __invoke(TheGameIsOver $event): void
+    public function __invoke(GameCompleted $event): void
     {
         $results = $this->formatResults($event->game->getResults());
 

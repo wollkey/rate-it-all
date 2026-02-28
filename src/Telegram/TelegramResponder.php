@@ -39,20 +39,34 @@ final readonly class TelegramResponder
         );
     }
 
-    public function replyCallback(
-        TelegramInput $dto,
+    public function editMessage(
+        TelegramInput $telegramInput,
         string $text,
         ?InlineKeyboardMarkup $keyboardMarkup = null,
         ?string $parseMode = 'markdown',
     ): void {
-        $this->answerCallbackQuery($dto->callbackQuery->id);
-
         $this->api->editMessageText(
             text: $text,
-            chatId: $dto->callbackQuery->message->chat->id,
-            messageId: $dto->callbackQuery->message->messageId,
+            chatId: $telegramInput->callbackQuery->message->chat->id,
+            messageId: $telegramInput->callbackQuery->message->messageId,
             parseMode: $parseMode,
             replyMarkup: $keyboardMarkup,
+        );
+    }
+
+    public function replyCallback(
+        TelegramInput $telegramInput,
+        string $text,
+        ?InlineKeyboardMarkup $keyboardMarkup = null,
+        ?string $parseMode = 'markdown',
+    ): void {
+        $this->answerCallbackQuery($telegramInput->callbackQuery->id);
+
+        $this->editMessage(
+            telegramInput: $telegramInput,
+            text: $text,
+            keyboardMarkup: $keyboardMarkup,
+            parseMode: $parseMode,
         );
     }
 

@@ -7,18 +7,21 @@ namespace App\Game\Domain;
 use App\Game\Domain\Aggregate\AggregateRoot;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Entity\Thing;
-use App\Game\Domain\Event\GameCollectingStarted;
-use App\Game\Domain\Event\NextRatedThingTaken;
-use App\Game\Domain\Event\PlayerHasJoined;
+use App\Game\Domain\Event\CollectingStarted;
+use App\Game\Domain\Event\GameCompleted;
+use App\Game\Domain\Event\GameTerminated;
+use App\Game\Domain\Event\NextThingPicked;
+use App\Game\Domain\Event\PlayerJoined;
+use App\Game\Domain\Event\PlayerLeft;
 use App\Game\Domain\Event\RatingStarted;
-use App\Game\Domain\Event\TheGameIsOver;
-use App\Game\Domain\Event\ThingHasBeenAdded;
-use App\Game\Domain\Event\ThingHasBeenRated;
+use App\Game\Domain\Event\ThingAdded;
+use App\Game\Domain\Event\ThingRated;
 use App\Game\Domain\Exception\GameNotFinishedException;
 use App\Game\Domain\Exception\InvalidGameStateException;
 use App\Game\Domain\Exception\MasterCannotLeaveException;
 use App\Game\Domain\Exception\NoCurrentThingException;
 use App\Game\Domain\Exception\NotEnoughPlayersException;
+use App\Game\Domain\Exception\OnlyMasterCanFinishException;
 use App\Game\Domain\Exception\OnlyMasterCanStartException;
 use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
 use App\Game\Domain\Exception\PlayerNotInGameException;
@@ -95,7 +98,7 @@ final class Game extends AggregateRoot
         }
 
         $this->players->add($player);
-        $this->addEvent(new PlayerHasJoined($player, $this));
+        $this->addEvent(new PlayerJoined($player, $this));
     }
 
     public function leave(Player $player): void
@@ -105,9 +108,11 @@ final class Game extends AggregateRoot
         }
 
         $this->players->removeElement($player);
+        $this->addEvent(new PlayerLeft($player, $this));
 
         if ($this->players->count() <= 1) {
-            $this->finish();
+            $this->state = GameState::Finished;
+            $this->addEvent(new GameTerminated($this));
         }
     }
 
@@ -145,7 +150,7 @@ final class Game extends AggregateRoot
         $thing = new Thing($this, $author, $normalizedValue);
         $this->things->add($thing);
 
-        $this->addEvent(new ThingHasBeenAdded($author, $this));
+        $this->addEvent(new ThingAdded($author, $this));
 
         if ($this->isTotalThingLimitReached()) {
             $this->startRating();
@@ -171,7 +176,7 @@ final class Game extends AggregateRoot
 
         $this->state = GameState::Collecting;
 
-        $this->addEvent(new GameCollectingStarted($this));
+        $this->addEvent(new CollectingStarted($this));
     }
 
     /**
@@ -195,7 +200,7 @@ final class Game extends AggregateRoot
         }
 
         $this->currentThing->rate($player, $score);
-        $this->addEvent(new ThingHasBeenRated($player, $this));
+        $this->addEvent(new ThingRated($player, $this));
 
         if ($this->isCurrentThingFullyRated()) {
             $this->advanceToNextThing();
@@ -248,9 +253,18 @@ final class Game extends AggregateRoot
         return $results;
     }
 
-    public function finish(): void
+    /**
+     * @throws OnlyMasterCanFinishException
+     */
+    public function finish(Player $initiator): void
     {
+        if (!$this->isMaster($initiator)) {
+            throw new OnlyMasterCanFinishException($this);
+        }
+
         $this->state = GameState::Finished;
+        $this->currentThing = null;
+        $this->addEvent(new GameTerminated($this));
     }
 
     public function isFinished(): bool
@@ -330,13 +344,13 @@ final class Game extends AggregateRoot
         if ($unratedThings === []) {
             $this->currentThing = null;
             $this->state = GameState::Finished;
-            $this->addEvent(new TheGameIsOver($this));
+            $this->addEvent(new GameCompleted($this));
 
             return;
         }
 
         $this->currentThing = $unratedThings[array_rand($unratedThings)];
-        $this->addEvent(new NextRatedThingTaken($this));
+        $this->addEvent(new NextThingPicked($this));
     }
 
     private function pickNextThing(): bool

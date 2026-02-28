@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\EventListener;
 
-use App\Game\Domain\Event\GameCollectingStarted;
+use App\Game\Domain\Event\CollectingStarted;
 use App\Game\Infrastructure\Telegram\Handler\AddThing;
 use App\Telegram\Infrastructure\Conversation\ConversationStorage;
 use App\Telegram\TelegramResponder;
@@ -21,7 +21,7 @@ final readonly class NotifyPlayerAboutGameCollectingStarted
     ) {
     }
 
-    public function __invoke(GameCollectingStarted $event): void
+    public function __invoke(CollectingStarted $event): void
     {
         foreach ($event->game->getPlayers() as $player) {
             $this->conversations->save(
