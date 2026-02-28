@@ -66,7 +66,7 @@ final readonly class CreateGame
             ), range(ThingsPerPlayer::MIN_THINGS_PER_PLAYER, ThingsPerPlayer::MAX_THINGS_PER_PLAYER)),
             [
                 new InlineKeyboardButton(
-                    text: '⬅️ '.$this->translator->trans('Back to menu'),
+                    text: '⬅️ '.$this->translator->trans('Back'),
                     callbackData: ShowRules::COMMAND_NAME,
                 ),
             ],
