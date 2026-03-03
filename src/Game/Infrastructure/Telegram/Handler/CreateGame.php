@@ -106,7 +106,7 @@ final readonly class CreateGame
                 [
                     new InlineKeyboardButton(
                         text: '📤 '.$this->translator->trans('Invite friends'),
-                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.$this->translator->trans('Join the game at this link:'),
+                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.rawurlencode($this->translator->trans('Join the game at this link').' ☝️'),
                     ),
                 ],
             ]),

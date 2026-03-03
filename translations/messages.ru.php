@@ -27,7 +27,7 @@ return [
     // Setup
     'Enter the number of rated things per player:' => 'Выберите количество вещей на каждого игрока:',
     'Invite your friends using the button below' => 'Пригласите друзей по кнопке ниже',
-    'Join the game at this link:' => 'Присоединяйтесь к игре по ссылке:',
+    'Join the game at this link' => 'Присоединяйтесь к игре по ссылке',
     "And then start the game as soon as you're ready" => 'Начните игру, как только будете готовы',
 
     // Joining

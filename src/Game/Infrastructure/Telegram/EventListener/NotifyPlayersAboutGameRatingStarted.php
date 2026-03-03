@@ -25,7 +25,7 @@ final readonly class NotifyPlayersAboutGameRatingStarted
         foreach ($event->game->getPlayers() as $player) {
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: $this->translator->trans('All things collected! Rating begins!').' ⚡',
+                text: $this->translator->trans('And now — rate all this nonsense!').' ⚡',
             );
 
             $this->telegramResponder->send(
