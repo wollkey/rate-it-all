@@ -121,7 +121,7 @@ final readonly class StartBot
             ],
             [
                 new InlineKeyboardButton(
-                    text: '📋 '.$this->translator->trans('How to Play'),
+                    text: '📖 '.$this->translator->trans('How to Play'),
                     callbackData: ShowRules::COMMAND_NAME,
                 ),
             ],
@@ -130,7 +130,7 @@ final readonly class StartBot
         $this->telegramResponder->send(
             chatId: $telegramDto->message->chat->id,
             text: implode(PHP_EOL, [
-                $this->translator->trans('Hi there!'),
+                $this->translator->trans('Hi there!').'👋',
                 $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),
             ]),
             keyboardMarkup: new InlineKeyboardMarkup($keyboard),

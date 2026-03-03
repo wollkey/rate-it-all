@@ -17,6 +17,9 @@ final readonly class CreateGameUseCase
     ) {
     }
 
+    /**
+     * @throws PlayerAlreadyInAnotherGameException
+     */
     public function __invoke(Player $master, ThingsPerPlayer $thingsPerPlayer): Game
     {
         $existingGame = $this->gameRepository->findActiveByPlayer($master);

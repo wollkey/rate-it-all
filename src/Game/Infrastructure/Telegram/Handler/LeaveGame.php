@@ -74,7 +74,7 @@ final readonly class LeaveGame
 
         $this->telegramResponder->reply(
             $telegramDto,
-            $this->translator->trans('See you at another game!'),
+            $this->translator->trans('See you at another game!').' 👋',
             new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(

@@ -23,7 +23,9 @@ final readonly class ShowResultToPlayers
     {
         $results = $this->formatResults($event->game->getResults());
 
-        $text = $this->translator->trans('The game is over!').PHP_EOL.PHP_EOL.$results;
+        $text = $this->translator->trans('The game is over!').' 🏁'
+            .PHP_EOL.$this->translator->trans('Congrats! You really rated all this nonsense!').' 🎉'
+            .PHP_EOL.PHP_EOL.$results;
 
         foreach ($event->game->getPlayers() as $player) {
             $this->telegramResponder->send(

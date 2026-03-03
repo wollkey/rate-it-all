@@ -25,7 +25,7 @@ final readonly class SendNextRatedThingToPlayers
         foreach ($event->game->getPlayers() as $player) {
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: $this->translator->trans(
+                text: '🤔 '.$this->translator->trans(
                     'Rate the next thing: anyThing',
                     ['anyThing' => $event->game->getCurrentThing()->getValue()]
                 ),

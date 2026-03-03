@@ -37,7 +37,7 @@ final readonly class GameInfo
             $this->translator->trans('Gameplay rules:'),
             ...array_map(static fn (string $rule) => "- $rule", $this->rules()),
             '',
-            $this->translator->trans('Have fun!'),
+            $this->translator->trans('Have fun!').' 🎊',
         ]);
     }
 }

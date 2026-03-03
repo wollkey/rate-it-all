@@ -47,7 +47,7 @@ final readonly class AddThing
         } catch (ThingsPlayerLimitReachedException) {
             $this->telegramResponder->reply(
                 $player->getTelegramId(),
-                $this->translator->trans('Wait other players...'),
+                $this->translator->trans('Wait other players...').'⏳',
             );
         } catch (ThingValueTooShortException) {
             $this->telegramResponder->reply(

@@ -42,7 +42,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
                 $this->translator->trans('Players joined the game:'),
                 ...$game->getPlayers()->map(static fn (Player $player) => $player->getFirstName()),
                 '',
-                $this->translator->trans('As soon as you are ready, start the game'),
+                $this->translator->trans('As soon as everyone is ready, start the game').' 🚀',
             ]),
             chatId: $chatId,
             messageId: $editedMessageId,
@@ -56,8 +56,8 @@ final readonly class NotifyMasterAboutJoinedPlayer
                 ],
                 [
                     new InlineKeyboardButton(
-                        text: '📤 Пригласить друзей',
-                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text=Присоединяйся к игре!',
+                        text: '📤 '.$this->translator->trans('Invite friends'),
+                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.$this->translator->trans('Join the game!'),
                     ),
                 ],
             ]),

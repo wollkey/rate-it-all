@@ -7,7 +7,9 @@ namespace App\Game\Application\UseCase;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\InvalidGameStateException;
 use App\Game\Domain\Exception\PlayerAlreadyInAnotherGameException;
+use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
 use App\Game\Domain\Repository\GameRepository;
 use Symfony\Component\Uid\Uuid;
 
@@ -20,7 +22,9 @@ final readonly class JoinGameUseCase
 
     /**
      * @throws GameNotFoundException
-     * @throws GameException
+     * @throws PlayerAlreadyInAnotherGameException
+     * @throws InvalidGameStateException
+     * @throws PlayerAlreadyInCurrentGameException
      */
     public function __invoke(Player $player, Uuid $gameCode): void
     {

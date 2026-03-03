@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener]
-final readonly class OnPlayerLeft
+final readonly class NotifyPlayersAboutPlayerLeftGame
 {
     public function __construct(
         private TranslatorInterface $translator,

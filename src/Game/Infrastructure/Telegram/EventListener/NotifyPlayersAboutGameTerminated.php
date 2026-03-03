@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener]
-final readonly class OnGameTerminated
+final readonly class NotifyPlayersAboutGameTerminated
 {
     public function __construct(
         private TranslatorInterface $translator,

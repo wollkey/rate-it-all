@@ -234,8 +234,6 @@ final class Game extends AggregateRoot
 
     /**
      * @return non-empty-list<RatedThingResult>
-     *
-     * @throws GameNotFinishedException
      */
     public function getResults(): array
     {

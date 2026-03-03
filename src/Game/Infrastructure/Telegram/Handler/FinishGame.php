@@ -58,7 +58,7 @@ final readonly class FinishGame
         } catch (OnlyMasterCanFinishException) {
             $this->telegramResponder->reply(
                 $telegramInput,
-                $this->translator->trans('As player you can only leave the game. Do you really want it?'),
+                $this->translator->trans('Only the game master can end this party. You can gracefully exit, though.'),
                 new InlineKeyboardMarkup([
                     [
                         new InlineKeyboardButton(
@@ -74,7 +74,7 @@ final readonly class FinishGame
 
         $this->telegramResponder->reply(
             $telegramInput,
-            $this->translator->trans('The game is over!'),
+            $this->translator->trans('The game is over!').' 🏁',
             new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(

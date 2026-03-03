@@ -101,12 +101,12 @@ final readonly class CreateGame
 
         $this->telegramResponder->replyCallback(
             $telegramInput,
-            'Отправьте ссылку друзьям, чтобы они присоединились',
+            $this->translator->trans('Invite your friends using the button below'),
             new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
-                        text: '📤 Поделиться с друзьями',
-                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text=Присоединяйся к игре!',
+                        text: '📤 '.$this->translator->trans('Invite friends'),
+                        url: 'https://t.me/share/url?url='.urlencode($joinLink).'&text='.$this->translator->trans('Join the game at this link:'),
                     ),
                 ],
             ]),

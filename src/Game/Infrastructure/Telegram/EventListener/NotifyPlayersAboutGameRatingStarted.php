@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener]
-final readonly class NotifyPlayerAboutGameRatingStarted
+final readonly class NotifyPlayersAboutGameRatingStarted
 {
     public function __construct(
         private TelegramResponder $telegramResponder,
@@ -25,12 +25,12 @@ final readonly class NotifyPlayerAboutGameRatingStarted
         foreach ($event->game->getPlayers() as $player) {
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: $this->translator->trans('All things collected! Rating begins!'),
+                text: $this->translator->trans('All things collected! Rating begins!').' ⚡',
             );
 
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: $this->translator->trans(
+                text: '🤔 '.$this->translator->trans(
                     'Rate the thing: anyThing',
                     ['anyThing' => $event->game->getCurrentThing()->getValue()],
                 ),

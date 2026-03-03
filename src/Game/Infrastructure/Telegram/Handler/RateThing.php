@@ -47,12 +47,12 @@ final readonly class RateThing
 
             $this->telegramResponder->editMessage(
                 $telegramInput,
-                "$thing — ⭐ {$rating->getRating()}",
+                "$thing — {$rating->getRating()} ⭐",
             );
         } catch (ThingIsAlreadyRatedException) {
             $this->telegramResponder->send(
                 $player->getTelegramId(),
-                implode(PHP_EOL, [$this->translator->trans('You must not change you rating. Choose wisely.')])
+                implode(PHP_EOL, [$this->translator->trans('You must not change your rating. Choose wisely.')])
             );
         } catch (GameException $exception) {
             throw new TelegramException($exception->getMessage());

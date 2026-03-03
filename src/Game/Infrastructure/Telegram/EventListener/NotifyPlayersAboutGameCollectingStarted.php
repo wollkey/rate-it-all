@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener]
-final readonly class NotifyPlayerAboutGameCollectingStarted
+final readonly class NotifyPlayersAboutGameCollectingStarted
 {
     public function __construct(
         private ConversationStorage $conversations,
@@ -31,7 +31,7 @@ final readonly class NotifyPlayerAboutGameCollectingStarted
 
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: $this->translator->trans('Add any crazy thing that came into your head:'),
+                text: '💡 '.$this->translator->trans('Add any crazy thing that came into your head:'),
             );
         }
     }
