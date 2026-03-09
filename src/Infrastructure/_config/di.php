@@ -15,8 +15,8 @@ return static function (ContainerConfigurator $container): void {
     $services->set(LocaleSubscriber::class)
         ->arg('$defaultLocale', '%kernel.default_locale%');
 
-    if ($container->env() === 'prod') {
-        $services->set(PsrLogMessageProcessor::class)
-            ->tag('monolog.processor', ['handler' => 'sentry']);
-    }
+//    if ($container->env() === 'prod') {
+//        $services->set(PsrLogMessageProcessor::class)
+//            ->tag('monolog.processor', ['handler' => 'sentry']);
+//    }
 };
