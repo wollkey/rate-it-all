@@ -59,7 +59,7 @@ CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
 FROM base AS production
 
 COPY .docker/php/config/prod.ini /usr/local/etc/php/conf.d/
-
+COPY .docker/php/Caddyfile /etc/caddy/Caddyfile
 COPY composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
