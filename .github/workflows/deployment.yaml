@@ -98,7 +98,7 @@ jobs:
                         echo "🔧 Running post-deploy..."
                         docker exec game-app php bin/console cache:clear --env=prod --no-debug
                         docker exec game-app php bin/console doctrine:migrations:migrate --no-interaction --env=prod --no-debug
-                        docker exec game-app php bin/console app:telegram-set-webhook
+                        docker exec game-app php bin/console app:telegram:set-webhook
                         
                         # Check if container is running
                         if [ "$(docker ps -q -f name=game-app)" ]; then
