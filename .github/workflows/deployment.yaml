@@ -88,8 +88,6 @@ jobs:
                         --restart unless-stopped \
                         --env-file /opt/game/.env.prod \
                         -p 127.0.0.1:8080:8080 \
-                        -p 443:443 \
-                        -p 443:443/udp \
                         ghcr.io/${{ github.repository }}:latest
                         
                         # Wait for container to be healthy
