@@ -18,7 +18,7 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
 
     $services
         ->load('App\\Game\\', '../*')
-        ->exclude('../../{Domain,_config}');
+        ->exclude('../{_config}');
 
     $builder->registerAttributeForAutoconfiguration(
         OnGameState::class,

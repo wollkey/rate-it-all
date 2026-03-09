@@ -21,7 +21,7 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
 
     $services
         ->load('App\\Telegram\\', '../*')
-        ->exclude('../../{Domain,_config}');
+        ->exclude('../{_config}');
 
     $services->set(TelegramBotApi::class)
         ->args(['$token' => env('TELEGRAM_API_KEY')]);
