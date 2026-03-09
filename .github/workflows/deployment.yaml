@@ -87,7 +87,7 @@ jobs:
                         --name game-app \
                         --restart unless-stopped \
                         --env-file /opt/game/.env.prod \
-                        -p 8080:8080 \
+                        -p 127.0.0.1:8080:8080 \
                         -p 443:443 \
                         -p 443:443/udp \
                         ghcr.io/${{ github.repository }}:latest
