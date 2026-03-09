@@ -43,7 +43,7 @@ help: ## Show this help message
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
 .PHONY: help
 
-fresh: down cache setup up install ## Fresh start (stop, clear cache, rebuild)
+fresh: down up cache setup install ## Fresh start (stop, clear cache, rebuild)
 	@echo -e "$(GREEN)✓ Fresh environment ready$(RESET)"
 .PHONY: fresh
 

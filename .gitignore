@@ -7,7 +7,7 @@
 /public/bundles/
 /var/
 /vendor/
-.docker-compose.override.yaml
+docker-compose.override.yaml
 ###< symfony/framework-bundle ###
 
 ###> Project files ###
