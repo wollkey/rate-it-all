@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Infrastructure\Application\LocaleSubscriber;
+use App\Infrastructure\Http\SentryTestController;
 use Monolog\Level;
-use Monolog\Processor\PsrLogMessageProcessor;
 use Sentry\SentryBundle\Monolog\LogsHandler;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -17,11 +17,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set(LocaleSubscriber::class)
         ->arg('$defaultLocale', '%kernel.default_locale%');
 
-    if ($container->env() === 'prod') {
-        $services->set(PsrLogMessageProcessor::class)
-            ->tag('monolog.processor', ['handler' => 'sentry']);
+    $services->set(SentryTestController::class);
 
+    if ($container->env() === 'prod') {
         $services->set(LogsHandler::class)
-            ->args([Level::Warning]);
+            ->args([Level::Info]);
     }
 };

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Game\Application\UseCase;
 
 use App\Game\Domain\Entity\Player;
-use App\Game\Domain\Exception\GameException;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\InvalidGameStateException;
 use App\Game\Domain\Exception\PlayerAlreadyInAnotherGameException;
