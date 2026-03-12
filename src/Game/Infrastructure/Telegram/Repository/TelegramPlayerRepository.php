@@ -9,7 +9,7 @@ use App\Game\Domain\Repository\PlayerRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class TelegramPlayerRepository extends ServiceEntityRepository implements PlayerRepository
+final class TelegramPlayerRepository extends ServiceEntityRepository implements PlayerRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
