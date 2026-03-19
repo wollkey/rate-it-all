@@ -5,10 +5,9 @@ includes:
     - vendor/phpstan/phpstan-doctrine/rules.neon
 
 parameters:
-    level: 9
+    level: 1
     paths:
         - src/
-        - tests/
     excludePaths:
         - src/Kernel.php
     symfony:

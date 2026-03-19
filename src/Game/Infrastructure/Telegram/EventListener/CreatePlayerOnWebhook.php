@@ -28,13 +28,11 @@ final readonly class CreatePlayerOnWebhook
             return;
         }
 
-        $player = new Player()
-            ->setFirstName($user->firstName)
-            ->setTelegramId($user->id);
-
-        if ($user->lastName !== null) {
-            $player->setLastName($user->lastName);
-        }
+        $player = new Player(
+            telegramId: $user->id,
+            firstName: $user->firstName,
+            lastName: $user->lastName,
+        );
 
         $this->entityManager->persist($player);
         $this->entityManager->flush();

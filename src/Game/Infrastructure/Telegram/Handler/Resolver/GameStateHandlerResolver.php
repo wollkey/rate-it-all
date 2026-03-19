@@ -37,6 +37,7 @@ final readonly class GameStateHandlerResolver implements HandlerResolver
 
         $stateKey = $game->getState()->value;
 
+        /* @var callable(TelegramInput): void */
         return $this->handlers->has($stateKey)
             ? $this->handlers->get($stateKey)
             : null;

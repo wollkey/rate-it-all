@@ -66,12 +66,11 @@ final readonly class WebHookController
         try {
             $handler($telegramInput);
         } catch (TelegramException $exception) {
-            $this->logger->error(json_encode([
-                'error' => $exception->getMessage(),
+            $this->logger->error($exception->getMessage(), [
+                'exception' => $exception,
                 'previous' => $exception->getPrevious()?->getMessage(),
-                'trace' => $exception->getTrace(),
-            ]));
-            $exceptionMessage = !empty($exception->getMessage()) ? $exception->getMessage() : 'Unknown error';
+            ]);
+            $exceptionMessage = $exception->getMessage() !== '' ? $exception->getMessage() : 'Unknown error';
             $this->telegram->reply($telegramInput, $exceptionMessage);
         }
     }

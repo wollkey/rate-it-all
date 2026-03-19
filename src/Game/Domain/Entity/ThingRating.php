@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Domain\Entity;
 
+use App\Game\Domain\ValueObject\Score;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -18,12 +19,12 @@ final class ThingRating
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Thing::class, inversedBy: 'ratings')]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-        private Thing $thing,
+        private readonly Thing $thing,
         #[ORM\ManyToOne(targetEntity: Player::class)]
         #[ORM\JoinColumn(nullable: false)]
-        private Player $player,
-        #[ORM\Column(type: 'smallint')]
-        private int $score,
+        private readonly Player $player,
+        #[ORM\Embedded(class: Score::class, columnPrefix: false)]
+        private readonly Score $score
     ) {
     }
 
@@ -32,39 +33,18 @@ final class ThingRating
         return $this->id;
     }
 
-    public function getThing(): Thing
-    {
-        return $this->thing;
-    }
-
-    public function setThing(Thing $thing): ThingRating
-    {
-        $this->thing = $thing;
-
-        return $this;
-    }
-
     public function getPlayer(): Player
     {
         return $this->player;
     }
 
-    public function setPlayer(Player $player): ThingRating
+    public function getThing(): Thing
     {
-        $this->player = $player;
-
-        return $this;
+        return $this->thing;
     }
 
-    public function getScore(): int
+    public function getScore(): Score
     {
         return $this->score;
-    }
-
-    public function setScore(int $score): ThingRating
-    {
-        $this->score = $score;
-
-        return $this;
     }
 }

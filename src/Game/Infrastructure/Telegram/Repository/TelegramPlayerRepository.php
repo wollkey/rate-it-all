@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Telegram\Repository;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -19,5 +20,10 @@ final class TelegramPlayerRepository extends ServiceEntityRepository implements 
     public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Player
     {
         return parent::findOneBy(['telegramId' => $id]);
+    }
+
+    public function get(mixed $id, $lockMode = null, $lockVersion = null): Player
+    {
+        return parent::findOneBy(['telegramId' => $id]) ?? throw new PlayerNotFoundException();
     }
 }

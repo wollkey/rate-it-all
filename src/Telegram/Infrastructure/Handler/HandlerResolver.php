@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 interface HandlerResolver
 {
     /**
-     * @return callable(TelegramInput):void|null
+     * @return (callable(TelegramInput): void)|null
      */
     public function resolve(TelegramInput $telegramInput): ?callable;
 }

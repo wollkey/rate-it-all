@@ -22,7 +22,7 @@ final readonly class ChainHandlerResolver implements HandlerResolver
     }
 
     /**
-     * @return callable(TelegramInput): void|null
+     * @return (callable(TelegramInput): void)|null
      */
     public function resolve(TelegramInput $telegramInput): ?callable
     {
@@ -36,8 +36,15 @@ final readonly class ChainHandlerResolver implements HandlerResolver
         return null;
     }
 
+    /**
+     * @param (callable(TelegramInput): void)&object $handler
+     */
     private function allows(callable $handler, TelegramInput $telegramInput): bool
     {
+        if (!is_object($handler)) {
+            return false;
+        }
+
         $reflection = new \ReflectionClass($handler);
         $attributes = $reflection->getAttributes(AsTelegramHandler::class);
 
@@ -49,7 +56,7 @@ final readonly class ChainHandlerResolver implements HandlerResolver
         $attribute = $attributes[0]->newInstance();
 
         $chatType = ChatType::tryFrom($telegramInput->message->chat->type);
-        if ($chatType !== null && !in_array($chatType, $attribute->chatTypes)) {
+        if ($chatType !== null && !in_array($chatType, $attribute->chatTypes, true)) {
             return false;
         }
 

@@ -27,10 +27,10 @@ final readonly class JoinGameUseCase
      */
     public function __invoke(Player $player, Uuid $gameCode): void
     {
-        $game = $this->gameRepository->findByCode($gameCode) ?? throw new GameNotFoundException();
+        $game = $this->gameRepository->getByCode($gameCode);
         $existingGame = $this->gameRepository->findActiveByPlayer($player);
 
-        if ($existingGame !== null && $existingGame->getId() !== $game->getId()) {
+        if ($existingGame !== null && $existingGame->getIdOrFail() !== $game->getIdOrFail()) {
             throw new PlayerAlreadyInAnotherGameException($existingGame);
         }
 

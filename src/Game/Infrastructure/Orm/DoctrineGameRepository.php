@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Game\Infrastructure\Orm;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Game;
 use App\Game\Domain\GameState;
 use App\Game\Domain\Repository\GameRepository;
@@ -25,6 +26,11 @@ final class DoctrineGameRepository extends ServiceEntityRepository implements Ga
     public function findByCode(Uuid $code): ?Game
     {
         return $this->findOneBy(['code' => $code]);
+    }
+
+    public function getByCode(Uuid $code): Game
+    {
+        return $this->findOneBy(['code' => $code]) ?? throw new GameNotFoundException();
     }
 
     public function save(Game $game): void

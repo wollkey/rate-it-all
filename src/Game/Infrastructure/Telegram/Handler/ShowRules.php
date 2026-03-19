@@ -30,10 +30,10 @@ final readonly class ShowRules
     /**
      * @throws \Exception
      */
-    public function __invoke(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramInput): void
     {
         $this->telegram->reply(
-            $telegramDto,
+            $telegramInput,
             $this->gameInfo->prettyInfo(),
             new InlineKeyboardMarkup([
                 [

@@ -8,6 +8,7 @@ use App\Game\Application\UseCase\StartGameUseCase;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\NotEnoughPlayersException;
 use App\Game\Domain\Exception\OnlyMasterCanStartException;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
@@ -33,11 +34,11 @@ final readonly class StartGame
     }
 
     /**
-     * @throws \Exception
+     * @throws PlayerNotFoundException
      */
     public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramInput->user->id);
+        $player = $this->playerRepository->get($telegramInput->user->id);
 
         try {
             ($this->startGameUseCase)($player);

@@ -6,6 +6,8 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\CreateGameUseCase;
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\PlayerAlreadyInAnotherGameException;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Game;
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\Repository\PlayerRepository;
@@ -19,6 +21,7 @@ use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[OnCommand(command: self::COMMAND_NAME)]
@@ -40,9 +43,13 @@ final readonly class CreateGame
     ) {
     }
 
+    /**
+     * @throws PlayerNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramInput->user->id);
+        $player = $this->playerRepository->get($telegramInput->user->id);
         $game = $this->gameRepository->findActiveByPlayer($player);
 
         if ($game !== null) {
@@ -57,6 +64,9 @@ final readonly class CreateGame
         };
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function askThingsCount(TelegramInput $telegramInput): void
     {
         $inlineKeyboard = new InlineKeyboardMarkup([
@@ -93,9 +103,23 @@ final readonly class CreateGame
 
         $this->gameTelegramContext->saveEditedMessage($telegramInput->message);
 
+        $callbackData = $telegramInput->callbackQuery->data;
+        if (!is_numeric($callbackData)) {
+            $this->telegramResponder->replyCallback(
+                $telegramInput,
+                $this->translator->trans('Value of things per player must be a number'),
+            );
+
+            return;
+        }
+
         $numberOfThings = new ThingsPerPlayer((int) $telegramInput->callbackQuery->data);
 
-        $newGame = ($this->createGameUseCase)($player, $numberOfThings);
+        try {
+            $newGame = ($this->createGameUseCase)($player, $numberOfThings);
+        } catch (PlayerAlreadyInAnotherGameException $e) {
+            throw new \LogicException('Player already in game after pre-check passed', previous: $e);
+        }
 
         $joinLink = "https://t.me/{$this->telegramBotName}?start={$newGame->getCode()->toRfc4122()}";
 

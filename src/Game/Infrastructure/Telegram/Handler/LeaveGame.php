@@ -7,6 +7,7 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 use App\Game\Application\UseCase\LeaveGameUseCase;
 use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Exception\MasterCannotLeaveException;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
@@ -32,17 +33,17 @@ final readonly class LeaveGame
     }
 
     /**
-     * @throws \Exception
+     * @throws PlayerNotFoundException
      */
-    public function __invoke(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
+        $player = $this->playerRepository->get($telegramInput->user->id);
 
         try {
             ($this->leaveGameUseCase)($player);
         } catch (GameNotFoundException) {
             $this->telegramResponder->reply(
-                $telegramDto,
+                $telegramInput,
                 $this->translator->trans('You are not in any game').PHP_EOL.$this->translator->trans('Create a game or join an existing one'),
                 new InlineKeyboardMarkup([
                     [
@@ -57,7 +58,7 @@ final readonly class LeaveGame
             return;
         } catch (MasterCannotLeaveException) {
             $this->telegramResponder->reply(
-                $telegramDto,
+                $telegramInput,
                 $this->translator->trans('As master you can only finish the game. Do you really want it?'),
                 new InlineKeyboardMarkup([
                     [
@@ -73,7 +74,7 @@ final readonly class LeaveGame
         }
 
         $this->telegramResponder->reply(
-            $telegramDto,
+            $telegramInput,
             $this->translator->trans('See you at another game!').' 👋',
             new InlineKeyboardMarkup([
                 [

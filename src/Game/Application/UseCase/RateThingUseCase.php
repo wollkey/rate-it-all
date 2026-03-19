@@ -11,7 +11,7 @@ use App\Game\Domain\Exception\NoCurrentThingException;
 use App\Game\Domain\Exception\PlayerNotInGameException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Repository\GameRepository;
-use App\Game\Domain\ValueObject\Rating;
+use App\Game\Domain\ValueObject\Score;
 
 final readonly class RateThingUseCase
 {
@@ -27,12 +27,12 @@ final readonly class RateThingUseCase
      * @throws PlayerNotInGameException
      * @throws ThingIsAlreadyRatedException
      */
-    public function __invoke(Player $player, Rating $rating): void
+    public function __invoke(Player $player, Score $rating): void
     {
         $game = $this->gameRepository->findActiveByPlayer($player)
             ?? throw new GameNotFoundException();
 
-        $game->rate($player, $rating->getRating());
+        $game->rate($player, $rating);
         $this->gameRepository->save($game);
     }
 }

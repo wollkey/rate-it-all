@@ -18,6 +18,9 @@ final readonly class TelegramInput
     ) {
     }
 
+    /**
+     * @phpstan-assert-if-true CallbackQuery $this->callbackQuery
+     */
     public function isCallback(): bool
     {
         return $this->callbackQuery !== null;

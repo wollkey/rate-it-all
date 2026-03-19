@@ -15,14 +15,15 @@ final class Player
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private string $firstName;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $lastName = null;
-
-    #[ORM\Column(type: 'bigint')]
-    private int $telegramId;
+    public function __construct(
+        #[ORM\Column(type: 'bigint')]
+        private readonly int $telegramId,
+        #[ORM\Column(length: 255)]
+        private string $firstName,
+        #[ORM\Column(length: 255, nullable: true)]
+        private ?string $lastName = null,
+    ) {
+    }
 
     public function getId(): ?int
     {
@@ -34,23 +35,9 @@ final class Player
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
     public function getLastName(): ?string
     {
         return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
     }
 
     public function getTelegramId(): int
@@ -58,10 +45,9 @@ final class Player
         return $this->telegramId;
     }
 
-    public function setTelegramId(int $telegramId): static
+    public function updateProfile(string $firstName, ?string $lastName): void
     {
-        $this->telegramId = $telegramId;
-
-        return $this;
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
     }
 }

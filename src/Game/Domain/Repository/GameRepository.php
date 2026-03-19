@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Game\Domain\Repository;
 
 use App\Game\Domain\Entity\Player;
+use App\Game\Domain\Exception\GameNotFoundException;
 use App\Game\Domain\Game;
 use Symfony\Component\Uid\Uuid;
 
 interface GameRepository
 {
     public function findByCode(Uuid $code): ?Game;
+
+    /**
+     * @throws GameNotFoundException
+     */
+    public function getByCode(Uuid $code): Game;
 
     public function save(Game $game): void;
 

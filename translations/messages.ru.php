@@ -31,6 +31,7 @@ return [
     "And then start the game as soon as you're ready" => 'Начните игру, как только будете готовы',
 
     // Joining
+    'This game has already started' => 'Игра уже началась',
     'You have joined the game!' => 'Вы в игре!',
     'Players joined the game:' => 'Игроки в игре:',
     'As soon as everyone is ready, start the game' => 'Как только все готовы — начинайте!',
@@ -59,6 +60,7 @@ return [
     'playerName left the game' => 'playerName покинул игру',
 
     // Validation
+    'Value of things per player must be a number' => 'Значение должно быть числом',
     'Thing value is too short' => 'Слишком короткое название',
     'This is already on the list of madness list' => 'Это уже есть в списке безумств',
     'Need at least 2 players to start' => 'Нужно хотя бы 2 игрока',

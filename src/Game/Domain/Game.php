@@ -27,10 +27,12 @@ use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
 use App\Game\Domain\Exception\PlayerNotInGameException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
+use App\Game\Domain\Exception\ThingListIsEmptyException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Exception\ThingValueTooShortException;
 use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\RatedThingResult;
+use App\Game\Domain\ValueObject\Score;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,15 +54,16 @@ final class Game extends AggregateRoot
     #[ORM\Column(length: 20, enumType: GameState::class)]
     private GameState $state;
 
-    #[ORM\Column(type: 'smallint')]
-    private int $thingsPerPlayer;
-
-    /** @var Collection<int, Player> */
+    /**
+     * @var Collection<int, Player>
+     */
     #[ORM\ManyToMany(targetEntity: Player::class, inversedBy: 'game')]
     #[ORM\JoinTable(name: 'game_player')]
     private Collection $players;
 
-    /** @var Collection<int, Thing> */
+    /**
+     * @var Collection<int, Thing>
+     */
     #[ORM\OneToMany(targetEntity: Thing::class, mappedBy: 'game', cascade: ['persist'])]
     private Collection $things;
 
@@ -75,12 +78,11 @@ final class Game extends AggregateRoot
         #[ORM\ManyToOne(targetEntity: Player::class)]
         #[ORM\JoinColumn(nullable: false)]
         private readonly Player $master,
-        #[ORM\Column]
-        ThingsPerPlayer $thingsPerPlayer,
+        #[ORM\Embedded(class: ThingsPerPlayer::class, columnPrefix: false)]
+        private readonly ThingsPerPlayer $thingsPerPlayer,
     ) {
         $this->code = new UuidV7();
         $this->state = GameState::Waiting;
-        $this->thingsPerPlayer = $thingsPerPlayer->getValue();
         $this->createdAt = new \DateTimeImmutable();
         $this->players = new ArrayCollection();
         $this->things = new ArrayCollection();
@@ -88,6 +90,10 @@ final class Game extends AggregateRoot
         $this->players->add($master);
     }
 
+    /**
+     * @throws PlayerAlreadyInCurrentGameException
+     * @throws InvalidGameStateException
+     */
     public function join(Player $player): void
     {
         if ($this->hasPlayer($player)) {
@@ -119,15 +125,18 @@ final class Game extends AggregateRoot
 
     public function hasPlayer(Player $targetPlayer): bool
     {
-        return $this->players->exists(fn (int $key, Player $player): bool => $player->getId() === $targetPlayer->getId());
+        return $this->players->exists(
+            fn (int|string $key, Player $player): bool => $player->getId() === $targetPlayer->getId(),
+        );
     }
 
     /**
      * @throws InvalidGameStateException
      * @throws PlayerNotInGameException
      * @throws ThingIsAlreadyInTheListException
-     * @throws ThingsPlayerLimitReachedException
+     * @throws ThingListIsEmptyException
      * @throws ThingValueTooShortException
+     * @throws ThingsPlayerLimitReachedException
      */
     public function addThing(Player $author, string $value): Thing
     {
@@ -170,6 +179,10 @@ final class Game extends AggregateRoot
         return $this->countPlayerThings($player) >= $this->thingsPerPlayer;
     }
 
+    /**
+     * @throws NotEnoughPlayersException
+     * @throws OnlyMasterCanStartException
+     */
     public function startCollecting(Player $initiator): void
     {
         if (!$this->isMaster($initiator)) {
@@ -191,7 +204,7 @@ final class Game extends AggregateRoot
      * @throws PlayerNotInGameException
      * @throws InvalidGameStateException
      */
-    public function rate(Player $player, int $score): void
+    public function rate(Player $player, Score $rating): void
     {
         if (!$this->hasPlayer($player)) {
             throw new PlayerNotInGameException();
@@ -205,7 +218,7 @@ final class Game extends AggregateRoot
             throw new NoCurrentThingException();
         }
 
-        $this->currentThing->rate($player, $score);
+        $this->currentThing->rate($player, $rating);
         $this->addEvent(new ThingRated($player, $this));
 
         if ($this->isCurrentThingFullyRated()) {
@@ -219,10 +232,12 @@ final class Game extends AggregateRoot
             return false;
         }
 
-        return $this->currentThing->isFullyRatedBy($this->getPlayersCount());
+        return $this->currentThing->isFullyRatedBy($this->players->count());
     }
 
-    /** @return list<Player> */
+    /**
+     * @return list<Player>
+     */
     public function getPlayersWhoNotRated(): array
     {
         if ($this->currentThing === null) {
@@ -234,6 +249,8 @@ final class Game extends AggregateRoot
 
     /**
      * @return non-empty-list<RatedThingResult>
+     *
+     * @throws GameNotFinishedException
      */
     public function getResults(): array
     {
@@ -253,6 +270,10 @@ final class Game extends AggregateRoot
             $results,
             static fn (RatedThingResult $a, RatedThingResult $b): int => $b->averageScore <=> $a->averageScore,
         );
+
+        if ($results === []) {
+            throw new \LogicException('Finished game must have things');
+        }
 
         return $results;
     }
@@ -291,6 +312,14 @@ final class Game extends AggregateRoot
         return $this->id;
     }
 
+    /**
+     * @return positive-int
+     */
+    public function getIdOrFail(): int
+    {
+        return $this->id ?? throw new \LogicException('Game has no ID yet');
+    }
+
     public function getCode(): Uuid
     {
         return $this->code;
@@ -301,19 +330,25 @@ final class Game extends AggregateRoot
         return $this->state;
     }
 
+    /**
+     * @return int<1, 5>
+     */
     public function getThingsPerPlayer(): int
     {
         return $this->thingsPerPlayer;
     }
 
     /**
-     * @return Collection<Player>
+     * @return Collection<int, Player>
      */
     public function getPlayers(): Collection
     {
         return $this->players;
     }
 
+    /**
+     * @return Collection<int, Thing>
+     */
     public function getThings(): Collection
     {
         return $this->things;
@@ -329,10 +364,13 @@ final class Game extends AggregateRoot
         return $this->createdAt;
     }
 
+    /**
+     * @throws ThingListIsEmptyException
+     */
     private function startRating(): void
     {
         $this->state = GameState::Rating;
-        $this->pickNextThing();
+        $this->currentThing = $this->getRandomUnratedThing() ?? throw new ThingListIsEmptyException();
         $this->addEvent(new RatingStarted($this));
     }
 
@@ -343,9 +381,9 @@ final class Game extends AggregateRoot
 
     private function advanceToNextThing(): void
     {
-        $unratedThings = $this->getUnratedThings();
+        $unratedThing = $this->getRandomUnratedThing();
 
-        if ($unratedThings === []) {
+        if ($unratedThing === null) {
             $this->currentThing = null;
             $this->state = GameState::Finished;
             $this->addEvent(new GameCompleted($this));
@@ -353,27 +391,20 @@ final class Game extends AggregateRoot
             return;
         }
 
-        $this->currentThing = $unratedThings[array_rand($unratedThings)];
+        $this->currentThing = $unratedThing;
         $this->addEvent(new NextThingPicked($this));
     }
 
-    private function pickNextThing(): bool
+    private function getRandomUnratedThing(): ?Thing
     {
         $unratedThings = $this->getUnratedThings();
 
-        if (empty($unratedThings)) {
-            $this->currentThing = null;
-            $this->state = GameState::Finished;
-
-            return false;
-        }
-
-        $this->currentThing = $unratedThings[array_rand($unratedThings)];
-
-        return true;
+        return $unratedThings === [] ? null : $unratedThings[array_rand($unratedThings)];
     }
 
-    /** @return list<Thing> */
+    /**
+     * @return list<Thing>
+     */
     private function getUnratedThings(): array
     {
         $playerCount = $this->players->count();
@@ -388,6 +419,9 @@ final class Game extends AggregateRoot
         return $unrated;
     }
 
+    /**
+     * @return non-negative-int
+     */
     private function countPlayerThings(Player $player): int
     {
         $count = 0;
@@ -400,19 +434,8 @@ final class Game extends AggregateRoot
         return $count;
     }
 
-    public function thingExists(string $value): bool
+    private function thingExists(string $value): bool
     {
-        foreach ($this->things as $thing) {
-            if ($thing->getValue() === $value) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function getPlayersCount(): int
-    {
-        return $this->players->count();
+        return array_any($this->things->toArray(), fn (Thing $thing) => $thing->getValue() === $value);
     }
 }

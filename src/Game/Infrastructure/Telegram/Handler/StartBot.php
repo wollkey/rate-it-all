@@ -6,8 +6,10 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\JoinGameUseCase;
 use App\Game\Domain\Exception\GameNotFoundException;
+use App\Game\Domain\Exception\InvalidGameStateException;
 use App\Game\Domain\Exception\PlayerAlreadyInAnotherGameException;
 use App\Game\Domain\Exception\PlayerAlreadyInCurrentGameException;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
@@ -32,15 +34,15 @@ final readonly class StartBot
     }
 
     /**
-     * @throws \Exception
+     * @throws PlayerNotFoundException
      */
-    public function __invoke(TelegramInput $telegramDto): void
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $gameCode = $this->extractGameCode($telegramDto->message->text);
+        $gameCode = $this->extractGameCode($telegramInput->message->text);
 
         $gameCode !== null
-            ? $this->joinGame($telegramDto, $gameCode)
-            : $this->showWelcome($telegramDto);
+            ? $this->joinGame($telegramInput, $gameCode)
+            : $this->showWelcome($telegramInput);
     }
 
     private function extractGameCode(?string $text): ?Uuid
@@ -54,9 +56,12 @@ final readonly class StartBot
         return Uuid::isValid($parts[1] ?? '') ? Uuid::fromString($parts[1]) : null;
     }
 
+    /**
+     * @throws PlayerNotFoundException
+     */
     private function joinGame(TelegramInput $telegramInput, Uuid $gameCode): void
     {
-        $player = $this->playerRepository->find($telegramInput->user->id);
+        $player = $this->playerRepository->get($telegramInput->user->id);
 
         try {
             ($this->joinGameUseCase)($player, $gameCode);
@@ -107,10 +112,15 @@ final readonly class StartBot
                     $this->translator->trans('You are already in this game'),
                 );
             }
+        } catch (InvalidGameStateException) {
+            $this->telegramResponder->reply(
+                $telegramInput,
+                $this->translator->trans('This game has already started'),
+            );
         }
     }
 
-    private function showWelcome(TelegramInput $telegramDto): void
+    private function showWelcome(TelegramInput $telegramInput): void
     {
         $keyboard = [
             [
@@ -128,7 +138,7 @@ final readonly class StartBot
         ];
 
         $this->telegramResponder->send(
-            chatId: $telegramDto->message->chat->id,
+            chatId: $telegramInput->message->chat->id,
             text: implode(PHP_EOL, [
                 $this->translator->trans('Hi there!').'👋',
                 $this->translator->trans('This is a game in which you have to rate everything that comes to your mind.'),

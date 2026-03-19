@@ -6,6 +6,7 @@ namespace App\Game\Infrastructure\Telegram\Handler;
 
 use App\Game\Application\UseCase\AddThingUseCase;
 use App\Game\Domain\Exception\GameException;
+use App\Game\Domain\Exception\PlayerNotFoundException;
 use App\Game\Domain\Exception\ThingIsAlreadyInTheListException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Exception\ThingValueTooShortException;
@@ -31,12 +32,15 @@ final readonly class AddThing
     ) {
     }
 
-    public function __invoke(TelegramInput $telegramDto): void
+    /**
+     * @throws PlayerNotFoundException
+     */
+    public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->find($telegramDto->user->id);
+        $player = $this->playerRepository->get($telegramInput->user->id);
 
         try {
-            ($this->addThingUseCase)($player, (string) $telegramDto->message->text);
+            ($this->addThingUseCase)($player, (string) $telegramInput->message->text);
         } catch (ThingIsAlreadyInTheListException) {
             $this->telegramResponder->send(
                 $player->getTelegramId(),
@@ -46,12 +50,12 @@ final readonly class AddThing
             return;
         } catch (ThingsPlayerLimitReachedException) {
             $this->telegramResponder->reply(
-                $player->getTelegramId(),
+                $telegramInput,
                 $this->translator->trans('Wait other players...').'⏳',
             );
         } catch (ThingValueTooShortException) {
             $this->telegramResponder->reply(
-                $player->getTelegramId(),
+                $telegramInput,
                 $this->translator->trans('Thing value is too short'),
             );
         } catch (GameException|\InvalidArgumentException $exception) {

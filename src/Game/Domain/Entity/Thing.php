@@ -6,6 +6,7 @@ namespace App\Game\Domain\Entity;
 
 use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Game;
+use App\Game\Domain\ValueObject\Score;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,40 +19,38 @@ final class Thing
     #[ORM\Column]
     private ?int $id = null;
 
-    /**
-     * @var Collection<ThingRating>
-     */
+    /** @var Collection<int, ThingRating> */
     #[ORM\OneToMany(targetEntity: ThingRating::class, mappedBy: 'thing', cascade: ['persist', 'remove'])]
     private Collection $ratings;
 
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'things')]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-        private Game $game,
+        private readonly Game $game,
         #[ORM\ManyToOne(targetEntity: Player::class)]
         #[ORM\JoinColumn(nullable: false)]
-        private Player $author,
+        private readonly Player $author,
         #[ORM\Column(length: 255)]
-        private string $value,
+        private readonly string $value,
     ) {
         $this->ratings = new ArrayCollection();
     }
 
-    /**
-     * @throws ThingIsAlreadyRatedException
-     */
-    public function rate(Player $player, int $score): void
+    public function rate(Player $player, Score $rating): void
     {
         if ($this->hasRatingFrom($player)) {
             throw new ThingIsAlreadyRatedException();
         }
 
-        $this->ratings->add(new ThingRating($this, $player, $score));
+        $this->ratings->add(new ThingRating($this, $player, $rating));
     }
 
     public function hasRatingFrom(Player $player): bool
     {
-        return array_any($this->ratings->toArray(), fn (ThingRating $rating) => $rating->getPlayer()->getId() === $player->getId());
+        return array_any(
+            $this->ratings->toArray(),
+            fn (ThingRating $r): bool => $r->getPlayer()->getId() === $player->getId(),
+        );
     }
 
     public function isFullyRatedBy(int $playerCount): bool
@@ -60,6 +59,8 @@ final class Thing
     }
 
     /**
+     * @param Collection<int, Player> $players
+     *
      * @return list<Player>
      */
     public function getPlayersWhoNotRated(Collection $players): array
@@ -87,7 +88,7 @@ final class Thing
 
         $sum = 0;
         foreach ($this->ratings as $rating) {
-            $sum += $rating->getScore();
+            $sum += $rating->getScore()->value;
         }
 
         return $sum / $this->ratings->count();
@@ -103,23 +104,9 @@ final class Thing
         return $this->game;
     }
 
-    public function setGame(Game $game): Thing
-    {
-        $this->game = $game;
-
-        return $this;
-    }
-
     public function getAuthor(): Player
     {
         return $this->author;
-    }
-
-    public function setAuthor(Player $author): Thing
-    {
-        $this->author = $author;
-
-        return $this;
     }
 
     public function getValue(): string
@@ -127,22 +114,11 @@ final class Thing
         return $this->value;
     }
 
-    public function setValue(string $value): Thing
-    {
-        $this->value = $value;
-
-        return $this;
-    }
-
+    /**
+     * @return Collection<int, ThingRating>
+     */
     public function getRatings(): Collection
     {
         return $this->ratings;
-    }
-
-    public function setRatings(Collection $ratings): Thing
-    {
-        $this->ratings = $ratings;
-
-        return $this;
     }
 }
