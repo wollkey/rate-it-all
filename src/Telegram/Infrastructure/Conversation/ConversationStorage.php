@@ -18,8 +18,7 @@ final readonly class ConversationStorage
     }
 
     /**
-     * @param class-string $handlerClass
-     *
+     * @param class-string          $handlerClass
      * @param array<string, string> $data
      *
      * @throws InvalidArgumentException

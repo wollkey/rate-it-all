@@ -7,7 +7,7 @@ namespace App\Telegram;
 final readonly class ConversationStep
 {
     /**
-     * @param class-string $handler
+     * @param class-string          $handler
      * @param array<string, string> $data
      */
     public function __construct(

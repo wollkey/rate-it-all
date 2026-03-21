@@ -61,9 +61,7 @@ final readonly class CreateGame
         match ($telegramInput->conversationStep?->name) {
             null => $this->askThingsCount($telegramInput),
             self::STEP_AWAITING_THINGS_COUNT => $this->createGame($telegramInput, $player),
-            default => throw new \LogicException(
-                sprintf('Unexpected conversation step: %s', $telegramInput->conversationStep->name),
-            ),
+            default => throw new \LogicException(sprintf('Unexpected conversation step: %s', $telegramInput->conversationStep->name)),
         };
     }
 
