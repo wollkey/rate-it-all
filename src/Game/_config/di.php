@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Game\Domain\Repository\GameRepository;
+use App\Game\Domain\Repository\PlayerRepository;
+use App\Game\Infrastructure\Orm\DoctrineGameRepository;
 use App\Game\Infrastructure\Telegram\Handler\Resolver\OnGameState;
+use App\Game\Infrastructure\Telegram\Repository\TelegramPlayerRepository;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -19,6 +23,9 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
     $services
         ->load('App\\Game\\', '../*')
         ->exclude('../{_config}');
+
+    $services->alias(PlayerRepository::class, TelegramPlayerRepository::class);
+    $services->alias(GameRepository::class, DoctrineGameRepository::class);
 
     $builder->registerAttributeForAutoconfiguration(
         OnGameState::class,

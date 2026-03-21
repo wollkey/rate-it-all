@@ -19,7 +19,10 @@ return new PhpCsFixer\Config()
         'yoda_style' => [
             'equal' => false,
             'identical' => false,
-        ]
+        ],
+        'phpdoc_to_comment' => [
+            'allow_before_return_statement' => true,
+        ],
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__.'/var/.php-cs-fixer.cache');

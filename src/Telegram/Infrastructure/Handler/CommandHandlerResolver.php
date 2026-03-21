@@ -31,7 +31,7 @@ final readonly class CommandHandlerResolver implements HandlerResolver
 
         $this->conversation->clear($telegramInput->message->chat->id);
 
-        /* @var callable(TelegramInput): void */
+        /** @var callable(TelegramInput): void */
         return $this->handlers->get($command);
     }
 

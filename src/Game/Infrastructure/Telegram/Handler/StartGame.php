@@ -56,7 +56,7 @@ final readonly class StartGame
             );
         } catch (OnlyMasterCanStartException) {
             $this->telegramResponder->answerCallbackQuery(
-                callbackQueryId: $telegramInput->callbackQuery->id,
+                callbackQueryId: $telegramInput->getCallbackQueryOrFail()->id,
                 text: $this->translator->trans('Only the game master can start the game'),
                 showAlert: true,
             );

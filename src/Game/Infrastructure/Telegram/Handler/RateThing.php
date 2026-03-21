@@ -43,7 +43,7 @@ final readonly class RateThing
             $game = $this->gameRepository->findActiveByPlayer($player);
             $thing = $game?->getCurrentThing()?->getValue() ?? '?';
 
-            $rating = new Score((int) $telegramInput->callbackQuery->data);
+            $rating = new Score((int) $telegramInput->callbackQuery?->data);
             ($this->rateThingUseCase)($player, $rating);
 
             $this->telegramResponder->editMessage(

@@ -23,6 +23,9 @@ final class Thing
     #[ORM\OneToMany(targetEntity: ThingRating::class, mappedBy: 'thing', cascade: ['persist', 'remove'])]
     private Collection $ratings;
 
+    /**
+     * @param non-empty-string $value
+     */
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'things')]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -109,6 +112,9 @@ final class Thing
         return $this->author;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function getValue(): string
     {
         return $this->value;

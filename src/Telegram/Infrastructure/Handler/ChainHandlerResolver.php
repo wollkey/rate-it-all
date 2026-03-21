@@ -28,7 +28,7 @@ final readonly class ChainHandlerResolver implements HandlerResolver
     {
         foreach ($this->resolvers as $resolver) {
             $handler = $resolver->resolve($telegramInput);
-            if ($handler !== null && $this->allows($handler, $telegramInput)) {
+            if (is_object($handler) && $this->allows($handler, $telegramInput)) {
                 return $handler;
             }
         }
@@ -41,10 +41,6 @@ final readonly class ChainHandlerResolver implements HandlerResolver
      */
     private function allows(callable $handler, TelegramInput $telegramInput): bool
     {
-        if (!is_object($handler)) {
-            return false;
-        }
-
         $reflection = new \ReflectionClass($handler);
         $attributes = $reflection->getAttributes(AsTelegramHandler::class);
 

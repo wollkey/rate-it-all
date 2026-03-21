@@ -32,7 +32,7 @@ final readonly class NotifyPlayersAboutGameRatingStarted
                 chatId: $player->getTelegramId(),
                 text: '🤔 '.$this->translator->trans(
                     'Rate the thing: anyThing',
-                    ['anyThing' => $event->game->getCurrentThing()->getValue()],
+                    ['anyThing' => $event->game->getCurrentThingOrFail()->getValue()],
                 ),
                 keyboardMarkup: $this->ratingKeyboardFactory->create(),
             );

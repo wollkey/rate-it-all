@@ -1,10 +1,22 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Using nullsafe property access "\?\-\>message" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
+			message: '#^Property App\\Game\\Domain\\Entity\\Thing\:\:\$value type mapping mismatch\: database can contain string but property expects non\-empty\-string\.$#'
+			identifier: doctrine.columnType
 			count: 1
-			path: src/Telegram/Domain/Service/MessageExtractor.php
+			path: src/Game/Domain/Entity/Thing.php
+
+		-
+			message: '#^Method App\\Game\\Infrastructure\\Orm\\DoctrineGameRepository\:\:findActiveByMaster\(\) should return App\\Game\\Domain\\Game\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Game/Infrastructure/Orm/DoctrineGameRepository.php
+
+		-
+			message: '#^Method App\\Game\\Infrastructure\\Orm\\DoctrineGameRepository\:\:findActiveByPlayer\(\) should return App\\Game\\Domain\\Game\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Game/Infrastructure/Orm/DoctrineGameRepository.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>from" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -13,7 +25,7 @@ parameters:
 			path: src/Telegram/Domain/Service/UserExtractor.php
 
 		-
-			message: '#^Call to function is_object\(\) with callable\(App\\Telegram\\TelegramInput\)\: void&object will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
+			message: '#^Parameter \#1 \$environment of class App\\Kernel constructor expects string, mixed given\.$#'
+			identifier: argument.type
 			count: 1
-			path: src/Telegram/Infrastructure/Handler/ChainHandlerResolver.php
+			path: tests/object-manager.php

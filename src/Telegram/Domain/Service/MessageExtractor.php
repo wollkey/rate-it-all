@@ -11,9 +11,12 @@ final class MessageExtractor
 {
     public function extract(Update $update): Message
     {
-        return $update->message
+        $message = $update->message
             ?? $update->editedMessage
-            ?? $update->callbackQuery?->message
-            ?? throw new \Exception('Message not found');
+            ?? $update->callbackQuery?->message;
+
+        return $message instanceof Message
+            ? $message
+            : throw new \Exception('Message not found');
     }
 }

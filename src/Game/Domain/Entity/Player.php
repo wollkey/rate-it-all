@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Game\Domain\Entity;
 
-use App\Game\Domain\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PlayerRepository::class)]
+#[ORM\Entity]
 final class Player
 {
     #[ORM\Id]

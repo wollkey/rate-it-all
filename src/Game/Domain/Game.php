@@ -30,7 +30,6 @@ use App\Game\Domain\Exception\ThingIsAlreadyRatedException;
 use App\Game\Domain\Exception\ThingListIsEmptyException;
 use App\Game\Domain\Exception\ThingsPlayerLimitReachedException;
 use App\Game\Domain\Exception\ThingValueTooShortException;
-use App\Game\Domain\Repository\GameRepository;
 use App\Game\Domain\ValueObject\RatedThingResult;
 use App\Game\Domain\ValueObject\Score;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
@@ -40,7 +39,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
 
-#[ORM\Entity(repositoryClass: GameRepository::class)]
+#[ORM\Entity]
 final class Game extends AggregateRoot
 {
     #[ORM\Id]
@@ -317,7 +316,11 @@ final class Game extends AggregateRoot
      */
     public function getIdOrFail(): int
     {
-        return $this->id ?? throw new \LogicException('Game has no ID yet');
+        if ($this->id === null || $this->id < 1) {
+            throw new \LogicException('Game has no ID yet');
+        }
+
+        return $this->id;
     }
 
     public function getCode(): Uuid
@@ -354,6 +357,11 @@ final class Game extends AggregateRoot
     public function getCurrentThing(): ?Thing
     {
         return $this->currentThing;
+    }
+
+    public function getCurrentThingOrFail(): Thing
+    {
+        return $this->currentThing ?? throw new \LogicException('Game has no current thing');
     }
 
     public function getCreatedAt(): \DateTimeImmutable

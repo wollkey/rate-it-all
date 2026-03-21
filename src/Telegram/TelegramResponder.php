@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
+use App\Telegram\Domain\Exception\TelegramException;
 use Phptg\BotApi\TelegramBotApi;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
 
@@ -47,8 +48,8 @@ final readonly class TelegramResponder
     ): void {
         $this->api->editMessageText(
             text: $text,
-            chatId: $telegramInput->callbackQuery->message->chat->id,
-            messageId: $telegramInput->callbackQuery->message->messageId,
+            chatId: $telegramInput->callbackQuery?->message?->chat->id,
+            messageId: $telegramInput->callbackQuery?->message?->messageId,
             parseMode: $parseMode,
             replyMarkup: $keyboardMarkup,
         );
@@ -60,7 +61,10 @@ final readonly class TelegramResponder
         ?InlineKeyboardMarkup $keyboardMarkup = null,
         ?string $parseMode = 'markdown',
     ): void {
-        $this->answerCallbackQuery($telegramInput->callbackQuery->id);
+        $callbackQuery = $telegramInput->callbackQuery
+            ?? throw new TelegramException('Callback query must not be empty');
+
+        $this->answerCallbackQuery($callbackQuery->id);
 
         $this->editMessage(
             telegramInput: $telegramInput,

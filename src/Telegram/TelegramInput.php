@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
+use App\Telegram\Domain\Exception\TelegramException;
 use Phptg\BotApi\Type\CallbackQuery;
 use Phptg\BotApi\Type\Message;
 use Phptg\BotApi\Type\User;
@@ -24,5 +25,10 @@ final readonly class TelegramInput
     public function isCallback(): bool
     {
         return $this->callbackQuery !== null;
+    }
+
+    public function getCallbackQueryOrFail(): CallbackQuery
+    {
+        return $this->callbackQuery ?? throw new TelegramException('Callback query must not be empty');
     }
 }
