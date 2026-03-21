@@ -49,7 +49,7 @@ final readonly class CreateGame
      */
     public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->get($telegramInput->user->id);
+        $player = $this->playerRepository->getById($telegramInput->user->id);
         $game = $this->gameRepository->findActiveByPlayer($player);
 
         if ($game !== null) {

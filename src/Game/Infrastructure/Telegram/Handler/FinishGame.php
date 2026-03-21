@@ -37,7 +37,7 @@ final readonly class FinishGame
      */
     public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->get($telegramInput->user->id);
+        $player = $this->playerRepository->getById($telegramInput->user->id);
 
         try {
             ($this->finishGameUseCase)($player);

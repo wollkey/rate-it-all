@@ -37,7 +37,7 @@ final readonly class RateThing
      */
     public function __invoke(TelegramInput $telegramInput): void
     {
-        $player = $this->playerRepository->get($telegramInput->user->id);
+        $player = $this->playerRepository->getById($telegramInput->user->id);
 
         try {
             $game = $this->gameRepository->findActiveByPlayer($player);

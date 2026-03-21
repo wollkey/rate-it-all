@@ -61,7 +61,7 @@ final readonly class StartBot
      */
     private function joinGame(TelegramInput $telegramInput, Uuid $gameCode): void
     {
-        $player = $this->playerRepository->get($telegramInput->user->id);
+        $player = $this->playerRepository->getById($telegramInput->user->id);
 
         try {
             ($this->joinGameUseCase)($player, $gameCode);

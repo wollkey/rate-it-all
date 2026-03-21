@@ -20,12 +20,12 @@ final class TelegramPlayerRepository extends ServiceEntityRepository implements 
         parent::__construct($registry, Player::class);
     }
 
-    public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Player
+    public function findById(int $id): ?Player
     {
         return parent::findOneBy(['telegramId' => $id]);
     }
 
-    public function get(mixed $id): Player
+    public function getById(int $id): Player
     {
         return parent::findOneBy(['telegramId' => $id]) ?? throw new PlayerNotFoundException();
     }

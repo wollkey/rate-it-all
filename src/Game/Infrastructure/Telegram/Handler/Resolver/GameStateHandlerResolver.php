@@ -25,7 +25,7 @@ final readonly class GameStateHandlerResolver implements HandlerResolver
 
     public function resolve(TelegramInput $telegramInput): ?callable
     {
-        $player = $this->playerRepository->find($telegramInput->user->id);
+        $player = $this->playerRepository->findById($telegramInput->user->id);
         if ($player === null) {
             return null;
         }
