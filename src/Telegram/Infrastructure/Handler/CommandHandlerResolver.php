@@ -14,9 +14,6 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 #[AsTaggedItem(priority: 30)]
 final readonly class CommandHandlerResolver implements HandlerResolver
 {
-    /**
-     * @param ContainerInterface<callable(TelegramInput):void> $handlers
-     */
     public function __construct(
         #[AutowireLocator('app.telegram.command_handler', indexAttribute: 'key')]
         private ContainerInterface $handlers,

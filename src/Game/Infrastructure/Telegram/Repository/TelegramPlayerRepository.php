@@ -10,6 +10,9 @@ use App\Game\Domain\Repository\PlayerRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<Player>
+ */
 final class TelegramPlayerRepository extends ServiceEntityRepository implements PlayerRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -22,7 +25,7 @@ final class TelegramPlayerRepository extends ServiceEntityRepository implements 
         return parent::findOneBy(['telegramId' => $id]);
     }
 
-    public function get(mixed $id, $lockMode = null, $lockVersion = null): Player
+    public function get(mixed $id): Player
     {
         return parent::findOneBy(['telegramId' => $id]) ?? throw new PlayerNotFoundException();
     }

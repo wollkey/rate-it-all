@@ -20,6 +20,9 @@ final readonly class GameInfo
         );
     }
 
+    /**
+     * @return list<string>
+     */
     public function rules(): array
     {
         return array_map($this->translator->trans(...), [

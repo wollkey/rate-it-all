@@ -12,9 +12,6 @@ final readonly class Score
     private const int MIN = 1;
     private const int MAX = 10;
 
-    /**
-     * @param int<1, 10> $value
-     */
     public function __construct(
         #[ORM\Column(name: 'score', type: 'smallint')]
         public int $value,

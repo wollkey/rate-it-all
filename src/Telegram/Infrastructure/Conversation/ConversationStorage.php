@@ -20,6 +20,8 @@ final readonly class ConversationStorage
     /**
      * @param class-string $handlerClass
      *
+     * @param array<string, string> $data
+     *
      * @throws InvalidArgumentException
      */
     public function save(int $chatId, string $handlerClass, ?string $step = null, array $data = []): void

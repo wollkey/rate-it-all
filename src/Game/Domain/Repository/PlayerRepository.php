@@ -9,10 +9,10 @@ use App\Game\Domain\Exception\PlayerNotFoundException;
 
 interface PlayerRepository
 {
-    public function find(int $id): ?Player;
+    public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Player;
 
     /**
      * @throws PlayerNotFoundException
      */
-    public function get(int $id): Player;
+    public function get(mixed $id): Player;
 }

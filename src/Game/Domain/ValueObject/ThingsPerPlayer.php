@@ -12,9 +12,6 @@ final readonly class ThingsPerPlayer
     public const int MIN_THINGS_PER_PLAYER = 1;
     public const int MAX_THINGS_PER_PLAYER = 5;
 
-    /**
-     * @param int<1, 5> $value
-     */
     public function __construct(
         #[ORM\Column(name: 'things_per_player', type: 'smallint')]
         public int $value,

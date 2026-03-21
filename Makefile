@@ -108,21 +108,13 @@ test-coverage: ## Run tests with coverage report
 	$(PHP) vendor/bin/phpunit --coverage-html var/coverage
 .PHONY: test-coverage
 
-psalm: ## Run Psalm static analysis
-	$(PHP) vendor/bin/psalm --no-cache
-.PHONY: psalm
-
-psalm-set: ## Set Psalm baseline
-	$(PHP) vendor/bin/psalm --set-baseline=psalm-baseline.xml
-.PHONY: psalm-baseline
-
-psalm-update: ## Update Psalm baseline
-	$(PHP) vendor/bin/psalm --update-baseline
-.PHONY: psalm-baseline
-
 stan: ## Run PHPStan static analysis
-	$(PHP) vendor/bin/phpstan analyse src tests
+	$(PHP) vendor/bin/phpstan analyse
 .PHONY: stan
+
+stan-baseline: ## Generate PHPStan baseline
+	$(PHP) vendor/bin/phpstan analyse --generate-baseline
+.PHONY: stan-baseline
 
 lint: ## Fix code style with PHP CS Fixer
 	$(PHP) vendor/bin/php-cs-fixer fix --verbose

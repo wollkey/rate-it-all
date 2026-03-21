@@ -176,7 +176,7 @@ final class Game extends AggregateRoot
 
     public function isPlayerThingLimitReached(Player $player): bool
     {
-        return $this->countPlayerThings($player) >= $this->thingsPerPlayer;
+        return $this->countPlayerThings($player) >= $this->thingsPerPlayer->value;
     }
 
     /**
@@ -330,10 +330,7 @@ final class Game extends AggregateRoot
         return $this->state;
     }
 
-    /**
-     * @return int<1, 5>
-     */
-    public function getThingsPerPlayer(): int
+    public function getThingsPerPlayer(): ThingsPerPlayer
     {
         return $this->thingsPerPlayer;
     }
@@ -376,7 +373,7 @@ final class Game extends AggregateRoot
 
     private function isTotalThingLimitReached(): bool
     {
-        return $this->things->count() >= $this->players->count() * $this->thingsPerPlayer;
+        return $this->things->count() >= $this->players->count() * $this->thingsPerPlayer->value;
     }
 
     private function advanceToNextThing(): void
