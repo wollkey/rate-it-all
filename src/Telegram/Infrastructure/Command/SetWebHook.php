@@ -23,7 +23,7 @@ final readonly class SetWebHook
 
     public function __invoke(OutputInterface $output): int
     {
-        $result = $this->telegram->setWebHook($this->webhookUrl);
+        $result = $this->telegram->setWebhook($this->webhookUrl);
 
         if ($result instanceof FailResult) {
             $output->writeln("<error>{$result->response->body}</error>");

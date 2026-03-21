@@ -9,7 +9,7 @@ use Phptg\BotApi\Type\InlineKeyboardMarkup;
 
 final class RatingKeyboardFactory
 {
-    public static function create(): InlineKeyboardMarkup
+    public function create(): InlineKeyboardMarkup
     {
         return new InlineKeyboardMarkup([
             array_map(

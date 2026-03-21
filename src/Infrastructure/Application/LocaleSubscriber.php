@@ -26,11 +26,12 @@ final readonly class LocaleSubscriber
 
         $locale = $request->attributes->get('_locale');
 
-        if (!empty($locale)) {
+        if (!is_string($locale) || $locale === '') {
             $request->getSession()->set('_locale', $locale);
         } else {
             $locale = $request->getSession()->get('_locale', $this->defaultLocale);
 
-            $request->setLocale(is_string($locale) ? $locale : $this->defaultLocale);        }
+            $request->setLocale(is_string($locale) ? $locale : $this->defaultLocale);
+        }
     }
 }
