@@ -87,6 +87,7 @@ jobs:
                         --name game-app \
                         --restart unless-stopped \
                         --network game-net \
+                        --memory=200m \
                         --env-file /opt/game/.env.prod \
                         -p 127.0.0.1:8080:8080 \
                         ghcr.io/${{ github.repository }}:latest
