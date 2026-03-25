@@ -11,18 +11,16 @@ use Symfony\Component\Uid\Uuid;
 
 interface GameRepository
 {
-    public function findByCode(Uuid $code): ?Game;
-
     /**
      * @throws GameNotFoundException
      */
-    public function getByCode(Uuid $code): Game;
+    public function get(Uuid $id): Game;
 
     public function save(Game $game): void;
+
+    public function delete(Game $game): void;
 
     public function findActiveByPlayer(Player $player): ?Game;
 
     public function findActiveByMaster(Player $player): ?Game;
-
-    public function delete(Game $game): void;
 }

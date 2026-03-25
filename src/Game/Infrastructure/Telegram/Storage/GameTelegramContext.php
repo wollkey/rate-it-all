@@ -6,7 +6,6 @@ namespace App\Game\Infrastructure\Telegram\Storage;
 
 use Phptg\BotApi\Type\Message;
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 final readonly class GameTelegramContext
 {

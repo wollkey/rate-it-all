@@ -122,7 +122,7 @@ final readonly class CreateGame
             throw new \LogicException('Player already in game after pre-check passed', previous: $e);
         }
 
-        $joinLink = "https://t.me/{$this->telegramBotName}?start={$newGame->getCode()->toRfc4122()}";
+        $joinLink = "https://t.me/{$this->telegramBotName}?start={$newGame->getId()->toRfc4122()}";
 
         $this->telegramResponder->replyCallback(
             $telegramInput,

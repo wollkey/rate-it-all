@@ -36,6 +36,7 @@ use App\Game\Domain\ValueObject\ThingsPerPlayer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
 
@@ -43,12 +44,8 @@ use Symfony\Component\Uid\UuidV7;
 final class Game extends AggregateRoot
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(type: 'uuid', unique: true)]
-    private Uuid $code;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
 
     #[ORM\Column(length: 20, enumType: GameState::class)]
     private GameState $state;
@@ -80,7 +77,7 @@ final class Game extends AggregateRoot
         #[ORM\Embedded(class: ThingsPerPlayer::class, columnPrefix: false)]
         private readonly ThingsPerPlayer $thingsPerPlayer,
     ) {
-        $this->code = new UuidV7();
+        $this->id = new UuidV7();
         $this->state = GameState::Waiting;
         $this->createdAt = new \DateTimeImmutable();
         $this->players = new ArrayCollection();
@@ -125,7 +122,7 @@ final class Game extends AggregateRoot
     public function hasPlayer(Player $targetPlayer): bool
     {
         return $this->players->exists(
-            fn (int|string $key, Player $player): bool => $player->getId() === $targetPlayer->getId(),
+            fn (int|string $key, Player $player): bool => $player->getId()->equals($targetPlayer->getId()),
         );
     }
 
@@ -303,29 +300,12 @@ final class Game extends AggregateRoot
 
     public function isMaster(Player $player): bool
     {
-        return $this->getMaster()->getId() === $player->getId();
+        return $this->getMaster()->getId()->equals($player->getId());
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
-    }
-
-    /**
-     * @return positive-int
-     */
-    public function getIdOrFail(): int
-    {
-        if ($this->id === null || $this->id < 1) {
-            throw new \LogicException('Game has no ID yet');
-        }
-
-        return $this->id;
-    }
-
-    public function getCode(): Uuid
-    {
-        return $this->code;
     }
 
     public function getState(): GameState
@@ -431,7 +411,7 @@ final class Game extends AggregateRoot
     {
         $count = 0;
         foreach ($this->things as $thing) {
-            if ($thing->getAuthor()->getId() === $player->getId()) {
+            if ($thing->getAuthor()->getId()->equals($player->getId())) {
                 ++$count;
             }
         }

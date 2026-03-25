@@ -35,7 +35,7 @@ final readonly class NotifyMasterAboutJoinedPlayer
         $chatId = $game->getMaster()->getTelegramId();
         $editedMessageId = $this->gameTelegramContext->getEditedMessage($chatId);
 
-        $joinLink = "https://t.me/{$this->telegramBotName}?start={$game->getCode()->toRfc4122()}";
+        $joinLink = "https://t.me/{$this->telegramBotName}?start={$game->getId()->toRfc4122()}";
 
         $this->telegram->editMessageText(
             implode(PHP_EOL, [

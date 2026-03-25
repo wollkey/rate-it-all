@@ -24,7 +24,6 @@
         "doctrine/orm": "^3.5",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phptg/bot-api": "*",
-        "ramsey/uuid": "^4.9",
         "sentry/sentry-symfony": "^5.9",
         "symfony/console": "7.4.*",
         "symfony/doctrine-bridge": "7.4.*",

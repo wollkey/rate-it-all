@@ -52,7 +52,7 @@ final class Thing
     {
         return array_any(
             $this->ratings->toArray(),
-            fn (ThingRating $r): bool => $r->getPlayer()->getId() === $player->getId(),
+            fn (ThingRating $thingRating): bool => $thingRating->getPlayer()->getId()->equals($player->getId()),
         );
     }
 
@@ -70,12 +70,12 @@ final class Thing
     {
         $ratedPlayerIds = [];
         foreach ($this->ratings as $rating) {
-            $ratedPlayerIds[$rating->getPlayer()->getId()] = true;
+            $ratedPlayerIds[$rating->getPlayer()->getId()->toRfc4122()] = true;
         }
 
         $notRated = [];
         foreach ($players as $player) {
-            if (!isset($ratedPlayerIds[$player->getId()])) {
+            if (!isset($ratedPlayerIds[$player->getId()->toRfc4122()])) {
                 $notRated[] = $player;
             }
         }

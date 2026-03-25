@@ -23,14 +23,9 @@ final class DoctrineGameRepository extends ServiceEntityRepository implements Ga
         parent::__construct($registry, Game::class);
     }
 
-    public function findByCode(Uuid $code): ?Game
+    public function get(Uuid $id): Game
     {
-        return $this->findOneBy(['code' => $code]);
-    }
-
-    public function getByCode(Uuid $code): Game
-    {
-        return $this->findOneBy(['code' => $code]) ?? throw new GameNotFoundException();
+        return $this->find($id) ?? throw new GameNotFoundException();
     }
 
     public function save(Game $game): void

@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Game\Domain\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Entity]
 final class Player
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
 
     public function __construct(
         #[ORM\Column(type: 'bigint')]
@@ -22,9 +24,10 @@ final class Player
         #[ORM\Column(length: 255, nullable: true)]
         private ?string $lastName = null,
     ) {
+        $this->id = new UuidV7();
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
     }
