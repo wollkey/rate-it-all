@@ -148,7 +148,7 @@ final class Game extends AggregateRoot
             throw new ThingsPlayerLimitReachedException();
         }
 
-        $normalizedValue = mb_strtolower(trim($value));
+        $normalizedValue = trim($value);
 
         if (mb_strlen($normalizedValue) < 2) {
             throw new ThingValueTooShortException();
@@ -200,7 +200,7 @@ final class Game extends AggregateRoot
      * @throws PlayerNotInGameException
      * @throws InvalidGameStateException
      */
-    public function rate(Player $player, Score $rating): void
+    public function rate(Player $player, Score $score): void
     {
         if (!$this->hasPlayer($player)) {
             throw new PlayerNotInGameException();
@@ -214,7 +214,7 @@ final class Game extends AggregateRoot
             throw new NoCurrentThingException();
         }
 
-        $this->currentThing->rate($player, $rating);
+        $this->currentThing->rate($player, $score);
         $this->addEvent(new ThingRated($player, $this));
 
         if ($this->isCurrentThingFullyRated()) {
@@ -421,6 +421,9 @@ final class Game extends AggregateRoot
 
     private function thingExists(string $value): bool
     {
-        return array_any($this->things->toArray(), fn (Thing $thing) => $thing->getValue() === $value);
+        return array_any(
+            $this->things->toArray(),
+            fn (Thing $thing) => mb_strtolower($thing->getValue()) === mb_strtolower($value),
+        );
     }
 }
