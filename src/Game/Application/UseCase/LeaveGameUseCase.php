@@ -17,7 +17,8 @@ final readonly class LeaveGameUseCase
     }
 
     /**
-     * @throws GameNotFoundException|MasterCannotLeaveException
+     * @throws GameNotFoundException
+     * @throws MasterCannotLeaveException
      */
     public function __invoke(Player $player): void
     {

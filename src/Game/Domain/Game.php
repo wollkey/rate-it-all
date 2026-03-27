@@ -104,6 +104,9 @@ final class Game extends AggregateRoot
         $this->addEvent(new PlayerJoined($player, $this));
     }
 
+    /**
+     * @throws MasterCannotLeaveException
+     */
     public function leave(Player $player): void
     {
         if ($this->isMaster($player)) {
