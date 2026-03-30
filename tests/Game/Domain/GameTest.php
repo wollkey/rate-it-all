@@ -31,7 +31,6 @@ use App\Game\Domain\Game;
 use App\Game\Domain\GameState;
 use App\Game\Domain\ValueObject\Score;
 use App\Game\Domain\ValueObject\ThingsPerPlayer;
-use App\Game\Infrastructure\Telegram\Handler\FinishGame;
 use PHPUnit\Framework\TestCase;
 
 final class GameTest extends TestCase
