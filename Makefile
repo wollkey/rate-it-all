@@ -14,7 +14,7 @@ ifeq (debug,$(findstring debug,$(MAKECMDGOALS)))
 endif
 
 ifdef CI
-    PHP := web
+    PHP :=
     COMPOSER := composer
 else
     PHP := $(DC) exec $(DISABLE_XDEBUG) web
