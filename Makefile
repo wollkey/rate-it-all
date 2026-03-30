@@ -153,7 +153,7 @@ composer-check: composer-validate composer-audit composer-unused ## Run all comp
 	@echo -e "$(GREEN)✓ Composer checks passed$(RESET)"
 .PHONY: composer-check
 
-code-check: cs-check psalm rector-check test ## Run all code quality checks
+code-check: lint stan rector-check test ## Run all code quality checks
 	@echo -e "$(GREEN)✓ Code checks passed$(RESET)"
 .PHONY: code-check
 
