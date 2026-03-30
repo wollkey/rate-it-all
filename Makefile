@@ -50,6 +50,7 @@ fresh: down up cache setup install ## Fresh start (stop, clear cache, rebuild)
 setup: ## Initial project setup
 	@[ -f .env.local ] || cp .env.local.example .env.local 2>/dev/null || touch .env.local
 	@mkdir -p var/cache var/log
+	$(MAKE) hooks
 	@echo -e "$(GREEN)✓ Project setup complete$(RESET)"
 .PHONY: setup
 
@@ -199,6 +200,16 @@ cache: ## Clean var directory (cache, logs)
 	rm -rf var/cache/* var/log/*
 	$(PHP) bin/console cache:warmup --env=dev
 .PHONY: cache
+
+##
+## Git Hooks
+## ---------
+
+hooks: ## Install git hooks
+	git config core.hooksPath .githooks
+	chmod +x .githooks/pre-push
+	@echo -e "$(GREEN)✓ Git hooks installed$(RESET)"
+.PHONY: hooks
 
 ##
 ## Utilities
