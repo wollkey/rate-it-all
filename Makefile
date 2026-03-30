@@ -157,11 +157,11 @@ code-check: lint-check stan rector-check test ## Run all code quality checks
 	@echo -e "$(GREEN)✓ Code checks passed$(RESET)"
 .PHONY: code-check
 
-check: code-check composer-check ## Run all checks
+check: composer-check code-check ## Run all checks
 	@echo -e "$(GREEN)✓ All checks passed$(RESET)"
 .PHONY: check
 
-fix: cs-fix rector ## Apply all automatic fixes
+fix: lint rector ## Apply all automatic fixes
 .PHONY: fix
 
 ##
