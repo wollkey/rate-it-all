@@ -81,7 +81,7 @@ jobs:
             -   name: Run migrations
                 run: bin/console doctrine:migrations:migrate --no-interaction --env=test
                 env:
-                    DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db_test?serverVersion=17&charset=utf8
+                    DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=17&charset=utf8
 
             -   name: PHPUnit
                 run: make test
