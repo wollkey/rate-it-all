@@ -19,7 +19,7 @@ jobs:
             postgres:
                 image: postgres:17-alpine
                 env:
-                    POSTGRES_DB: test_db
+                    POSTGRES_DB: test_db_test
                     POSTGRES_USER: test_user
                     POSTGRES_PASSWORD: test_password
                 ports:
@@ -78,6 +78,10 @@ jobs:
                 run: make stan
 
             # --- Tests ---
+            -   name: Run migrations
+                run: bin/console doctrine:migrations:migrate --no-interaction --env=test
+                env:
+                    DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db_test?serverVersion=17&charset=utf8
 
             -   name: PHPUnit
                 run: make test
