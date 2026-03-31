@@ -16,6 +16,10 @@ return static function (Configuration $config) use ($rootPackageName): Configura
     $config->addNamedFilter(NamedFilter::fromString('symfony/runtime'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/translation'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/dotenv'));
+    $config->addNamedFilter(NamedFilter::fromString('symfony/serializer'));
+    $config->addNamedFilter(NamedFilter::fromString('symfony/property-info'));
+    $config->addNamedFilter(NamedFilter::fromString('symfony/property-access'));
+    $config->addNamedFilter(NamedFilter::fromString('phpdocumentor/reflection-docblock'));
 
     return $config;
 };
