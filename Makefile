@@ -102,8 +102,16 @@ ps: ## Show running containers
 ## ------------
 
 test: ## Run all tests
-	$(PHP) vendor/bin/phpunit
+	$(PHP) vendor/bin/phpunit $(ARGS)
 .PHONY: test
+
+test/bootstrap: ## Prepare test DB and run tests
+	$(PHP) bin/console cache:clear --env=test
+	$(PHP) bin/console doctrine:database:drop --env=test --if-exists --force
+	$(PHP) bin/console doctrine:database:create --env=test
+	$(PHP) bin/console doctrine:migrations:migrate --env=test --no-interaction
+	$(PHP) vendor/bin/phpunit
+.PHONY: test/bootstrap
 
 test-coverage: ## Run tests with coverage report
 	$(PHP) vendor/bin/phpunit --coverage-html var/coverage
