@@ -18,7 +18,9 @@ final readonly class StartGameUseCase
     }
 
     /**
-     * @throws GameNotFoundException|OnlyMasterCanStartException|NotEnoughPlayersException
+     * @throws GameNotFoundException
+     * @throws OnlyMasterCanStartException
+     * @throws NotEnoughPlayersException
      */
     public function __invoke(Player $player): void
     {
