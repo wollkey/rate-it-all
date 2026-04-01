@@ -102,7 +102,10 @@ final readonly class CreateGame
             return;
         }
 
-        $this->gameTelegramContext->saveEditedMessage($telegramInput->message);
+        $this->gameTelegramContext->saveEditedMessage(
+            chatId: $telegramInput->message->chat->id,
+            messageId: $telegramInput->message->messageId,
+        );
 
         $callbackData = $telegramInput->callbackQuery->data;
         if (!is_numeric($callbackData)) {

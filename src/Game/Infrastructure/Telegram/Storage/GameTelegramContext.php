@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Storage;
 
-use Phptg\BotApi\Type\Message;
 use Psr\Cache\CacheItemPoolInterface;
 
 final readonly class GameTelegramContext
@@ -14,10 +13,10 @@ final readonly class GameTelegramContext
     ) {
     }
 
-    public function saveEditedMessage(Message $message): void
+    public function saveEditedMessage(int $chatId, int $messageId): void
     {
-        $item = $this->cache->getItem($this->getEditedMessageCacheKey($message->chat->id));
-        $item->set($message->messageId);
+        $item = $this->cache->getItem($this->getEditedMessageCacheKey($chatId));
+        $item->set($messageId);
         $item->expiresAfter(3600);
         $this->cache->save($item);
     }
