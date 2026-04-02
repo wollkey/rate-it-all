@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsController]
-#[Route('/{_locale}/telegram/hook')]
+#[Route('/telegram/hook')]
 final readonly class WebHookController
 {
     public function __construct(
