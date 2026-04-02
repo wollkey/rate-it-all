@@ -114,7 +114,7 @@ test/bootstrap: ## Prepare test DB and run tests
 .PHONY: test/bootstrap
 
 test-coverage: ## Run tests with coverage report
-	$(PHP) vendor/bin/phpunit --coverage-html var/coverage
+	$(PHP) env XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html var/coverage
 .PHONY: test-coverage
 
 stan: ## Run PHPStan static analysis
