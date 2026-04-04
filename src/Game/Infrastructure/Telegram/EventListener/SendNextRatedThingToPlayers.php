@@ -27,7 +27,8 @@ final readonly class SendNextRatedThingToPlayers
                 chatId: $player->getTelegramId(),
                 text: '🤔 '.$this->translator->trans(
                     'Rate the next thing: anyThing',
-                    ['anyThing' => $event->game->getCurrentThingOrFail()->getValue()]
+                    ['anyThing' => $event->game->getCurrentThingOrFail()->getValue()],
+                    locale: $player->getLocale(),
                 ),
                 keyboardMarkup: $this->ratingKeyboardFactory->create(),
             );

@@ -21,6 +21,8 @@ final class Player
         private readonly int $telegramId,
         #[ORM\Column(length: 255)]
         private string $firstName,
+        #[ORM\Column(length: 10, options: ['default' => 'en'])]
+        private string $locale = 'en',
         #[ORM\Column(length: 255, nullable: true)]
         private ?string $lastName = null,
     ) {
@@ -42,14 +44,24 @@ final class Player
         return $this->lastName;
     }
 
-    public function getTelegramId(): int
-    {
-        return $this->telegramId;
-    }
-
     public function updateProfile(string $firstName, ?string $lastName): void
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    public function changeLocale(string $locale): void
+    {
+        $this->locale = $locale;
+    }
+
+    public function getTelegramId(): int
+    {
+        return $this->telegramId;
     }
 }

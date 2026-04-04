@@ -26,6 +26,7 @@ final readonly class NotifyPlayersAboutPlayerLeftGame
                 text: $this->translator->trans(
                     'playerName left the game',
                     ['playerName' => $event->player->getFirstName()],
+                    locale: $player->getLocale(),
                 ),
             );
         }

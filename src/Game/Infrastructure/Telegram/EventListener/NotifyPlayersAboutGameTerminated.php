@@ -32,10 +32,11 @@ final readonly class NotifyPlayersAboutGameTerminated
                 text: $this->translator->trans(
                     'Game was ended by master masterName',
                     ['masterName' => $masterName],
+                    locale: $player->getLocale(),
                 ),
                 keyboardMarkup: new InlineKeyboardMarkup([[
                     new InlineKeyboardButton(
-                        text: '🎮 '.$this->translator->trans('Create new game'),
+                        text: '🎮 '.$this->translator->trans('Create new game', locale: $player->getLocale()),
                         callbackData: CreateGame::COMMAND_NAME,
                     ),
                 ]]),

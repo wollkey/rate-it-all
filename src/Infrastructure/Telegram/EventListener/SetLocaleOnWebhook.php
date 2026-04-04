@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Telegram\EventListener;
 
+use App\Infrastructure\Locale\LocaleResolver;
 use App\Telegram\Domain\Event\BeginHandleWebHook;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Translation\LocaleSwitcher;
@@ -13,15 +14,14 @@ final readonly class SetLocaleOnWebhook
 {
     public function __construct(
         private LocaleSwitcher $localeSwitcher,
+        private LocaleResolver $localeResolver,
     ) {
     }
 
     public function __invoke(BeginHandleWebHook $event): void
     {
         $languageCode = $event->telegramInput->user->languageCode;
-        $locale = in_array($languageCode, ['ru', 'en'], true)
-            ? $languageCode
-            : $this->localeSwitcher->getLocale();
+        $locale = $this->localeResolver->resolve($languageCode);
 
         $this->localeSwitcher->setLocale($locale);
     }

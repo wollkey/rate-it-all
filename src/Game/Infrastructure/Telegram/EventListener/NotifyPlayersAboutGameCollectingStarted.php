@@ -31,7 +31,10 @@ final readonly class NotifyPlayersAboutGameCollectingStarted
 
             $this->telegramResponder->send(
                 chatId: $player->getTelegramId(),
-                text: '💡 '.$this->translator->trans('Add any crazy thing that came into your head:'),
+                text: '💡 '.$this->translator->trans(
+                    'Add any crazy thing that came into your head:',
+                    locale: $player->getLocale(),
+                ),
             );
         }
     }
