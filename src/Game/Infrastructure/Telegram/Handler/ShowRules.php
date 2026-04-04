@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Handler;
 
-use App\Game\Application\GameInfo;
+use App\Game\Infrastructure\Telegram\TelegramGameInfo;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\OnCommand;
@@ -23,7 +23,7 @@ final readonly class ShowRules
     public function __construct(
         private TelegramResponder $telegram,
         private TranslatorInterface $translator,
-        private GameInfo $gameInfo,
+        private TelegramGameInfo $gameInfo,
     ) {
     }
 
