@@ -14,7 +14,6 @@ return static function (Configuration $config) use ($rootPackageName): Configura
 
     $config->addNamedFilter(NamedFilter::fromString('symfony/flex'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/runtime'));
-    $config->addNamedFilter(NamedFilter::fromString('symfony/translation'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/dotenv'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/serializer'));
     $config->addNamedFilter(NamedFilter::fromString('symfony/property-info'));

@@ -13,8 +13,7 @@ return static function (ContainerConfigurator $container): void {
             ->autowire()
             ->autoconfigure();
 
-    $services->set(SetLocaleOnWebhook::class)
-        ->arg('$defaultLocale', '%kernel.default_locale%');
+    $services->set(SetLocaleOnWebhook::class);
 
     if ($container->env() === 'prod') {
         $services->set(LogsHandler::class)
