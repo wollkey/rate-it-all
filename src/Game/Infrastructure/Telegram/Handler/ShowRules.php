@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Game\Infrastructure\Telegram\Handler;
 
-use App\Game\Infrastructure\Telegram\TelegramGameInfo;
+use App\Game\Application\GameInfo;
 use App\Telegram\AsTelegramHandler;
 use App\Telegram\Domain\Enum\InputType;
 use App\Telegram\OnCommand;
@@ -12,6 +12,7 @@ use App\Telegram\TelegramInput;
 use App\Telegram\TelegramResponder;
 use Phptg\BotApi\Type\InlineKeyboardButton;
 use Phptg\BotApi\Type\InlineKeyboardMarkup;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[OnCommand(self::COMMAND_NAME)]
@@ -23,7 +24,7 @@ final readonly class ShowRules
     public function __construct(
         private TelegramResponder $telegram,
         private TranslatorInterface $translator,
-        private TelegramGameInfo $gameInfo,
+        private GameInfo $gameInfo,
     ) {
     }
 
@@ -34,7 +35,7 @@ final readonly class ShowRules
     {
         $this->telegram->reply(
             $telegramInput,
-            $this->gameInfo->prettyInfo(),
+            $this->buildPrettyInfo(),
             new InlineKeyboardMarkup([
                 [
                     new InlineKeyboardButton(
@@ -44,5 +45,21 @@ final readonly class ShowRules
                 ],
             ]),
         );
+    }
+
+    public function buildPrettyInfo(): string
+    {
+        $rules = array_map(
+            fn (TranslatableMessage $rule) => '- '.$rule->trans($this->translator),
+            $this->gameInfo->rules(),
+        );
+
+        return implode(PHP_EOL, [
+            $this->gameInfo->description()->trans($this->translator).PHP_EOL,
+            $this->translator->trans('Gameplay rules:'),
+            ...$rules,
+            '',
+            $this->translator->trans('Have fun!').' 🎊',
+        ]);
     }
 }
