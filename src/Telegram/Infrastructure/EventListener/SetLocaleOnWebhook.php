@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Telegram\EventListener;
+namespace App\Telegram\Infrastructure\EventListener;
 
 use App\Infrastructure\Locale\LocaleResolver;
-use App\Telegram\Domain\Event\BeginHandleWebHook;
+use App\Telegram\BeginHandleWebHook;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Translation\LocaleSwitcher;
 

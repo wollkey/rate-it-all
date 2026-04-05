@@ -1,0 +1,79 @@
+deptrac:
+    analyser:
+        types:
+            - "use"
+            - "file"
+            - "class"
+    paths:
+        - ./src
+    layers:
+        # Game
+        -   name: Game\Domain
+            collectors:
+                -   type: directory
+                    value: src/Game/Domain/.*
+        -   name: Game\Application
+            collectors:
+                -   type: directory
+                    value: src/Game/Application/.*
+        -   name: Game\Infrastructure
+            collectors:
+                -   type: directory
+                    value: src/Game/Infrastructure/.*
+
+        # Telegram
+        # Root-level module files — public API (attributes, interfaces, DTO)
+        -   name: Telegram\Contracts
+            collectors:
+                -   type: directory
+                    value: src/Telegram/[^/]+\.php
+        -   name: Telegram\Domain
+            collectors:
+                -   type: directory
+                    value: src/Telegram/Domain/.*
+        -   name: Telegram\Infrastructure
+            collectors:
+                -   type: directory
+                    value: src/Telegram/Infrastructure/.*
+
+        # Shared
+        -   name: Infrastructure
+            collectors:
+                -   type: directory
+                    value: src/Infrastructure/.*
+
+    ruleset:
+        Game\Domain: ~
+        Game\Application:
+            - Game\Domain
+        Game\Infrastructure:
+            - Game\Domain
+            - Game\Application
+            - Telegram\Contracts
+            - Telegram\Domain
+            - Telegram\Infrastructure
+            - Infrastructure
+
+        Telegram\Contracts:
+            - Telegram\Domain
+        Telegram\Domain: ~
+        Telegram\Infrastructure:
+            - Telegram\Contracts
+            - Telegram\Domain
+            - Infrastructure
+
+        Infrastructure: ~
+
+    formatters:
+        graphviz:
+            hidden_layers: []
+            groups:
+                Game:
+                    - Game\Domain
+                    - Game\Application
+                    - Game\Infrastructure
+                Telegram:
+                    - Telegram\Contracts
+                    - Telegram\Domain
+                    - Telegram\Infrastructure
+            point_to_groups: false

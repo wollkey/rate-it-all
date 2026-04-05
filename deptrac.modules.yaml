@@ -1,0 +1,33 @@
+deptrac:
+    analyser:
+        types:
+            - "use"
+            - "file"
+            - "class"
+    paths:
+        - ./src
+    layers:
+        -   name: Game
+            collectors:
+                -   type: directory
+                    value: src/Game/.*
+        -   name: Telegram
+            collectors:
+                -   type: directory
+                    value: src/Telegram/.*
+        -   name: Infrastructure
+            collectors:
+                -   type: directory
+                    value: src/Infrastructure/.*
+    ruleset:
+        Game:
+            - Telegram
+            - Infrastructure
+        Telegram:
+            - Infrastructure
+        Infrastructure: ~
+    formatters:
+        graphviz:
+            hidden_layers: []
+            groups: []
+            point_to_groups: true

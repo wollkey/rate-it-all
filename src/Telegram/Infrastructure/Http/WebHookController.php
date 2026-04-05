@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Http;
 
-use App\Telegram\Domain\Event\BeginHandleWebHook;
+use App\Telegram\BeginHandleWebHook;
 use App\Telegram\Domain\Exception\TelegramException;
 use App\Telegram\Infrastructure\Handler\HandlerResolver;
 use App\Telegram\TelegramInput;

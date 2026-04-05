@@ -141,6 +141,17 @@ rector-check: ## Check Rector rules (dry run)
 	$(PHP) vendor/bin/rector process --dry-run
 .PHONY: rector-check
 
+deptrac-modules:
+	$(PHP) vendor/bin/deptrac analyse --config-file=deptrac.modules.yaml
+.PHONY: deptrac-modules
+
+deptrac-layers:
+	$(PHP) vendor/bin/deptrac analyse --config-file=deptrac.layers.yaml
+.PHONY: deptrac-layers
+
+deptrac: deptrac-modules deptrac-layers
+.PHONY: deptrac
+
 composer-validate: ## Validate composer.json
 	$(COMPOSER) validate --strict
 .PHONY: composer-validate
@@ -161,7 +172,7 @@ composer-check: composer-validate composer-audit composer-unused ## Run all comp
 	@echo -e "$(GREEN)✓ Composer checks passed$(RESET)"
 .PHONY: composer-check
 
-code-check: lint-check stan rector-check test ## Run all code quality checks
+code-check: lint-check stan rector-check deptrac test ## Run all code quality checks
 	@echo -e "$(GREEN)✓ Code checks passed$(RESET)"
 .PHONY: code-check
 

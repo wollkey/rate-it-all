@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram\Domain\Event;
+namespace App\Telegram;
 
-use App\Telegram\TelegramInput;
 use Symfony\Contracts\EventDispatcher\Event;
 
 final class BeginHandleWebHook extends Event

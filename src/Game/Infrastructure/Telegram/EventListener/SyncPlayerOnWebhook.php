@@ -7,7 +7,7 @@ namespace App\Game\Infrastructure\Telegram\EventListener;
 use App\Game\Domain\Entity\Player;
 use App\Game\Domain\Repository\PlayerRepository;
 use App\Infrastructure\Locale\LocaleResolver;
-use App\Telegram\Domain\Event\BeginHandleWebHook;
+use App\Telegram\BeginHandleWebHook;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 

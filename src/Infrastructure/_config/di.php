@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Infrastructure\Locale\LocaleResolver;
-use App\Infrastructure\Telegram\EventListener\SetLocaleOnWebhook;
 use Monolog\Level;
 use Sentry\SentryBundle\Monolog\LogsHandler;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -15,7 +14,6 @@ return static function (ContainerConfigurator $container): void {
             ->autoconfigure();
 
     $services->set(LocaleResolver::class);
-    $services->set(SetLocaleOnWebhook::class);
 
     if ($container->env() === 'prod') {
         $services->set(LogsHandler::class)
